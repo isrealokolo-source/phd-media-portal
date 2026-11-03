@@ -1,0 +1,226 @@
+SCHEDULE A
+STANDARD RELEASE SCHEDULE AND MASTER REGISTER
+Agreement: Music Distribution, Management & Master Control Agreement
+Company/Manager: PHD Services (“PHD”)
+Artist: Dekaf (“Artist”)
+Effective Date: ______
+Agreement Term: Five (5) years, subject to the renewal and termination provisions of the Agreement.
+PART I — RELEASE INFORMATION
+FieldDetails
+Release Reference Number______
+Release Title______
+Release Type☐ Single ☐ EP ☐ Album ☐ Mixtape ☐ Other
+Primary Artist______
+Featured Artist(s)______
+Record Label/Imprint, if any______
+Genre______
+Planned Release Date______
+Territory☐ Worldwide ☐ Specify: ____
+Distribution Format☐ Streaming ☐ Digital Download ☐ Physical ☐ Other
+Distribution Platforms______
+Release Description______
+Release Status☐ Proposed ☐ Approved ☐ Delivered ☐ Released ☐ On Hold
+PART II — MASTER RECORDING REGISTER
+A separate entry shall be completed for each sound recording included in the release.
+FieldDetails
+Track Number______
+Track Title______
+Version/Remix______
+Primary Artist______
+Featured Artist(s)______
+Producer/Beatmaker______
+Songwriter(s)/Composer(s)______
+Master Owner______
+Master Ownership Percentage(s)______
+ISRC______
+Recording Completion Date______
+Explicit Content☐ Yes ☐ No
+Language______
+Duration______
+Lyrics Delivered☐ Yes ☐ No ☐ N/A
+Final Master Delivered☐ Yes ☐ No
+Artwork/Metadata Delivered☐ Yes ☐ No
+Rights Clearance Status☐ Cleared ☐ Pending ☐ Not Applicable
+Existing Licence or Restriction______
+PHD Acceptance Date______
+Artist Approval Date______
+Additional Masters: Attach a continuation sheet using the same fields where the release contains more than one recording.
+PART III — RELEASE DELIVERABLES AND DEADLINES
+DeliverableResponsible PartyDeadlineStatus
+Final audio masterArtist________
+Clean/radio edit, if requiredArtist________
+Instrumental/acapella, if agreedArtist________
+Cover artworkArtist / agreed designer________
+Track metadata and creditsArtist________
+Lyrics and explicit-content declarationArtist________
+Producer and featured-artist agreementsRelevant Party________
+Sample, beat and other rights clearancesRelevant Party________
+Promotional photographs and biographyArtist________
+Release and marketing planPHD and Artist________
+DSP submissionPHD________
+Release confirmationPHD________
+A planned release date is subject to timely delivery, completed rights clearances, technical acceptance by the relevant platforms and the terms of the Agreement. Neither Party shall represent a release date as guaranteed where third-party approval remains outstanding.
+PART IV — RELEASE BUDGET AND APPROVED RECOUPABLE COSTS
+Release Reference Number: ______
+Expense CategoryApproved AmountActual AmountApproval ReferenceInvoice/Receipt
+Recording/mastering________________
+Artwork/design________________
+Music video/visual content________________
+Digital advertising________________
+Public relations/publicity________________
+Approved promotional campaign________________
+Other approved third-party costs________________
+Total________
+Currency: ______
+Maximum approved budget: ______
+Additional conditions or limits:
+⸻
+Cost Approval and Recoupment
+1. Only costs permitted by the Agreement and approved in writing where required shall qualify as Recoupable Costs.
+2. Each claimed cost must be supported by reasonable documentary evidence, including an invoice, receipt, payment record or other appropriate record.
+3. Expenditure exceeding an approved budget or introducing a new material expense category requires prior written approval in accordance with the Agreement.
+4. Approved Recoupable Costs and Advances shall be recouped through the revenue waterfall provided in the Agreement before the 70% Artist / 30% PHD allocation.
+5. PHD shall not deduct the same expense twice. Ordinary management and distribution services included in PHD’s 30% share shall not be charged separately unless expressly agreed in writing.
+6. An unrecouped balance shall be treated in accordance with the Agreement and shall not automatically become the Artist’s personal debt.
+PART V — APPROVAL AND INCORPORATION
+The Parties approve the release details and identify the recordings listed in this Schedule as the Masters covered by the Agreement. Approval of this Schedule does not transfer copyright ownership to PHD.
+For PHD Services
+Authorized Representative: __________
+Position: ______________
+Signature: _______________
+Date: _______________
+Artist — Dekaf
+Legal Name: _____________
+Signature: _______________
+Date: _______________
+⸻
+SCHEDULE B
+STANDARD RIGHTS DOCUMENTATION AND CLEARANCE REGISTER
+Agreement: Music Distribution, Management & Master Control Agreement
+Company/Manager: PHD Services
+Artist: Dekaf
+Release Reference Number: ______
+Release Title: ___________
+PART I — MASTER OWNERSHIP DECLARATION
+Complete one form for each Master where ownership differs or requires separate confirmation.
+Track Title: _____________
+Version: ______________
+ISRC, if assigned: ___________
+Legal name of Master owner: ________
+Ownership share: ____________
+Other owners and their shares:
+⸻
+How was the Master created or acquired?
+☐ Artist-funded recording
+☐ Commissioned recording
+☐ Producer/beatmaker arrangement
+☐ Jointly owned recording
+☐ Acquired or licensed recording
+☐ Other: ______________
+Existing rights or restrictions
+Are there any existing exclusive licences, assignments, distribution agreements, third-party interests, claims or other restrictions affecting the Master?
+☐ No
+☐ Yes — details and supporting documents:
+⸻
+Artist Declaration
+The Artist confirms that the information provided in this declaration is accurate to the best of the Artist’s knowledge, subject to the disclosures made above. The Artist has disclosed material third-party interests and restrictions known to the Artist and shall obtain the permissions required for the exploitation authorized under the Agreement.
+This declaration does not replace the warranties, indemnities or other obligations in the main Agreement.
+Artist’s Legal Name: ___________
+Signature: _______________
+Date: _______________
+PART II — RIGHTS CLEARANCE CHECKLIST
+Mark the relevant status and identify the supporting document.
+Rights Document/ClearanceStatusDocument Reference
+Master ownership evidence☐ Obtained ☐ Pending ☐ N/A____
+Producer agreement☐ Obtained ☐ Pending ☐ N/A____
+Beat licence or purchase agreement☐ Obtained ☐ Pending ☐ N/A____
+Featured-artist consent/release☐ Obtained ☐ Pending ☐ N/A____
+Co-owner consent/agreement☐ Obtained ☐ Pending ☐ N/A____
+Sample clearance☐ Obtained ☐ Pending ☐ N/A____
+Interpolation/composition permission☐ Obtained ☐ Pending ☐ N/A____
+Songwriter/composer split agreement☐ Obtained ☐ Pending ☐ N/A____
+Artwork/photography licence☐ Obtained ☐ Pending ☐ N/A____
+Music video/visual-content permissions☐ Obtained ☐ Pending ☐ N/A____
+Session musician/performer release, if required☐ Obtained ☐ Pending ☐ N/A____
+Publisher/collecting-society information☐ Obtained ☐ Pending ☐ N/A____
+Existing licence or distribution agreement review☐ Obtained ☐ Pending ☐ N/A____
+Other third-party permissions☐ Obtained ☐ Pending ☐ N/A____
+A clearance marked “Pending” must be resolved before the relevant Master is exploited in a manner requiring that clearance. “Not Applicable” should be used only where the relevant permission is genuinely unnecessary.
+PART III — PRODUCER AND CONTRIBUTOR REGISTER
+Contributor NameRoleTrackFee/Royalty/ShareRights Agreement Reference
+____Producer____________
+____Beatmaker____________
+____Songwriter____________
+____Featured Artist____________
+____Session Musician____________
+____Other____________
+The applicable signed agreement must specify the rights granted, any ownership interest, agreed credits and any fees or royalties payable. A contributor’s fee, songwriting share, publishing interest and Master ownership are distinct matters and shall not be treated as interchangeable.
+PART IV — BEAT, SAMPLE AND THIRD-PARTY LICENCE FORM
+Complete this form for each beat, sample, interpolation or other third-party material used in a Master.
+Track Title: _____________
+Material Used: ____________
+Original Creator/Source: __________
+Rights Holder/Licensor: _________
+Licence/Permission Date: _________
+Licence Type: ☐ Exclusive ☐ Non-exclusive ☐ Other
+Territory: _____________
+Licence Duration/Expiry: _________
+Commercial Streaming/Download Rights: ☐ Included ☐ Not Included ☐ Unclear
+Music Video/Synchronization Rights: ☐ Included ☐ Not Included ☐ Restricted
+Advertising/Promotional Rights: ☐ Included ☐ Not Included ☐ Restricted
+Attribution Requirements: _________
+Royalty, Fee or Revenue-Share Obligations:
+⸻
+Other Restrictions:
+⸻
+Supporting Licence Attached: ☐ Yes ☐ No
+The Parties shall not assume that a beat purchase, sample licence or other permission authorizes every intended use. Any relevant limits on commercial exploitation, territory, duration, exclusivity, audiovisual use or payment obligations must be disclosed before release.
+PART V — FEATURED ARTIST AND PERFORMER CONSENT REGISTER
+Featured Artist/Performer: ________
+Track Title: _____________
+Role/Contribution: ____________
+Agreed Credit: ____________
+Fee or Royalty Arrangement: ________
+Consent/Release Attached: ☐ Yes ☐ No
+Agreed Uses:
+☐ Sound recording distribution
+☐ Streaming and digital downloads
+☐ Marketing and promotion
+☐ Music video or audiovisual use, if separately authorized
+☐ Other: ______________
+Restrictions or Outstanding Obligations:
+⸻
+The relevant signed agreement shall govern the actual permissions granted, compensation, credit, approval rights and restrictions.
+PART VI — ARTWORK AND AUDIOVISUAL RIGHTS REGISTER
+ItemCreatorRights HolderPermission/Licence ReferenceRestrictions
+Cover artwork________________
+Promotional photograph________________
+Music video________________
+Visualizer/lyric video________________
+Other visual material________________
+The Artist shall ensure that materials supplied for release may lawfully be used for the purposes authorized by the Agreement. PHD’s use shall remain within the scope of the relevant licence or permission.
+PART VII — RIGHTS DOCUMENT SUBMISSION LOG
+Document NameTrack/ReleaseDate ReceivedReviewed ByOutstanding Issue
+____________________
+____________________
+____________________
+____________________
+PART VIII — FINAL CLEARANCE CONFIRMATION
+Artist Confirmation
+I confirm that I have disclosed the material ownership interests and third-party rights known to me relating to the Masters identified in Schedule A and have supplied the documents recorded in this Schedule, except for any items expressly marked pending or disclosed in writing.
+Artist’s Legal Name: ___________
+Signature: _______________
+Date: _______________
+PHD Services Acknowledgment
+PHD acknowledges receipt of the documents listed in this Schedule. Receipt or review does not constitute a guarantee that every third-party right has been independently verified, nor does it waive any right or obligation under the main Agreement.
+Authorized Representative: __________
+Signature: _______________
+Date: _______________
+⸻
+GENERAL SCHEDULE TERMS
+1. Incorporation: Schedules A and B form part of the Agreement once duly approved and incorporated by the Parties.
+2. Ownership: Nothing in either Schedule transfers copyright ownership to PHD. The Artist or other lawful owner retains ownership as identified in the applicable register.
+3. Scope of control: PHD’s distribution, management and exploitation authority is limited to the Masters accepted under the Agreement and remains subject to its duration, approval requirements and other terms.
+4. Changes: Additions or material changes to a Master’s ownership, rights status or scope must be documented in writing and approved in accordance with the Agreement.
+5. Conflicts: If a Schedule conflicts with the main Agreement, the main Agreement prevails unless the Parties expressly agree in writing to vary the relevant provision.
+6. Records: Each Party shall retain relevant approvals, licences, clearances and expenditure records in accordance with the Agreement and applicable law

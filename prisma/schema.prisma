@@ -1,0 +1,460 @@
+// Prisma Schema for PHD Services Release Management & Rights Clearance Portal
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  RELEASE_REVIEWER
+  ARTIST
+}
+
+enum ReleaseStatus {
+  DRAFT
+  SUBMITTED_PENDING_APPROVAL
+  REVISION_REQUESTED
+  RESUBMITTED
+  FULLY_EXECUTED_APPROVED
+  ON_HOLD
+  WITHDRAWN
+  TERMINATED
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  passwordHash     String
+  name             String
+  role             Role              @default(ARTIST)
+  isEmailVerified  Boolean           @default(false)
+  avatarUrl        String?
+  artistProfile    ArtistProfile?
+  releases         Release[]         @relation("ArtistReleases")
+  reviews          Review[]
+  revisionRequests RevisionRequest[]
+  auditLogs        AuditLog[]
+  signatures       Signature[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+model ArtistProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stageName    String
+  legalName    String
+  label        String?
+  bio          String?
+  contactEmail String
+  phone        String?
+  country      String?  @default("Nigeria")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Release {
+  id                    String                 @id @default(cuid())
+  referenceNumber       String                 @unique // Format: PHD-2026-REL-001
+  artistId              String
+  artist                User                   @relation("ArtistReleases", fields: [artistId], references: [id])
+  title                 String
+  releaseType           String                 @default("Single") // Single, EP, Album, Mixtape, Other
+  primaryArtist         String
+  featuredArtists       String?
+  recordLabel           String?
+  genre                 String?
+  subgenre              String?
+  plannedReleaseDate    DateTime?
+  territoryType         String                 @default("Worldwide") // Worldwide, Specific
+  territoryDetails      String?
+  distributionFormats   String                 @default("[\"Streaming\",\"Digital Download\"]") // JSON array
+  distributionPlatforms String                 @default("[\"Spotify\",\"Apple Music\",\"YouTube Music\",\"Audiomack\",\"TIDAL\",\"Amazon Music\",\"TikTok/Meta\"]") // JSON array
+  releaseDescription    String?
+  status                ReleaseStatus          @default(DRAFT)
+  onHoldReason          String?
+  currency              String                 @default("NGN") // NGN, USD, GBP, EUR
+  maxApprovedBudget     Float?
+  budgetConditions      String?
+  currentVersion        Int                    @default(1)
+  readinessScore        Int                    @default(0)
+  isDemo                Boolean                @default(false)
+  submittedAt           DateTime?
+  approvedAt            DateTime?
+  executedAt            DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  versions              ReleaseVersion[]
+  tracks                Track[]
+  masterOwnerships      MasterOwnership[]
+  clearanceItems        ClearanceItem[]
+  licences              Licence[]
+  featuredArtistConsents FeaturedArtistConsent[]
+  visualRights          VisualRights[]
+  deliverables          Deliverable[]
+  budgetItems           BudgetItem[]
+  signatures            Signature[]
+  reviews               Review[]
+  revisionRequests      RevisionRequest[]
+  auditLogs             AuditLog[]
+  executedDocuments     ExecutedDocument[]
+  emailNotifications    EmailNotification[]
+
+  @@index([referenceNumber])
+  @@index([artistId])
+  @@index([status])
+}
+
+model ReleaseVersion {
+  id            String   @id @default(cuid())
+  releaseId     String
+  release       Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  snapshotData  String   @db.Text // Full JSON snapshot of the release state
+  createdBy     String
+  createdAt     DateTime @default(now())
+
+  @@index([releaseId])
+}
+
+model Track {
+  id                           String                  @id @default(cuid())
+  releaseId                    String
+  release                      Release                 @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  trackNumber                  Int
+  title                        String
+  versionRemix                 String?
+  primaryArtist                String
+  featuredArtists              String?
+  producerBeatmaker            String?
+  songwritersComposers         String?
+  masterOwnerLegalName         String?
+  masterOwnershipPercentage    Float                   @default(100.0)
+  isrc                         String?
+  recordingCompletionDate      DateTime?
+  explicitContent              Boolean                 @default(false)
+  language                     String                  @default("English")
+  duration                     String?
+  lyricsText                   String?                 @db.Text
+  lyricsDelivered              String                  @default("No") // Yes, No, N/A
+  finalMasterDelivered         String                  @default("No") // Yes, No
+  artworkMetadataDelivered     String                  @default("No") // Yes, No
+  rightsClearanceStatus        String                  @default("Pending") // Cleared, Pending, Not Applicable
+  existingLicenceOrRestriction String?
+  phdAcceptanceDate            DateTime?
+  artistApprovalDate           DateTime?
+  audioFileUrl                 String?
+  audioFileName                String?
+  audioFileSize                Int?
+  audioSampleRate              String?
+  audioBitDepth                String?
+  audioChannels                String?
+  audioIsLossless              Boolean?
+  createdAt                    DateTime                @default(now())
+  updatedAt                    DateTime                @updatedAt
+
+  contributors                 TrackContributor[]
+  masterOwnerships             MasterOwnership[]
+  clearanceItems               ClearanceItem[]
+  licences                     Licence[]
+  featuredArtistConsents       FeaturedArtistConsent[]
+
+  @@index([releaseId])
+}
+
+model TrackContributor {
+  id                 String   @id @default(cuid())
+  trackId            String
+  track              Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  contributorName    String
+  role               String // Producer, Beatmaker, Songwriter, Featured Artist, Session Musician, Other
+  feeRoyaltyShare    String? // Fee, royalty, publishing or master share description
+  rightsAgreementRef String?
+  supportingDocUrl   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([trackId])
+}
+
+model MasterOwnership {
+  id                          String   @id @default(cuid())
+  releaseId                   String
+  release                     Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  trackId                     String?
+  track                       Track?   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  ownerLegalName              String
+  ownershipShare              Float // Percentage e.g. 50.0
+  otherOwnersSummary          String?
+  creationAcquisitionType     String // Artist-funded recording, Commissioned recording, Producer/beatmaker arrangement, Jointly owned recording, Acquired or licensed recording, Other
+  creationAcquisitionOther    String?
+  hasExistingRestrictions     Boolean  @default(false)
+  existingRestrictionsDetails String?
+  supportingDocUrl            String?
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@index([releaseId])
+  @@index([trackId])
+}
+
+model ClearanceItem {
+  id                String    @id @default(cuid())
+  releaseId         String
+  release           Release   @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  trackId           String?
+  track             Track?    @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  category          String // 1 of the 14 Schedule B categories
+  status            String    @default("Pending") // Obtained, Pending, N/A
+  documentReference String?
+  supportingDocUrl  String?
+  notes             String?
+  rightsHolder      String?
+  dateReceived      DateTime?
+  reviewStatus      String    @default("Pending") // Approved, Flagged, Pending
+  reviewNotes       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([releaseId])
+  @@index([category])
+}
+
+model Licence {
+  id                                 String    @id @default(cuid())
+  releaseId                          String
+  release                            Release   @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  trackId                            String?
+  track                              Track?    @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  materialUsed                       String
+  originalCreatorSource              String?
+  rightsHolderLicensor               String?
+  licencePermissionDate              DateTime?
+  licenceType                        String    @default("Non-exclusive") // Exclusive, Non-exclusive, Other
+  territory                          String    @default("Worldwide")
+  licenceDurationExpiry              String?
+  commercialStreamingDownloadRights  String    @default("Included") // Included, Not Included, Unclear
+  musicVideoSyncRights               String    @default("Included") // Included, Not Included, Restricted
+  advertisingPromotionalRights       String    @default("Included") // Included, Not Included, Restricted
+  attributionRequirements            String?
+  royaltyFeeRevShareObligations      String?
+  otherRestrictions                  String?
+  supportingLicenceDocUrl            String?
+  createdAt                          DateTime  @default(now())
+  updatedAt                          DateTime  @updatedAt
+
+  @@index([releaseId])
+}
+
+model FeaturedArtistConsent {
+  id                                 String   @id @default(cuid())
+  releaseId                          String
+  release                            Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  trackId                            String?
+  track                              Track?   @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  featuredArtistName                 String
+  roleContribution                   String?
+  agreedCredit                       String?
+  feeOrRoyaltyArrangement            String?
+  consentReleaseDocUrl               String?
+  agreedUses                         String   @default("[\"Sound recording distribution\",\"Streaming and digital downloads\",\"Marketing and promotion\"]")
+  restrictionsOutstandingObligations String?
+  createdAt                          DateTime @default(now())
+  updatedAt                          DateTime @updatedAt
+
+  @@index([releaseId])
+}
+
+model VisualRights {
+  id                   String   @id @default(cuid())
+  releaseId            String
+  release              Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  itemType             String // Cover artwork, Promotional photograph, Music video, Visualizer/lyric video, Other visual material
+  creator              String?
+  rightsHolder         String?
+  permissionLicenceRef String?
+  restrictions         String?
+  supportingDocUrl     String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([releaseId])
+}
+
+model Deliverable {
+  id               String    @id @default(cuid())
+  releaseId        String
+  release          Release   @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  deliverableKey   String // Key identifier e.g. final_audio_master
+  name             String
+  responsibleParty String // Artist, PHD, Relevant Party, Artist / agreed designer
+  deadline         DateTime?
+  status           String    @default("Not Started") // Not Started, Uploaded, Under Review, Approved, Rejected
+  fileUrl          String?
+  fileName         String?
+  fileSize         Int?
+  fileMimeType     String?
+  metadataJson     String? // Dimensions, sample rate, bit depth, format
+  reviewComments   String?
+  approvalDate     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([releaseId])
+  @@index([deliverableKey])
+}
+
+model BudgetItem {
+  id                   String    @id @default(cuid())
+  releaseId            String
+  release              Release   @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  expenseCategory      String // Recording/mastering, Artwork/design, Music video/visual content, Digital advertising, Public relations/publicity, Approved promotional campaign, Other approved third-party costs
+  suggestedAmount      Float     @default(0) // Suggested / proposed budget submitted by Artist
+  approvedAmount       Float     @default(0) // Rate / amount approved by PHD Reviewer
+  actualAmount         Float     @default(0) // Actual documented expense incurred
+  approvalReference    String?   // e.g. PHD-BUD-APPR-01
+  approvalStatus       String    @default("PENDING_REVIEW") // PENDING_REVIEW, APPROVED, ADJUSTED, REJECTED
+  reviewerNotes        String?
+  invoiceReceiptDocUrl String?
+  invoiceReceiptDate   DateTime?
+  isEligibleRecoupable Boolean   @default(true)
+  notes                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([releaseId])
+}
+
+model Signature {
+  id              String   @id @default(cuid())
+  releaseId       String
+  release         Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  scheduleType    String   @default("SCHEDULE_A_AND_B") // SCHEDULE_A, SCHEDULE_B, SCHEDULE_A_AND_B
+  signerType      String // ARTIST, PHD_REPRESENTATIVE
+  signerUserId    String
+  signerUser      User     @relation(fields: [signerUserId], references: [id])
+  signerLegalName String
+  signerPosition  String?
+  signatureType   String   @default("DRAWN") // DRAWN, TYPED
+  signatureData   String   @db.Text // Base64 signature image or text representation
+  ipAddress       String?
+  userAgent       String?
+  signedAt        DateTime @default(now())
+  documentHash    String? // SHA-256 hash calculated at time of signing
+  createdAt       DateTime @default(now())
+
+  @@index([releaseId])
+  @@index([signerUserId])
+}
+
+model RevisionRequest {
+  id                String    @id @default(cuid())
+  releaseId         String
+  release           Release   @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  requestedByUserId String
+  requestedByUser   User      @relation(fields: [requestedByUserId], references: [id])
+  sectionKey        String // release_info, tracks, clearances, deliverables, budget
+  trackId           String?
+  comments          String    @db.Text
+  resolved          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  resolvedAt        DateTime?
+
+  @@index([releaseId])
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  releaseId      String
+  release        Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  reviewerUserId String
+  reviewerUser   User     @relation(fields: [reviewerUserId], references: [id])
+  reviewType     String // APPROVAL, REVISION_REQUEST, HOLD, NOTE
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  @@index([releaseId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  releaseId   String?
+  release     Release? @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail   String?
+  action      String // RELEASE_CREATED, RELEASE_UPDATED, SUBMITTED, REVISION_REQUESTED, RESUBMITTED, APPROVED, COUNTERSIGNED, EXECUTED, ON_HOLD, WITHDRAWN, DOCUMENT_DOWNLOADED
+  entityType  String
+  entityId    String?
+  previousValue String? @db.Text
+  newValue    String?  @db.Text
+  ipAddress   String?
+  timestamp   DateTime @default(now())
+
+  @@index([releaseId])
+  @@index([userId])
+  @@index([action])
+}
+
+model ExecutedDocument {
+  id              String   @id @default(cuid())
+  releaseId       String
+  release         Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  documentType    String // SCHEDULE_A, SCHEDULE_B, COMBINED
+  versionNumber   Int
+  pdfFileUrl      String
+  documentHash    String // SHA-256
+  executedAt      DateTime @default(now())
+  artistSignerName String
+  phdSignerName   String
+  metadataJson    String?  @db.Text
+
+  @@index([releaseId])
+  @@index([documentHash])
+}
+
+model EmailNotification {
+  id              String   @id @default(cuid())
+  releaseId       String?
+  release         Release? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+  recipientEmail  String
+  subject         String
+  templateType    String // SUBMISSION, REVISION_REQUEST, EXECUTION, ON_HOLD
+  status          String   @default("SENT") // PENDING, SENT, FAILED
+  deliveryDetails String?  @db.Text
+  sentAt          DateTime @default(now())
+
+  @@index([releaseId])
+  @@index([recipientEmail])
+}
+
+model SystemSettings {
+  id                          String   @id @default("default")
+  companyName                 String   @default("PHD Services")
+  companyLogoUrl              String?
+  administrativeEmail         String   @default("operations@phdservices.com")
+  companyContactInfo          String   @default("PHD Services HQ, Lagos / London")
+  defaultAuthorizedRep        String   @default("Authorised Representative")
+  defaultRepPosition          String   @default("Head of Legal & Business Affairs")
+  releaseReferencePrefix      String   @default("PHD")
+  availableCurrencies         String   @default("[\"NGN\",\"USD\",\"GBP\",\"EUR\"]")
+  supportedDsps               String   @default("[\"Spotify\",\"Apple Music\",\"YouTube Music\",\"Audiomack\",\"TIDAL\",\"Amazon Music\",\"TikTok/Meta\"]")
+  deliverableRequirementsJson String?  @db.Text
+  emailTemplatesJson          String?  @db.Text
+  readinessRulesJson          String?  @db.Text
+  maxFileUploadMb             Int      @default(100)
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+}
+

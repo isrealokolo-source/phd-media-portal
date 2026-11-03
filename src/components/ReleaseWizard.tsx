@@ -1,0 +1,1408 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Disc3,
+  Layers,
+  FileCheck,
+  ShieldAlert,
+  Upload,
+  DollarSign,
+  PenTool,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Trash2,
+  Music,
+  ArrowRight,
+  ArrowLeft,
+  Info,
+  Calendar,
+  Globe,
+  Tag,
+  Check,
+  AlertTriangle,
+  Lock,
+} from 'lucide-react';
+import {
+  CLEARANCE_CATEGORIES,
+  DELIVERABLES_CONFIG,
+  EXPENSE_CATEGORIES,
+  PENDING_CLEARANCE_WARNING,
+  RECOUPMENT_LEGAL_NOTICE,
+  ARTIST_DECLARATION_TEXT,
+  ARTIST_CONFIRMATION_TEXT,
+  CURRENCIES,
+  DEFAULT_DSPS,
+} from '@/lib/constants';
+import { ReadinessMeter } from '@/components/ReadinessMeter';
+import { SignaturePad } from '@/components/SignaturePad';
+import { AudioPlayer } from '@/components/AudioPlayer';
+import { ArtworkPreview } from '@/components/ArtworkPreview';
+import { RevenueSimulator } from '@/components/RevenueSimulator';
+
+interface ReleaseWizardProps {
+  initialRelease: any;
+  user: any;
+}
+
+const STEPS = [
+  { id: 1, title: 'Release Info', desc: 'Schedule A – Part I' },
+  { id: 2, title: 'Track Register', desc: 'Schedule A – Part II' },
+  { id: 3, title: 'Rights Clearance', desc: 'Schedule B – Checklist & Licences' },
+  { id: 4, title: 'Deliverables', desc: 'Schedule A – Part III' },
+  { id: 5, title: 'Budget & Recoupment', desc: 'Schedule A – Part IV' },
+  { id: 6, title: 'Review & Sign', desc: 'Execute & Submit to PHD' },
+];
+
+export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [release, setRelease] = useState(initialRelease);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  // Form states
+  const [tracks, setTracks] = useState<any[]>(initialRelease.tracks || []);
+  const [clearanceItems, setClearanceItems] = useState<any[]>(initialRelease.clearanceItems || []);
+  const [deliverables, setDeliverables] = useState<any[]>(initialRelease.deliverables || []);
+  const [budgetItems, setBudgetItems] = useState<any[]>(initialRelease.budgetItems || []);
+
+  // Signing states
+  const [artistLegalName, setArtistLegalName] = useState(
+    user.artistProfile?.legalName || user.name || ''
+  );
+  const [signatureData, setSignatureData] = useState('');
+  const [signatureType, setSignatureType] = useState<'DRAWN' | 'TYPED'>('DRAWN');
+  const [confirmDeclarations, setConfirmDeclarations] = useState(false);
+
+  // Auto-save logic
+  const saveChanges = async (updates: any = {}) => {
+    setIsSaving(true);
+    try {
+      const payload = {
+        ...updates,
+        tracks,
+        clearanceItems,
+        deliverables,
+        budgetItems,
+      };
+
+      const res = await fetch(`/api/releases/${release.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (data.success && data.release) {
+        setRelease(data.release);
+        setLastSaved(new Date());
+      }
+    } catch (err) {
+      console.error('Auto-save error:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Track helpers
+  const addTrack = () => {
+    const newTrackNumber = tracks.length + 1;
+    const newTrack = {
+      id: `temp_${Date.now()}`,
+      trackNumber: newTrackNumber,
+      title: `Track ${newTrackNumber}`,
+      versionRemix: 'Original Mix',
+      primaryArtist: release.primaryArtist,
+      featuredArtists: '',
+      producerBeatmaker: '',
+      songwritersComposers: '',
+      masterOwnerLegalName: artistLegalName,
+      masterOwnershipPercentage: 100,
+      isrc: '',
+      explicitContent: false,
+      language: 'English',
+      duration: '',
+      lyricsDelivered: 'No',
+      finalMasterDelivered: 'No',
+      rightsClearanceStatus: 'Pending',
+      contributors: [],
+    };
+    setTracks([...tracks, newTrack]);
+  };
+
+  const removeTrack = (index: number) => {
+    const updated = tracks.filter((_, i) => i !== index);
+    setTracks(updated);
+  };
+
+  const updateTrack = (index: number, field: string, val: any) => {
+    const updated = [...tracks];
+    updated[index] = { ...updated[index], [field]: val };
+    setTracks(updated);
+  };
+
+  // File upload helper
+  const handleFileUpload = async (
+    file: File,
+    category: 'master' | 'artwork' | 'document' | 'lyrics',
+    callback: (url: string, metadata?: any) => void
+  ) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', category);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      callback(data.fileUrl, data.metadata);
+      saveChanges();
+    } else {
+      alert(data.error || 'Upload failed');
+    }
+  };
+
+  // Submit Release
+  const handleSubmitRelease = async () => {
+    setSubmitError('');
+    if (!signatureData) {
+      setSubmitError('Digital signature is required to execute Schedule A and B.');
+      return;
+    }
+    if (!artistLegalName.trim()) {
+      setSubmitError('Artist legal name is required.');
+      return;
+    }
+    if (!confirmDeclarations) {
+      setSubmitError('You must confirm the statutory declarations.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // First save all current states
+      await saveChanges();
+
+      const res = await fetch(`/api/releases/${release.id}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          legalName: artistLegalName,
+          signatureData,
+          signatureType,
+          confirmDeclarations,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Submission failed');
+      }
+
+      router.push(`/artist/releases/${release.id}`);
+      router.refresh();
+    } catch (err: any) {
+      setSubmitError(err.message || 'Submission failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const artworkDeliverable = deliverables.find((d) => d.deliverableKey === 'cover_artwork');
+
+  return (
+    <div className="space-y-6">
+      {/* Wizard Header Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#12151B] border border-[#1F2430]">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/70 px-2 py-0.5 rounded border border-indigo-800/50">
+              {release.referenceNumber}
+            </span>
+            <span className="text-xs text-zinc-400 font-mono">
+              Version {release.currentVersion} • Draft
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-white mt-1">{release.title}</h1>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <div className="text-right text-xs">
+            <span className="text-zinc-500 block">
+              {isSaving ? 'Saving changes...' : 'All changes saved'}
+            </span>
+            <span className="text-zinc-400 text-[10px] font-mono">
+              {lastSaved ? lastSaved.toLocaleTimeString('en-GB') : ''}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => saveChanges()}
+            disabled={isSaving}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-200 text-xs font-medium border border-[#262D3D] transition-colors"
+          >
+            <Save className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Save Draft</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Persistent Step Navigation */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        {STEPS.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => {
+              saveChanges();
+              setCurrentStep(s.id);
+            }}
+            className={`text-left p-3 rounded-xl border transition-all ${
+              currentStep === s.id
+                ? 'bg-indigo-600/15 border-indigo-500 text-white shadow-sm'
+                : currentStep > s.id
+                ? 'bg-[#12151B] border-emerald-900/40 text-emerald-300 hover:border-emerald-700/60'
+                : 'bg-[#12151B] border-[#1F2430] text-zinc-400 hover:border-[#2E374A]'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold">STEP 0{s.id}</span>
+              {currentStep > s.id && <Check className="w-3 h-3 text-emerald-400" />}
+            </div>
+            <p className="text-xs font-semibold text-zinc-100 mt-1 truncate">{s.title}</p>
+            <p className="text-[10px] text-zinc-500 truncate mt-0.5">{s.desc}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Main Form Body */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* STEP 1: RELEASE INFORMATION */}
+          {currentStep === 1 && (
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-5">
+              <div className="border-b border-[#1F2430] pb-3">
+                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                  <Tag className="w-4 h-4 text-indigo-400" />
+                  <span>Release Information (Schedule A – Part I)</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  General legal metadata for this release schedule.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    Release Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={release.title}
+                    onChange={(e) => setRelease({ ...release, title: e.target.value })}
+                    onBlur={() => saveChanges({ title: release.title })}
+                    placeholder="e.g. Midnight in Lagos EP"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    Release Type *
+                  </label>
+                  <select
+                    value={release.releaseType}
+                    onChange={(e) => {
+                      setRelease({ ...release, releaseType: e.target.value });
+                      saveChanges({ releaseType: e.target.value });
+                    }}
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="Single">Single</option>
+                    <option value="EP">EP</option>
+                    <option value="Album">Album</option>
+                    <option value="Mixtape">Mixtape</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    Primary Artist *
+                  </label>
+                  <input
+                    type="text"
+                    value={release.primaryArtist}
+                    onChange={(e) => setRelease({ ...release, primaryArtist: e.target.value })}
+                    onBlur={() => saveChanges({ primaryArtist: release.primaryArtist })}
+                    placeholder="e.g. Dekaf"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    Featured Artist(s)
+                  </label>
+                  <input
+                    type="text"
+                    value={release.featuredArtists || ''}
+                    onChange={(e) => setRelease({ ...release, featuredArtists: e.target.value })}
+                    onBlur={() => saveChanges({ featuredArtists: release.featuredArtists })}
+                    placeholder="e.g. Tems, Burna Boy"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    Record Label / Imprint
+                  </label>
+                  <input
+                    type="text"
+                    value={release.recordLabel || ''}
+                    onChange={(e) => setRelease({ ...release, recordLabel: e.target.value })}
+                    onBlur={() => saveChanges({ recordLabel: release.recordLabel })}
+                    placeholder="e.g. Independent / Starfleet Records"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    Planned Release Date
+                  </label>
+                  <input
+                    type="date"
+                    value={
+                      release.plannedReleaseDate
+                        ? new Date(release.plannedReleaseDate).toISOString().split('T')[0]
+                        : ''
+                    }
+                    onChange={(e) => {
+                      const d = e.target.value ? new Date(e.target.value) : null;
+                      setRelease({ ...release, plannedReleaseDate: d });
+                      saveChanges({ plannedReleaseDate: d });
+                    }}
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">Genre</label>
+                  <input
+                    type="text"
+                    value={release.genre || ''}
+                    onChange={(e) => setRelease({ ...release, genre: e.target.value })}
+                    onBlur={() => saveChanges({ genre: release.genre })}
+                    placeholder="e.g. Afrobeats"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1">Subgenre</label>
+                  <input
+                    type="text"
+                    value={release.subgenre || ''}
+                    onChange={(e) => setRelease({ ...release, subgenre: e.target.value })}
+                    onBlur={() => saveChanges({ subgenre: release.subgenre })}
+                    placeholder="e.g. Afro-fusion / Alté"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  Territory
+                </label>
+                <div className="flex items-center space-x-4 mb-2">
+                  <label className="flex items-center space-x-2 text-xs text-zinc-300">
+                    <input
+                      type="radio"
+                      name="territoryType"
+                      checked={release.territoryType === 'Worldwide'}
+                      onChange={() => {
+                        setRelease({ ...release, territoryType: 'Worldwide' });
+                        saveChanges({ territoryType: 'Worldwide' });
+                      }}
+                      className="accent-indigo-600"
+                    />
+                    <span>Worldwide</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-xs text-zinc-300">
+                    <input
+                      type="radio"
+                      name="territoryType"
+                      checked={release.territoryType !== 'Worldwide'}
+                      onChange={() => {
+                        setRelease({ ...release, territoryType: 'Specific' });
+                        saveChanges({ territoryType: 'Specific' });
+                      }}
+                      className="accent-indigo-600"
+                    />
+                    <span>Specific Territories</span>
+                  </label>
+                </div>
+                {release.territoryType !== 'Worldwide' && (
+                  <input
+                    type="text"
+                    value={release.territoryDetails || ''}
+                    onChange={(e) => setRelease({ ...release, territoryDetails: e.target.value })}
+                    onBlur={() => saveChanges({ territoryDetails: release.territoryDetails })}
+                    placeholder="Specify territories (e.g. UK, Nigeria, Ghana, South Africa)"
+                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  Release Description & Operational Notes
+                </label>
+                <textarea
+                  rows={3}
+                  value={release.releaseDescription || ''}
+                  onChange={(e) => setRelease({ ...release, releaseDescription: e.target.value })}
+                  onBlur={() => saveChanges({ releaseDescription: release.releaseDescription })}
+                  placeholder="Outline key project concepts, marketing angles or operational guidelines..."
+                  className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-[#1F2430] flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveChanges();
+                    setCurrentStep(2);
+                  }}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
+                >
+                  <span>Continue to Master Recording Register</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: MASTER RECORDING REGISTER */}
+          {currentStep === 2 && (
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+                <div>
+                  <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                    <Disc3 className="w-4 h-4 text-indigo-400" />
+                    <span>Master Recording Register (Schedule A – Part II)</span>
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Register all individual sound recordings covered by the Agreement.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addTrack}
+                  className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Track</span>
+                </button>
+              </div>
+
+              {tracks.length === 0 ? (
+                <div className="text-center py-12 border border-dashed border-[#262D3D] rounded-xl p-6 space-y-3">
+                  <Music className="w-8 h-8 text-zinc-600 mx-auto" />
+                  <p className="text-xs text-zinc-400">
+                    No tracks in master recording register. Click "Add Track" to register your first master.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={addTrack}
+                    className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium"
+                  >
+                    Add Track 1
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {tracks.map((track, idx) => (
+                    <div
+                      key={track.id || idx}
+                      className="p-5 rounded-xl bg-[#0E1015] border border-[#222836] space-y-4 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="w-6 h-6 rounded-full bg-indigo-600/20 text-indigo-400 font-mono text-xs flex items-center justify-center font-bold">
+                            {track.trackNumber}
+                          </span>
+                          <span className="text-sm font-bold text-zinc-200">
+                            {track.title || `Track ${track.trackNumber}`}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeTrack(idx)}
+                          className="text-xs text-zinc-500 hover:text-rose-400 transition-colors p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Track Title *</label>
+                          <input
+                            type="text"
+                            value={track.title}
+                            onChange={(e) => updateTrack(idx, 'title', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Version / Remix</label>
+                          <input
+                            type="text"
+                            value={track.versionRemix || ''}
+                            onChange={(e) => updateTrack(idx, 'versionRemix', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. Original Master, Club Mix"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">ISRC Code</label>
+                          <input
+                            type="text"
+                            value={track.isrc || ''}
+                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. NG-PHD-26-00101"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Producer / Beatmaker</label>
+                          <input
+                            type="text"
+                            value={track.producerBeatmaker || ''}
+                            onChange={(e) => updateTrack(idx, 'producerBeatmaker', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. Kel-P, Sarz"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Songwriters / Composers</label>
+                          <input
+                            type="text"
+                            value={track.songwritersComposers || ''}
+                            onChange={(e) => updateTrack(idx, 'songwritersComposers', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. Dekaf, Kel-P"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Duration (MM:SS)</label>
+                          <input
+                            type="text"
+                            value={track.duration || ''}
+                            onChange={(e) => updateTrack(idx, 'duration', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="03:24"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Master Ownership Percentage & Legal Owner */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-[#12151B] rounded-lg border border-[#1F2430]">
+                        <div>
+                          <label className="block text-[11px] font-medium text-zinc-300 mb-1">
+                            Legal Master Owner Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={track.masterOwnerLegalName || artistLegalName}
+                            onChange={(e) => updateTrack(idx, 'masterOwnerLegalName', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="Legal Entity or Artist Legal Name"
+                            className="w-full px-3 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] font-medium text-zinc-300">
+                              Master Ownership Share (%) *
+                            </label>
+                            <span
+                              className={`text-[10px] font-mono font-bold ${
+                                Number(track.masterOwnershipPercentage) === 100
+                                  ? 'text-emerald-400'
+                                  : 'text-amber-400'
+                              }`}
+                            >
+                              {track.masterOwnershipPercentage || 100}%
+                            </span>
+                          </div>
+                          <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={track.masterOwnershipPercentage || 100}
+                            onChange={(e) => updateTrack(idx, 'masterOwnershipPercentage', Number(e.target.value))}
+                            onBlur={() => saveChanges()}
+                            className="w-full px-3 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Audio Master Upload & Preview */}
+                      <div className="space-y-2">
+                        <label className="block text-[11px] font-medium text-zinc-300">
+                          Final Audio Master (Uncompressed WAV)
+                        </label>
+
+                        {track.audioFileUrl ? (
+                          <AudioPlayer
+                            url={track.audioFileUrl}
+                            title={track.title}
+                            artist={track.primaryArtist}
+                            sampleRate={track.audioSampleRate}
+                            bitDepth={track.audioBitDepth}
+                            channels={track.audioChannels}
+                            isLossless={track.audioIsLossless}
+                          />
+                        ) : (
+                          <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#262D3D] hover:border-indigo-500/50 rounded-xl cursor-pointer bg-[#12151B] transition-colors text-center">
+                            <Upload className="w-5 h-5 text-indigo-400 mb-1" />
+                            <span className="text-xs text-zinc-300">
+                              Upload WAV Audio Master for {track.title}
+                            </span>
+                            <span className="text-[10px] text-zinc-500 mt-0.5">
+                              Accepts WAV / AIFF (24-bit uncompressed master)
+                            </span>
+                            <input
+                              type="file"
+                              accept=".wav,.aif,.aiff,.flac"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) {
+                                  handleFileUpload(f, 'master', (url, meta) => {
+                                    updateTrack(idx, 'audioFileUrl', url);
+                                    updateTrack(idx, 'audioFileName', f.name);
+                                    updateTrack(idx, 'audioFileSize', f.size);
+                                    updateTrack(idx, 'finalMasterDelivered', 'Yes');
+                                    if (meta) {
+                                      updateTrack(idx, 'audioSampleRate', meta.sampleRate);
+                                      updateTrack(idx, 'audioBitDepth', meta.bitDepth);
+                                      updateTrack(idx, 'audioChannels', meta.channels);
+                                      updateTrack(idx, 'audioIsLossless', meta.isLossless);
+                                    }
+                                  });
+                                }
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveChanges();
+                    setCurrentStep(3);
+                  }}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                >
+                  <span>Continue to Rights Clearance Register</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: RIGHTS CLEARANCE & DOCUMENTATION */}
+          {currentStep === 3 && (
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
+              <div className="border-b border-[#1F2430] pb-3">
+                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                  <FileCheck className="w-4 h-4 text-indigo-400" />
+                  <span>Rights Clearance Checklist (Schedule B – Part II)</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Complete all 14 statutory Schedule B clearance categories.
+                </p>
+              </div>
+
+              {/* Statutory Pending Warning */}
+              <div className="p-3 bg-amber-950/40 border border-amber-800/40 rounded-xl flex items-start space-x-3 text-xs text-amber-300">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+                <p className="leading-relaxed">
+                  <strong className="font-semibold">Notice:</strong> {PENDING_CLEARANCE_WARNING}
+                </p>
+              </div>
+
+              {/* 14 Categories List */}
+              <div className="space-y-3">
+                {clearanceItems.map((item, idx) => {
+                  const catDef = CLEARANCE_CATEGORIES.find((c) => c.id === item.category);
+                  const isObtained = item.status === 'Obtained';
+                  const isPending = item.status === 'Pending';
+
+                  return (
+                    <div
+                      key={item.id || idx}
+                      className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-3"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <span className="text-xs font-bold text-zinc-200">
+                            {idx + 1}. {catDef?.label || item.category}
+                          </span>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">
+                            {catDef?.description || 'Mandatory clearance item'}
+                          </p>
+                        </div>
+
+                        {/* Status selector */}
+                        <div className="flex items-center space-x-1.5">
+                          {['Obtained', 'Pending', 'N/A'].map((st) => (
+                            <button
+                              key={st}
+                              type="button"
+                              onClick={() => {
+                                const updated = [...clearanceItems];
+                                updated[idx] = { ...updated[idx], status: st };
+                                setClearanceItems(updated);
+                                saveChanges();
+                              }}
+                              className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                                item.status === st
+                                  ? st === 'Obtained'
+                                    ? 'bg-emerald-600 text-white shadow-sm'
+                                    : st === 'Pending'
+                                    ? 'bg-amber-600 text-white shadow-sm'
+                                    : 'bg-zinc-700 text-white'
+                                  : 'bg-[#1A1F2B] text-zinc-400 hover:text-zinc-200'
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[#1F2430]/60">
+                        <div>
+                          <label className="block text-[10px] text-zinc-400 mb-1">
+                            Document Reference Number
+                          </label>
+                          <input
+                            type="text"
+                            value={item.documentReference || ''}
+                            onChange={(e) => {
+                              const updated = [...clearanceItems];
+                              updated[idx] = { ...updated[idx], documentReference: e.target.value };
+                              setClearanceItems(updated);
+                            }}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. REF-AGR-2026-001"
+                            className="w-full px-3 py-1 bg-[#141820] border border-[#262D3D] rounded text-xs text-zinc-200 font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-zinc-400 mb-1">
+                            Rights Holder / Licensor Entity
+                          </label>
+                          <input
+                            type="text"
+                            value={item.rightsHolder || ''}
+                            onChange={(e) => {
+                              const updated = [...clearanceItems];
+                              updated[idx] = { ...updated[idx], rightsHolder: e.target.value };
+                              setClearanceItems(updated);
+                            }}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. Beatstars Licensor, Dekaf"
+                            className="w-full px-3 py-1 bg-[#141820] border border-[#262D3D] rounded text-xs text-zinc-200"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Statutory Artist Declaration wording */}
+              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl space-y-2">
+                <span className="text-xs font-bold text-zinc-300">
+                  Statutory Artist Rights Declaration
+                </span>
+                <p className="text-[11px] text-zinc-400 leading-relaxed italic">
+                  "{ARTIST_DECLARATION_TEXT}"
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(2)}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveChanges();
+                    setCurrentStep(4);
+                  }}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                >
+                  <span>Continue to Release Deliverables</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: DELIVERABLES */}
+          {currentStep === 4 && (
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
+              <div className="border-b border-[#1F2430] pb-3">
+                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                  <Upload className="w-4 h-4 text-indigo-400" />
+                  <span>Release Deliverables Schedule (Schedule A – Part III)</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Manage the 12 contractual delivery milestones and verify technical assets.
+                </p>
+              </div>
+
+              {/* Artwork Inspection Callout */}
+              <div className="p-5 bg-[#0E1015] border border-[#1F2430] rounded-xl flex flex-col md:flex-row gap-5 items-start">
+                <ArtworkPreview
+                  url={artworkDeliverable?.fileUrl}
+                  width={3000}
+                  height={3000}
+                />
+                <div className="space-y-3 flex-1">
+                  <div>
+                    <h3 className="text-sm font-bold text-zinc-200">Cover Artwork Delivery</h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      DSPs strictly require 1:1 square artwork, at least 3000 x 3000 pixels, in RGB format without unapproved promotional stickers.
+                    </p>
+                  </div>
+
+                  <label className="inline-flex items-center space-x-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Cover Artwork (PNG / JPG)</span>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) {
+                          handleFileUpload(f, 'artwork', (url, meta) => {
+                            const updated = deliverables.map((d) =>
+                              d.deliverableKey === 'cover_artwork'
+                                ? {
+                                    ...d,
+                                    fileUrl: url,
+                                    fileName: f.name,
+                                    status: 'Uploaded',
+                                    metadataJson: JSON.stringify(meta || {}),
+                                  }
+                                : d
+                            );
+                            setDeliverables(updated);
+                          });
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Deliverables Table */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  Deliverable Milestones
+                </h3>
+
+                <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl overflow-hidden bg-[#0E1015]">
+                  {deliverables.map((d, idx) => (
+                    <div key={d.id || idx} className="p-3.5 flex items-center justify-between text-xs">
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-zinc-200">{d.name}</span>
+                        <p className="text-[11px] text-zinc-500">
+                          Responsible: {d.responsibleParty}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <span
+                          className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
+                            d.status === 'Approved'
+                              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                              : d.status === 'Uploaded'
+                              ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
+                              : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                          }`}
+                        >
+                          {d.status}
+                        </span>
+
+                        <label className="text-[11px] text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium">
+                          Upload File
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) {
+                                handleFileUpload(f, 'document', (url) => {
+                                  const updated = [...deliverables];
+                                  updated[idx] = {
+                                    ...updated[idx],
+                                    fileUrl: url,
+                                    fileName: f.name,
+                                    status: 'Uploaded',
+                                  };
+                                  setDeliverables(updated);
+                                });
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(3)}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveChanges();
+                    setCurrentStep(5);
+                  }}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                >
+                  <span>Continue to Budget & Recoupment</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: BUDGET & RECOUPMENT */}
+          {currentStep === 5 && (
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+                <div>
+                  <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                    <DollarSign className="w-4 h-4 text-indigo-400" />
+                    <span>Release Budget & Recoupment (Schedule A – Part IV)</span>
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Track approved recoupable costs and simulate the 70% Artist / 30% PHD allocation.
+                  </p>
+                </div>
+
+                {/* Currency selector */}
+                <select
+                  value={release.currency || 'NGN'}
+                  onChange={(e) => {
+                    setRelease({ ...release, currency: e.target.value });
+                    saveChanges({ currency: e.target.value });
+                  }}
+                  className="px-3 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 font-mono font-bold"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>
+                      Currency: {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Expense Ledger */}
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-800/40 text-xs text-indigo-300 flex items-start space-x-3">
+                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-400" />
+                  <p className="leading-relaxed">
+                    <strong className="font-semibold text-white">Suggested Budget Notice:</strong> All figures entered on this screen constitute the Artist's <strong>Suggested Budget</strong>. PHD Services review officers will evaluate each category and return an <strong>Approved Rate</strong> in accordance with Schedule A before execution.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    Expense Ledger (Suggested vs Approved)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBudgetItems([
+                        ...budgetItems,
+                        {
+                          expenseCategory: EXPENSE_CATEGORIES[0],
+                          suggestedAmount: 0,
+                          approvedAmount: 0,
+                          actualAmount: 0,
+                          approvalReference: `PHD-PROP-${Date.now().toString().slice(-4)}`,
+                          approvalStatus: 'PENDING_REVIEW',
+                          isEligibleRecoupable: true,
+                          notes: '',
+                        },
+                      ]);
+                    }}
+                    className="flex items-center space-x-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Expense Entry</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {budgetItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-3 text-xs"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1F2430] pb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-zinc-100">{item.expenseCategory}</span>
+                          <span
+                            className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
+                              item.approvalStatus === 'REJECTED'
+                                ? 'bg-rose-950 text-rose-300 border-rose-800'
+                                : item.approvalStatus === 'ADJUSTED'
+                                ? 'bg-blue-950 text-blue-300 border-blue-800'
+                                : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
+                                ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                                : 'bg-amber-950 text-amber-300 border-amber-800'
+                            }`}
+                          >
+                            {item.approvalStatus === 'REJECTED'
+                              ? 'Disallowed by PHD'
+                              : item.approvalStatus === 'ADJUSTED'
+                              ? `Adjusted Rate: ${release.currency} ${Number(item.approvedAmount).toLocaleString()}`
+                              : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
+                              ? `Approved Rate: ${release.currency} ${Number(item.approvedAmount).toLocaleString()}`
+                              : 'Pending PHD Review'}
+                          </span>
+                        </div>
+                        {item.approvalReference && (
+                          <span className="text-[10px] font-mono text-zinc-500">
+                            Ref: {item.approvalReference}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[10px] text-zinc-400 mb-1">
+                            Expense Category
+                          </label>
+                          <select
+                            value={item.expenseCategory}
+                            onChange={(e) => {
+                              const updated = [...budgetItems];
+                              updated[idx].expenseCategory = e.target.value;
+                              setBudgetItems(updated);
+                            }}
+                            onBlur={() => saveChanges()}
+                            className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-200"
+                          >
+                            {EXPENSE_CATEGORIES.map((c) => (
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-medium text-indigo-300 mb-1">
+                            Artist Suggested Budget ({release.currency}) *
+                          </label>
+                          <input
+                            type="number"
+                            value={item.suggestedAmount ?? item.approvedAmount ?? 0}
+                            onChange={(e) => {
+                              const updated = [...budgetItems];
+                              updated[idx].suggestedAmount = Number(e.target.value);
+                              setBudgetItems(updated);
+                            }}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. 500000"
+                            className="w-full px-2.5 py-1.5 bg-[#141820] border border-indigo-700/50 rounded text-zinc-100 font-mono font-medium focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-zinc-400 mb-1">
+                            Actual Expenditure Incurred ({release.currency})
+                          </label>
+                          <input
+                            type="number"
+                            value={item.actualAmount || 0}
+                            onChange={(e) => {
+                              const updated = [...budgetItems];
+                              updated[idx].actualAmount = Number(e.target.value);
+                              setBudgetItems(updated);
+                            }}
+                            onBlur={() => saveChanges()}
+                            className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-200 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-zinc-400 mb-1">Notes / Budget Justification</label>
+                        <input
+                          type="text"
+                          value={item.notes || ''}
+                          onChange={(e) => {
+                            const updated = [...budgetItems];
+                            updated[idx].notes = e.target.value;
+                            setBudgetItems(updated);
+                          }}
+                          onBlur={() => saveChanges()}
+                          placeholder="e.g. 2 days studio time at Soundcity Studios..."
+                          className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-300 text-xs"
+                        />
+                      </div>
+
+                      {item.reviewerNotes && (
+                        <div className="p-2.5 bg-indigo-950/40 border border-indigo-800/40 rounded-lg text-xs text-indigo-300">
+                          <span className="font-semibold text-indigo-200">PHD Reviewer Feedback: </span>
+                          {item.reviewerNotes}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Revenue Waterfall Simulator */}
+              {(() => {
+                const totalRecoupable = budgetItems
+                  .filter((b) => b.isEligibleRecoupable)
+                  .reduce((acc, b) => acc + (Number(b.approvedAmount || b.suggestedAmount) || 0), 0);
+                return (
+                  <RevenueSimulator
+                    currency={release.currency || 'NGN'}
+                    totalApprovedRecoupableCosts={totalRecoupable}
+                  />
+                );
+              })()}
+
+              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(4)}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveChanges();
+                    setCurrentStep(6);
+                  }}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                >
+                  <span>Proceed to Final Execution & Signing</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 6: REVIEW & DIGITAL SIGNATURES */}
+          {currentStep === 6 && (
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
+              <div className="border-b border-[#1F2430] pb-3">
+                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                  <PenTool className="w-4 h-4 text-indigo-400" />
+                  <span>Digital Execution & Submission (Stage 2)</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Confirm statutory declarations, capture your signature, and submit to PHD Services.
+                </p>
+              </div>
+
+              {submitError && (
+                <div className="p-3 bg-rose-950/60 border border-rose-800/40 rounded-xl text-xs text-rose-300 flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{submitError}</span>
+                </div>
+              )}
+
+              {/* Statutory Confirmation Box */}
+              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl space-y-3">
+                <h4 className="text-xs font-bold text-zinc-200">
+                  Statutory Artist Confirmation (Schedule B – Part VIII)
+                </h4>
+                <p className="text-xs text-zinc-400 italic leading-relaxed">
+                  "{ARTIST_CONFIRMATION_TEXT}"
+                </p>
+
+                <label className="flex items-start space-x-2.5 pt-2 border-t border-[#1F2430] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={confirmDeclarations}
+                    onChange={(e) => setConfirmDeclarations(e.target.checked)}
+                    className="mt-0.5 accent-indigo-600 rounded"
+                  />
+                  <span className="text-xs text-zinc-300 font-medium leading-relaxed">
+                    I confirm that I have disclosed all material ownership interests, third-party rights, and supplied accurate legal documentation under the Music Distribution, Management & Master Control Agreement.
+                  </span>
+                </label>
+              </div>
+
+              {/* Signer Legal Name */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                  Artist Legal Name (Signatory) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={artistLegalName}
+                  onChange={(e) => setArtistLegalName(e.target.value)}
+                  placeholder="e.g. Damilola Emmanuel Kafaru"
+                  className="w-full px-3.5 py-2.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 font-medium"
+                />
+              </div>
+
+              {/* Signature Pad */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                  Digital Signature Pad *
+                </label>
+                <SignaturePad
+                  initialName={artistLegalName}
+                  onSignatureChange={(sig, type) => {
+                    setSignatureData(sig);
+                    setSignatureType(type);
+                  }}
+                />
+              </div>
+
+              {/* Submission Button */}
+              <div className="pt-4 border-t border-[#1F2430] flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(5)}
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={handleSubmitRelease}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-50"
+                >
+                  <PenTool className="w-4 h-4" />
+                  <span>
+                    {submitting ? 'Submitting & Hashing...' : 'Sign & Submit Release to PHD'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar: Health & Readiness Meter + Summary */}
+        <div className="space-y-6">
+          <ReadinessMeter
+            score={release.readinessScore || 0}
+            submissionReady={release.readinessScore >= 70}
+            clearanceReady={clearanceItems.some((c) => c.status === 'Obtained')}
+          />
+
+          <div className="bg-[#12151B] border border-[#1F2430] rounded-xl p-4 space-y-3 text-xs">
+            <h4 className="font-semibold text-zinc-200 uppercase tracking-wider text-[11px]">
+              Release Summary
+            </h4>
+            <div className="space-y-1.5 text-zinc-400">
+              <div className="flex justify-between">
+                <span>Reference:</span>
+                <span className="font-mono text-zinc-200">{release.referenceNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Total Tracks:</span>
+                <span className="text-zinc-200 font-medium">{tracks.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Currency:</span>
+                <span className="font-mono text-zinc-200">{release.currency}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Clearances:</span>
+                <span className="text-zinc-200">
+                  {clearanceItems.filter((c) => c.status === 'Obtained').length} of{' '}
+                  {clearanceItems.length} obtained
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
