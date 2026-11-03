@@ -69,7 +69,7 @@ export async function saveFile(options: SaveFileOptions): Promise<SaveFileResult
 
     const fileUrl = s3.publicUrl
       ? `${s3.publicUrl}/${storageKey}`
-      : `https://${s3.bucket}.s3.amazonaws.com/${storageKey}`;
+      : `/api/files/${storageKey}`;
 
     return {
       fileUrl,
