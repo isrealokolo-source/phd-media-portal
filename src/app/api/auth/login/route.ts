@@ -7,7 +7,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { sendLoginAlertEmail } from '@/lib/email';
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().email(),
   password: z.string().min(1, 'Password is required'),
 });
 

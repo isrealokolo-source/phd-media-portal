@@ -105,3 +105,4 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
     return NextResponse.json({ error: 'Failed to retrieve file' }, { status: 500 });
   }
 }
+
