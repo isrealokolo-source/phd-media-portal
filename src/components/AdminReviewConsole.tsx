@@ -23,6 +23,7 @@ import {
   Eye,
   Hash,
   ExternalLink,
+  Trash2,
 } from 'lucide-react';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { ArtworkPreview } from '@/components/ArtworkPreview';
@@ -125,6 +126,22 @@ export function AdminReviewConsole({
       setBudgetSaveError('Error updating budget rates: ' + err.message);
     } finally {
       setSavingBudget(false);
+    }
+  };
+
+  const handleSuperAdminDeleteRelease = async () => {
+    if (!confirm(`Are you sure you want to permanently delete release "${release.title}" (${release.referenceNumber})? This will delete all associated tracks, files, and audit records.`)) {
+      return;
+    }
+    setActionError('');
+    try {
+      const res = await fetch(`/api/releases/${release.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete release');
+      router.push('/admin');
+      router.refresh();
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to delete release');
     }
   };
 
@@ -264,7 +281,7 @@ export function AdminReviewConsole({
         <div className="flex flex-wrap items-center gap-2">
           <a
             href={`/api/releases/${release.id}/download?type=bundle`}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#F4F4F2] hover:bg-indigo-900 border border-indigo-700/60 text-[#171717] text-xs font-semibold transition-colors shadow-sm"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#EAEAEA] border border-[#E8E8E8] text-[#171717] text-xs font-semibold transition-colors shadow-sm"
             title="Download formatted cover art, all audio masters, and clearance PDFs (.ZIP)"
           >
             <FileDown className="w-3.5 h-3.5 text-[#171717]" />
@@ -276,7 +293,7 @@ export function AdminReviewConsole({
               <button
                 type="button"
                 onClick={() => setShowHoldModal(true)}
-                className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#252C3D] text-[#171717] border border-[#E8E8E8] text-xs font-medium transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] text-xs font-medium transition-colors"
               >
                 Place On Hold
               </button>
@@ -284,7 +301,7 @@ export function AdminReviewConsole({
               <button
                 type="button"
                 onClick={() => setShowRevisionModal(true)}
-                className="px-3.5 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-[#D69E36] border border-amber-500/30 text-xs font-medium transition-colors"
+                className="px-3.5 py-1.5 rounded-lg bg-[#FFFBEB] hover:bg-[#FEF3C7] text-[#D69E36] border border-[#FDE68A] text-xs font-medium transition-colors"
               >
                 Request Revisions
               </button>
@@ -292,7 +309,7 @@ export function AdminReviewConsole({
               <button
                 type="button"
                 onClick={() => setShowCountersignModal(true)}
-                className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-[#171717] hover:bg-[#262626] text-white text-xs font-bold transition-all shadow-md shadow-indigo-900/30"
+                className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-[#171717] hover:bg-[#262626] text-white text-xs font-bold transition-all shadow-sm"
               >
                 <PenTool className="w-3.5 h-3.5" />
                 <span>Countersign & Execute</span>
@@ -304,12 +321,24 @@ export function AdminReviewConsole({
             <div className="flex items-center space-x-2">
               <a
                 href={`/api/releases/${release.id}/pdf?type=combined`}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-colors"
               >
                 <FileDown className="w-4 h-4" />
                 <span>Download Executed Agreement PDF</span>
               </a>
             </div>
+          )}
+
+          {user?.role === 'SUPER_ADMIN' && (
+            <button
+              type="button"
+              onClick={handleSuperAdminDeleteRelease}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#D64B4B] border border-[#FECACA] text-xs font-medium transition-colors ml-auto sm:ml-0"
+              title="Super Admin: Permanently delete this release"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete Release</span>
+            </button>
           )}
         </div>
       </div>

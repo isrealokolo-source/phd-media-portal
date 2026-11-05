@@ -475,7 +475,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    if (release.status !== 'DRAFT') {
+    if (user.role !== 'SUPER_ADMIN' && release.status !== 'DRAFT') {
       return NextResponse.json({ error: 'Only draft releases can be deleted' }, { status: 400 });
     }
 
