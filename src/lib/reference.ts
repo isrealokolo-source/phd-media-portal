@@ -85,3 +85,57 @@ export async function generateContractNumber(customPrefix?: string): Promise<str
   });
 }
 
+/**
+ * Concurrency-safe, sequential ISRC code generator.
+ * Pattern: NGB77{YY}{SEQ5}
+ * Persistent Registrant Prefix: NGB77
+ * Year: 26 (2-digit reference year)
+ * Numbers start from: 00300 (e.g. NGB772600300, NGB772600301, ...)
+ */
+export async function generateNextIsrc(count: number = 1): Promise<string[]> {
+  const currentYear = new Date().getFullYear();
+  const year2Digits = currentYear.toString().slice(-2); // e.g. "26"
+  const prefix = `NGB77${year2Digits}`;
+  const BASE_START_SEQ = 300; // starts from 00300
+
+  return await prisma.$transaction(async (tx) => {
+    // Find all tracks with an ISRC starting with NGB77{YY}
+    const matchingTracks = await tx.track.findMany({
+      where: {
+        isrc: {
+          startsWith: prefix,
+        },
+      },
+      select: {
+        isrc: true,
+      },
+      orderBy: {
+        isrc: 'desc',
+      },
+      take: 100,
+    });
+
+    let maxSeq = BASE_START_SEQ - 1; // 299, so next is at least 300
+
+    for (const t of matchingTracks) {
+      if (!t.isrc) continue;
+      const clean = t.isrc.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      if (clean.startsWith(prefix)) {
+        const seqStr = clean.slice(prefix.length);
+        const seqNum = parseInt(seqStr, 10);
+        if (!isNaN(seqNum) && seqNum > maxSeq) {
+          maxSeq = seqNum;
+        }
+      }
+    }
+
+    const generated: string[] = [];
+    for (let i = 1; i <= count; i++) {
+      const nextSeq = maxSeq + i;
+      const formattedSeq = nextSeq.toString().padStart(5, '0');
+      generated.push(`${prefix}${formattedSeq}`);
+    }
+
+    return generated;
+  });
+}

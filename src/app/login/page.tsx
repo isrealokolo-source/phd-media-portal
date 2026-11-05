@@ -45,8 +45,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#0B0D11] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 items-center justify-center text-white shadow-xl shadow-indigo-900/30 mb-4">
-          <Disc3 className="w-7 h-7" />
+        <div className="inline-flex w-16 h-16 rounded-2xl bg-zinc-900 border border-[#1F2430] items-center justify-center p-2 shadow-xl shadow-black/40 mb-4">
+          <img src="/images/phd-logo.png" alt="PHD Services Logo" className="w-full h-full object-contain" />
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-white">
           PHD SERVICES

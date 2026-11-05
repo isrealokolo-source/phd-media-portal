@@ -71,8 +71,8 @@ export function Navbar({ user }: NavbarProps) {
         {/* Brand */}
         <div className="flex items-center space-x-6">
           <Link href={isAdmin ? '/admin' : '/artist'} className="flex items-center space-x-2.5 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-indigo-900/20 group-hover:from-indigo-400 group-hover:to-indigo-600 transition-all">
-              <Disc3 className="w-5 h-5 animate-spin-slow" />
+            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-[#262D3D] flex items-center justify-center p-1 overflow-hidden shadow-md group-hover:border-indigo-500/50 transition-all">
+              <img src="/images/phd-logo.png" alt="PHD Services Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center space-x-1.5">

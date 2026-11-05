@@ -29,6 +29,7 @@ import {
   Image as ImageIcon,
   ExternalLink,
   FileText,
+  Sparkles,
 } from 'lucide-react';
 import {
   CLEARANCE_CATEGORIES,
@@ -323,9 +324,84 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
     await saveChanges({ deliverables: updatedDeliverables });
   };
 
+  const [isGeneratingIsrcs, setIsGeneratingIsrcs] = useState(false);
+
+  // Auto-generate single track ISRC: Pattern NGB77{YY}{SEQ5} starting from 00300
+  const handleGenerateSingleIsrc = async (trackIdx: number) => {
+    setIsGeneratingIsrcs(true);
+    try {
+      const res = await fetch('/api/isrc/generate?count=1');
+      const data = await res.json();
+      if (data.success && data.isrcs?.[0]) {
+        const nextIsrc = data.isrcs[0];
+        const updated = tracks.map((t, i) => (i === trackIdx ? { ...t, isrc: nextIsrc } : t));
+        setTracks(updated);
+        await saveChanges({ tracks: updated });
+      } else {
+        alert(data.error || 'Failed to generate ISRC');
+      }
+    } catch {
+      alert('Error generating ISRC');
+    } finally {
+      setIsGeneratingIsrcs(false);
+    }
+  };
+
+  // Auto-generate sequential ISRCs for all tracks missing an ISRC (or all tracks)
+  const handleBatchGenerateIsrcs = async () => {
+    const missingIndices = tracks
+      .map((t, i) => (!t.isrc || !t.isrc.trim() ? i : -1))
+      .filter((i) => i !== -1);
+    const countToGenerate = missingIndices.length > 0 ? missingIndices.length : tracks.length;
+
+    if (missingIndices.length === 0) {
+      if (!confirm('All tracks already have assigned ISRCs. Do you want to re-allocate sequential ISRCs for all tracks?')) {
+        return;
+      }
+    }
+
+    setIsGeneratingIsrcs(true);
+    try {
+      const res = await fetch(`/api/isrc/generate?count=${countToGenerate}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.isrcs)) {
+        let isrcIdx = 0;
+        const updated = tracks.map((t, i) => {
+          if (missingIndices.length > 0) {
+            if ((!t.isrc || !t.isrc.trim()) && isrcIdx < data.isrcs.length) {
+              const code = data.isrcs[isrcIdx++];
+              return { ...t, isrc: code };
+            }
+            return t;
+          } else {
+            const code = data.isrcs[i];
+            return { ...t, isrc: code };
+          }
+        });
+        setTracks(updated);
+        await saveChanges({ tracks: updated });
+      } else {
+        alert(data.error || 'Failed to allocate ISRCs');
+      }
+    } catch {
+      alert('Error allocating ISRCs');
+    } finally {
+      setIsGeneratingIsrcs(false);
+    }
+  };
+
   // Track helpers
-  const addTrack = () => {
+  const addTrack = async () => {
     const newTrackNumber = tracks.length + 1;
+    let autoIsrc = '';
+    try {
+      const res = await fetch('/api/isrc/generate?count=1');
+      const data = await res.json();
+      if (data.success && data.isrcs?.[0]) {
+        autoIsrc = data.isrcs[0];
+      }
+    } catch {}
+
     const newTrack = {
       id: `temp_${Date.now()}`,
       trackNumber: newTrackNumber,
@@ -337,7 +413,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       songwritersComposers: '',
       masterOwnerLegalName: artistLegalName,
       masterOwnershipPercentage: 100,
-      isrc: '',
+      isrc: autoIsrc,
       explicitContent: false,
       language: 'English',
       duration: '',
@@ -879,14 +955,28 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     Register all individual sound recordings covered by the Agreement.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={addTrack}
-                  className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add Track</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  {tracks.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleBatchGenerateIsrcs}
+                      disabled={isGeneratingIsrcs}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#1A1F2B] hover:bg-[#262D3D] text-indigo-300 rounded-lg text-xs font-semibold border border-[#2B3447] transition-colors"
+                      title="Auto-generate sequential ISRCs (Pattern: NGB772600300...)"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>{isGeneratingIsrcs ? 'Allocating ISRCs...' : 'Auto-Generate ISRCs'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={addTrack}
+                    className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Track</span>
+                  </button>
+                </div>
               </div>
 
               {tracks.length === 0 ? (
@@ -1051,30 +1141,24 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <div>
                           <div className="flex items-center justify-between mb-1">
                             <label className="text-[11px] text-zinc-400">ISRC Code</label>
-                            {!track.isrc && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const trackNum = (idx + 1).toString().padStart(2, '0');
-                                  const year = new Date().getFullYear().toString().slice(-2);
-                                  const candidate = `NG-PHD-${year}-${trackNum}001`;
-                                  updateTrack(idx, 'isrc', candidate);
-                                  saveChanges();
-                                }}
-                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-mono transition-colors"
-                                title="Generate standard format placeholder ISRC"
-                              >
-                                Auto-Fill Placeholder
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateSingleIsrc(idx)}
+                              disabled={isGeneratingIsrcs}
+                              className="text-[10px] text-indigo-400 hover:text-indigo-300 font-mono transition-colors"
+                              title="Auto-generate official sequential ISRC (Pattern: NGB772600300...)"
+                            >
+                              {track.isrc ? 'Regenerate' : 'Auto-Generate ISRC'}
+                            </button>
                           </div>
                           <input
                             type="text"
                             value={track.isrc || ''}
-                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value.toUpperCase())}
+                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                             onBlur={() => saveChanges()}
-                            placeholder="e.g. NG-PHD-26-00101"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono uppercase"
+                            placeholder="e.g. NGB772600300"
+                            maxLength={12}
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono uppercase tracking-wider"
                           />
                         </div>
 
