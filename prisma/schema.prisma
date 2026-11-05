@@ -41,6 +41,7 @@ model User {
   revisionRequests RevisionRequest[]
   auditLogs        AuditLog[]
   signatures       Signature[]
+  contractsUploaded ArtistContract[] @relation("AdminContracts")
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -367,6 +368,7 @@ model RevisionRequest {
   sectionKey        String // release_info, tracks, clearances, deliverables, budget
   trackId           String?
   comments          String    @db.Text
+  requestedDocuments String?  @db.Text // JSON string array of specific requested documents
   resolved          Boolean   @default(false)
   createdAt         DateTime  @default(now())
   resolvedAt        DateTime?
@@ -456,5 +458,27 @@ model SystemSettings {
   maxFileUploadMb             Int      @default(100)
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
+}
+
+model ArtistContract {
+  id              String    @id @default(cuid())
+  contractNumber  String    @unique // e.g. PHD-CTR-2026-001
+  artistName      String    // Stage or legal name of artist
+  contractTitle   String    @default("Master Distribution, Management & Master Control Agreement")
+  fileUrl         String?
+  fileName        String?
+  fileSize        Int?
+  status          String    @default("ACTIVE") // ACTIVE, CLAIMED, REVOKED
+  uploadedById    String
+  uploadedBy      User      @relation("AdminContracts", fields: [uploadedById], references: [id])
+  claimedByUserId String?
+  claimedAt       DateTime?
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([contractNumber])
+  @@index([artistName])
+  @@index([status])
 }
 

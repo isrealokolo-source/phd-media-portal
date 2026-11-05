@@ -64,8 +64,9 @@ export function AdminReviewConsole({
 
   // Revision Form State
   const [revisionComments, setRevisionComments] = useState('');
-  const [revisionSection, setRevisionSection] = useState('track_register');
+  const [revisionSection, setRevisionSection] = useState('rights_clearance');
   const [revisionTrackId, setRevisionTrackId] = useState<string>('');
+  const [selectedRequestedDocs, setSelectedRequestedDocs] = useState<string[]>([]);
 
   // Hold Form State
   const [holdReason, setHoldReason] = useState('');
@@ -140,6 +141,7 @@ export function AdminReviewConsole({
           comments: revisionComments,
           sections: [revisionSection],
           trackId: revisionTrackId || undefined,
+          requestedDocuments: selectedRequestedDocs,
         }),
       });
       const data = await res.json();
@@ -989,6 +991,51 @@ export function AdminReviewConsole({
                   <option value="deliverables">Deliverables & Audio Masters (Part III)</option>
                   <option value="budget">Budget Ledger (Part IV)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-zinc-300 font-medium mb-1.5">
+                  Pick Specific Agreements & Documents to Request:
+                </label>
+                <div className="space-y-1.5 max-h-44 overflow-y-auto p-2 bg-[#0E1015] border border-[#262D3D] rounded-lg">
+                  {[
+                    'Producer Split Sheet Agreement',
+                    'Featured-Artist Consent / Release',
+                    'Songwriter & Composer Split Agreement',
+                    'Master Recording Assignment',
+                    'Sample / Beat Clearance License',
+                    'Cover Artwork (3000x3000px High-Res)',
+                    'Lossless WAV Audio Master',
+                    'Explicit Content Lyrics Declaration',
+                  ].map((docName) => {
+                    const isChecked = selectedRequestedDocs.includes(docName);
+                    return (
+                      <label
+                        key={docName}
+                        className={`flex items-center space-x-2 p-1.5 rounded cursor-pointer transition-colors ${
+                          isChecked ? 'bg-indigo-950/40 text-indigo-300' : 'text-zinc-400 hover:text-zinc-200'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedRequestedDocs([...selectedRequestedDocs, docName]);
+                            } else {
+                              setSelectedRequestedDocs(selectedRequestedDocs.filter((d) => d !== docName));
+                            }
+                          }}
+                          className="rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-0"
+                        />
+                        <span className="text-[11px] font-medium">{docName}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-zinc-500 mt-1">
+                  Selected documents will be clearly flagged on the artist&apos;s portal with download links for statutory templates.
+                </p>
               </div>
 
               <div>

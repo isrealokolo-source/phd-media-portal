@@ -37,13 +37,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const body = await req.json();
     const { action } = body; // 'COUNTERSIGN_EXECUTE' | 'REQUEST_REVISION' | 'PLACE_ON_HOLD' | 'REMOVE_HOLD'
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://phd-media-portal.onrender.com';
     const artistEmail = release.artist.email;
     const artistName = release.artist.artistProfile?.stageName || release.artist.name;
 
     // OPTION A: REQUEST REVISION
     if (action === 'REQUEST_REVISION') {
-      const { comments, sections = ['release_info'], trackId } = body;
+      const { comments, sections = ['release_info'], trackId, requestedDocuments } = body;
       if (!comments || !comments.trim()) {
         return NextResponse.json({ error: 'Revision feedback comments are required' }, { status: 400 });
       }
@@ -56,6 +56,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             sectionKey: Array.isArray(sections) ? sections.join(', ') : sections,
             trackId,
             comments,
+            requestedDocuments: Array.isArray(requestedDocuments)
+              ? JSON.stringify(requestedDocuments)
+              : requestedDocuments || null,
           },
         });
 
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         action: 'REVISION_REQUESTED',
         entityType: 'Release',
         entityId: release.id,
-        newValue: { comments, sections },
+        newValue: { comments, sections, requestedDocuments },
       });
 
       await sendRevisionRequestEmail({
@@ -93,6 +96,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         referenceNumber: release.referenceNumber,
         comments,
         sections: Array.isArray(sections) ? sections : [sections],
+        requestedDocuments: Array.isArray(requestedDocuments) ? requestedDocuments : undefined,
         releaseId: release.id,
         appUrl,
       });
@@ -286,7 +290,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
       // 5. Notify Artist & Admin via Email
       const settings = await prisma.systemSettings.findUnique({ where: { id: 'default' } });
-      const adminEmail = settings?.administrativeEmail || process.env.PHD_ADMIN_EMAIL || 'operations@phdservices.com';
+      const adminEmail = settings?.administrativeEmail || process.env.PHD_ADMIN_EMAIL || 'israel@phantomdigital.com.ng';
 
       sendReleaseExecutionEmail({
         artistEmail,

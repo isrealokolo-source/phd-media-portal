@@ -155,15 +155,45 @@ export default async function ArtistReleaseDetailPage({
             <p className="text-xs text-zinc-200 whitespace-pre-line leading-relaxed">
               {release.revisionRequests[0].comments}
             </p>
+            {release.revisionRequests[0].requestedDocuments && (
+              <div className="pt-2 border-t border-amber-900/40">
+                <span className="text-[11px] font-semibold text-amber-300 block mb-1.5">
+                  Requested Split Agreements & Documents:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(() => {
+                    try {
+                      const docs = JSON.parse(release.revisionRequests[0].requestedDocuments);
+                      return Array.isArray(docs)
+                        ? docs.map((d: string) => (
+                            <span
+                              key={d}
+                              className="px-2.5 py-1 rounded bg-amber-900/50 text-amber-200 border border-amber-700/50 text-xs font-semibold"
+                            >
+                              {d}
+                            </span>
+                          ))
+                        : null;
+                    } catch {
+                      return (
+                        <span className="text-xs text-amber-200">
+                          {release.revisionRequests[0].requestedDocuments}
+                        </span>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+            )}
             <div className="pt-2 flex items-center justify-between">
               <span className="text-[11px] text-zinc-400">
                 Sections to revise: {release.revisionRequests[0].sectionKey}
               </span>
               <Link
                 href={`/artist/releases/${release.id}/edit`}
-                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-black font-semibold rounded-lg text-xs"
+                className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-black font-bold rounded-lg text-xs transition-colors"
               >
-                Open Editor & Make Revisions
+                Open Editor & Complete Revisions
               </Link>
             </div>
           </div>
@@ -241,6 +271,12 @@ export default async function ArtistReleaseDetailPage({
                         {t.versionRemix && (
                           <span className="text-xs text-zinc-500 ml-1.5">({t.versionRemix})</span>
                         )}
+                        <div className="text-[11px] text-zinc-400 mt-0.5">
+                          <span>Primary: <strong className="text-zinc-200">{t.primaryArtist || release.primaryArtist}</strong></span>
+                          {t.featuredArtists && (
+                            <span className="ml-2">feat. <strong className="text-indigo-300">{t.featuredArtists}</strong></span>
+                          )}
+                        </div>
                       </div>
                       <span className="text-xs font-mono text-zinc-400">{t.duration || '03:20'}</span>
                     </div>
@@ -265,6 +301,15 @@ export default async function ArtistReleaseDetailPage({
                         </span>
                       </div>
                     </div>
+
+                    {t.lyricsText && (
+                      <div className="p-3 bg-[#12151B] border border-[#1F2430] rounded-lg space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Track Lyrics</span>
+                        <p className="text-xs text-zinc-300 whitespace-pre-line leading-relaxed font-sans max-h-36 overflow-y-auto pr-1">
+                          {t.lyricsText}
+                        </p>
+                      </div>
+                    )}
 
                     {t.audioFileUrl && (
                       <AudioPlayer

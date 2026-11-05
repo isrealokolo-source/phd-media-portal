@@ -28,6 +28,7 @@ import {
   RefreshCw,
   Image as ImageIcon,
   ExternalLink,
+  FileText,
 } from 'lucide-react';
 import {
   CLEARANCE_CATEGORIES,
@@ -121,6 +122,18 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       const data = await res.json();
       if (data.success && data.release) {
         setRelease(data.release);
+        if (Array.isArray(data.release.tracks)) {
+          setTracks(data.release.tracks);
+        }
+        if (Array.isArray(data.release.clearanceItems)) {
+          setClearanceItems(data.release.clearanceItems);
+        }
+        if (Array.isArray(data.release.deliverables)) {
+          setDeliverables(data.release.deliverables);
+        }
+        if (Array.isArray(data.release.budgetItems)) {
+          setBudgetItems(data.release.budgetItems);
+        }
         setLastSaved(new Date());
         return data.release;
       } else {
@@ -328,6 +341,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       explicitContent: false,
       language: 'English',
       duration: '',
+      lyricsText: '',
       lyricsDelivered: 'No',
       finalMasterDelivered: 'No',
       rightsClearanceStatus: 'Pending',
@@ -674,20 +688,6 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
                 <div>
                   <label className="block text-xs font-medium text-zinc-300 mb-1">
-                    Featured Artist(s)
-                  </label>
-                  <input
-                    type="text"
-                    value={release.featuredArtists || ''}
-                    onChange={(e) => setRelease({ ...release, featuredArtists: e.target.value })}
-                    onBlur={() => saveChanges({ featuredArtists: release.featuredArtists })}
-                    placeholder="e.g. Tems, Burna Boy"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
                     Record Label / Imprint
                   </label>
                   <input
@@ -881,7 +881,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div>
                           <label className="block text-[11px] text-zinc-400 mb-1">Track Title *</label>
                           <input
@@ -889,6 +889,30 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             value={track.title}
                             onChange={(e) => updateTrack(idx, 'title', e.target.value)}
                             onBlur={() => saveChanges()}
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Primary Artist *</label>
+                          <input
+                            type="text"
+                            value={track.primaryArtist || release.primaryArtist || ''}
+                            onChange={(e) => updateTrack(idx, 'primaryArtist', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder={release.primaryArtist || 'Primary Artist'}
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">Featured Artist(s)</label>
+                          <input
+                            type="text"
+                            value={track.featuredArtists || ''}
+                            onChange={(e) => updateTrack(idx, 'featuredArtists', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. Tems, Burna Boy"
                             className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
                           />
                         </div>
@@ -902,18 +926,6 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             onBlur={() => saveChanges()}
                             placeholder="e.g. Original Master, Club Mix"
                             className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">ISRC Code</label>
-                          <input
-                            type="text"
-                            value={track.isrc || ''}
-                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value)}
-                            onBlur={() => saveChanges()}
-                            placeholder="e.g. NG-PHD-26-00101"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
                           />
                         </div>
 
@@ -942,6 +954,18 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
 
                         <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">ISRC Code</label>
+                          <input
+                            type="text"
+                            value={track.isrc || ''}
+                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value)}
+                            onBlur={() => saveChanges()}
+                            placeholder="e.g. NG-PHD-26-00101"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                          />
+                        </div>
+
+                        <div>
                           <label className="block text-[11px] text-zinc-400 mb-1">Duration (MM:SS)</label>
                           <input
                             type="text"
@@ -952,6 +976,26 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
                           />
                         </div>
+                      </div>
+
+                      {/* Track Lyrics (Optional) */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-[11px] text-zinc-400">
+                            Track Lyrics (Optional)
+                          </label>
+                          <span className="text-[10px] text-zinc-500">
+                            Used for lyrics synchronization and DSP delivery
+                          </span>
+                        </div>
+                        <textarea
+                          rows={3}
+                          value={track.lyricsText || ''}
+                          onChange={(e) => updateTrack(idx, 'lyricsText', e.target.value)}
+                          onBlur={() => saveChanges()}
+                          placeholder="Type or paste lyrics for this track here..."
+                          className="w-full px-3 py-2 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-sans"
+                        />
                       </div>
 
                       {/* Master Ownership Percentage & Legal Owner */}
@@ -1116,21 +1160,175 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
           {currentStep === 3 && (
             <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
               <div className="border-b border-[#1F2430] pb-3">
-                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                  <FileCheck className="w-4 h-4 text-indigo-400" />
-                  <span>Rights Clearance Checklist (Schedule B – Part II)</span>
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+                    <FileCheck className="w-4 h-4 text-indigo-400" />
+                    <span>Rights Clearance & Agreements (Schedule B)</span>
+                  </h2>
+                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2.5 py-0.5 rounded-full">
+                    Optional at Initial Submission
+                  </span>
+                </div>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Complete all 14 statutory Schedule B clearance categories.
+                  Download sample statutory split sheets, execute with collaborators, and attach documentation. Reviewers will verify before final DSP store delivery.
                 </p>
               </div>
 
-              {/* Statutory Pending Warning */}
-              <div className="p-3 bg-amber-950/40 border border-amber-800/40 rounded-xl flex items-start space-x-3 text-xs text-amber-300">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
-                <p className="leading-relaxed">
-                  <strong className="font-semibold">Notice:</strong> {PENDING_CLEARANCE_WARNING}
-                </p>
+              {/* Reviewer Feedback / Document Request Notice if Revision Requested */}
+              {release.status === 'REVISION_REQUESTED' && release.revisionRequests?.[0] && (
+                <div className="p-4 bg-amber-950/50 border border-amber-800/60 rounded-xl space-y-2.5">
+                  <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Reviewer Revision Instructions</span>
+                  </div>
+                  <p className="text-xs text-amber-200/90 whitespace-pre-line pl-6">
+                    {release.revisionRequests[0].comments}
+                  </p>
+                  {release.revisionRequests[0].requestedDocuments && (
+                    <div className="mt-2 pl-6">
+                      <span className="text-[11px] font-semibold text-amber-300 block mb-1">
+                        Specific Agreements Requested by Reviewer:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(() => {
+                          try {
+                            const docs = JSON.parse(release.revisionRequests[0].requestedDocuments);
+                            return Array.isArray(docs)
+                              ? docs.map((d: string) => (
+                                  <span
+                                    key={d}
+                                    className="px-2.5 py-1 rounded bg-amber-900/60 text-amber-200 border border-amber-700/60 text-xs font-semibold"
+                                  >
+                                    {d}
+                                  </span>
+                                ))
+                              : null;
+                          } catch {
+                            return (
+                              <span className="text-xs text-amber-200">
+                                {release.revisionRequests[0].requestedDocuments}
+                              </span>
+                            );
+                          }
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Informational Non-Compulsory Notice */}
+              <div className="p-3.5 bg-indigo-950/30 border border-indigo-900/50 rounded-xl flex items-start space-x-3 text-xs text-indigo-300">
+                <Info className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-semibold text-indigo-200">Non-Compulsory for Initial Submission:</span>
+                  <p className="text-[11px] text-zinc-300 leading-relaxed">
+                    You can submit this release now with or without attached clearance documents. The PHD review team makes the final decision on whether the release proceeds to stores without documents, or they will request specific signed agreements from you.
+                  </p>
+                </div>
+              </div>
+
+              {/* SAMPLE AGREEMENTS DOWNLOAD & IDENTIFICATION CARDS */}
+              <div className="space-y-3">
+                <div>
+                  <h3 className="text-xs font-bold text-zinc-200 flex items-center space-x-1.5 uppercase tracking-wider">
+                    <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Download Official Sample Split Sheets & Agreements</span>
+                  </h3>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Each sample agreement is tagged with a unique document reference number for easy identification. Download, sign with your collaborators, and attach below.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                  {/* Card 1: Producer Agreement */}
+                  <div className="bg-[#0E1015] border border-[#1F2430] rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-900/50 px-2 py-0.5 rounded font-bold">
+                          {release.referenceNumber}-DOC-PROD
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-medium">Producer Split</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white mt-2">Music Producer Split Sheet</h4>
+                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-3">
+                        Statutory agreement establishing producer master ownership share, publishing percentage, advance fees, and production credits.
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#1F2430]">
+                      <a
+                        href="/templates/agreements/PHD-Producer-Split-Sheet.pdf"
+                        download="PHD-Producer-Split-Sheet.pdf"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Download Sample Template</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Featured Artist Consent */}
+                  <div className="bg-[#0E1015] border border-[#1F2430] rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-900/50 px-2 py-0.5 rounded font-bold">
+                          {release.referenceNumber}-DOC-FEAT
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-medium">Guest Artist Release</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white mt-2">Featured-Artist Consent / Release</h4>
+                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-3">
+                        Commercial consent and release granting name, image, and likeness rights along with agreed featured artist royalty shares.
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#1F2430]">
+                      <a
+                        href="/templates/agreements/PHD-Collaboration-Featured-Artist-Split-Sheet.pdf"
+                        download="PHD-Collaboration-Featured-Artist-Split-Sheet.pdf"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Download Sample Template</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Songwriter Split Sheet */}
+                  <div className="bg-[#0E1015] border border-[#1F2430] rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-900/50 px-2 py-0.5 rounded font-bold">
+                          {release.referenceNumber}-DOC-SPLIT
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-medium">Composition Split</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white mt-2">Songwriter / Composer Split Agreement</h4>
+                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-3">
+                        Legal composition split defining lyrical and musical publishing splits across co-writers, composers, and lyricists.
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#1F2430]">
+                      <a
+                        href="/templates/agreements/PHD-Songwriter-Composer-Split-Sheet.pdf"
+                        download="PHD-Songwriter-Composer-Split-Sheet.pdf"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Download Sample Template</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 14 Categories Checklist */}
+              <div className="pt-2 border-t border-[#1F2430]">
+                <h3 className="text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wider">
+                  Schedule B – Clearance Checklist (14 Categories)
+                </h3>
               </div>
 
               {/* 14 Categories List */}

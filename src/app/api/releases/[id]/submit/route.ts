@@ -156,8 +156,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Notify PHD and Artist through emails
     const settings = await prisma.systemSettings.findUnique({ where: { id: 'default' } });
-    const adminEmail = settings?.administrativeEmail || process.env.PHD_ADMIN_EMAIL || 'operations@phdservices.com';
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const adminEmail = settings?.administrativeEmail || process.env.PHD_ADMIN_EMAIL || 'israel@phantomdigital.com.ng';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://phd-media-portal.onrender.com';
     const artistName = user.artistProfile?.stageName || user.name;
 
     // 1. Send submission confirmation receipt to the Artist

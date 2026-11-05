@@ -119,27 +119,24 @@ export function evaluateReleaseReadiness(release: any): ReadinessEvaluation {
   }
 
   // 4. Rights Documentation & Clearances (Weight: 20%)
-  let clearanceScore = 0;
+  // Rights clearance is optional for artist submission. Reviewers assess documents prior to DSP delivery.
+  let clearanceScore = 20;
   const clearances = release.clearanceItems || [];
   if (clearances.length > 0) {
     const pendingItems = clearances.filter((c: any) => c.status === 'Pending');
     const obtainedItems = clearances.filter((c: any) => c.status === 'Obtained');
 
     if (obtainedItems.length > 0) {
-      completedItems.push(`${obtainedItems.length} clearance documentation item(s) obtained`);
+      completedItems.push(`${obtainedItems.length} clearance documentation item(s) uploaded`);
     }
 
     if (pendingItems.length > 0) {
-      warnings.push(`${pendingItems.length} clearance item(s) currently marked Pending (must be resolved before commercial exploitation)`);
-      outstandingItems.push('Resolve pending clearance items');
-      clearanceScore = Math.max(5, 20 - pendingItems.length * 2);
+      warnings.push(`${pendingItems.length} clearance item(s) pending (optional at submission; reviewer can request specific documents)`);
     } else {
-      clearanceScore = 20;
-      completedItems.push('All rights clearance checklist categories assessed');
+      completedItems.push('All rights clearance documentation cleared');
     }
   } else {
-    warnings.push('Rights clearance checklist not yet completed');
-    outstandingItems.push('Complete the 14-item Rights Clearance Checklist in Schedule B');
+    completedItems.push('Rights clearance review ready for reviewer assessment');
   }
 
   // 5. Deliverables (Weight: 15%)
@@ -180,9 +177,9 @@ export function evaluateReleaseReadiness(release: any): ReadinessEvaluation {
     releaseInfoScore + tracksScore + ownershipScore + clearanceScore + deliverablesScore + budgetScore
   ));
 
-  const submissionReady = criticalBlockers.length === 0 && totalScore >= 70;
-  const clearanceReady = (release.clearanceItems || []).some((c: any) => c.status === 'Obtained') &&
-    !(release.clearanceItems || []).some((c: any) => c.status === 'Pending' && c.category === 'MASTER_OWNERSHIP_EVIDENCE');
+  // Submission ready as long as critical blockers (title, artist, audio master, cover art) are met
+  const submissionReady = criticalBlockers.length === 0;
+  const clearanceReady = (release.clearanceItems || []).some((c: any) => c.status === 'Obtained');
 
   return {
     score: totalScore,

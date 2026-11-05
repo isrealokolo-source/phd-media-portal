@@ -150,10 +150,23 @@ export async function sendRevisionRequestEmail(params: {
   referenceNumber: string;
   comments: string;
   sections: string[];
+  requestedDocuments?: string[];
   releaseId: string;
   appUrl: string;
 }) {
   const editUrl = `${params.appUrl}/artist/releases/${params.releaseId}/edit`;
+  const requestedDocsHtml = params.requestedDocuments && params.requestedDocuments.length > 0
+    ? `
+      <div style="background-color: #1a1f2b; border-left: 4px solid #6366f1; padding: 16px; margin: 20px 0; border-radius: 4px;">
+        <h4 style="margin: 0 0 10px 0; color: #818cf8; font-size: 14px;">Specific Agreements / Documents Requested:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #e5e7eb;">
+          ${params.requestedDocuments.map((doc) => `<li style="padding: 4px 0;"><strong>${doc}</strong></li>`).join('')}
+        </ul>
+        <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px;">You can download official sample split sheet & consent templates directly in Step 3 of your release portal.</p>
+      </div>
+    `
+    : '';
+
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
       <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
@@ -165,6 +178,7 @@ export async function sendRevisionRequestEmail(params: {
         <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #f59e0b; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
         <tr><td style="padding: 8px 0; color: #9ca3af;">Sections Requiring Action:</td><td style="padding: 8px 0; color: #ffffff;">${params.sections.join(', ')}</td></tr>
       </table>
+      ${requestedDocsHtml}
       <div style="background-color: #1a1f2b; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px;">
         <h4 style="margin: 0 0 8px 0; color: #f59e0b;">Administrative Feedback:</h4>
         <p style="margin: 0; color: #e5e7eb; white-space: pre-line;">${params.comments}</p>
@@ -505,6 +519,92 @@ export async function sendAdminExecutionNotificationEmail(params: {
     html,
     releaseId: params.releaseId,
     templateType: 'EXECUTION_ADMIN',
+  });
+}
+
+// 10. Artist Welcome Onboarding Email
+export async function sendArtistWelcomeEmail(params: {
+  artistEmail: string;
+  artistName: string;
+  contractNumber: string;
+  appUrl: string;
+}) {
+  const portalUrl = `${params.appUrl}/artist`;
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
+      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
+        <h2 style="color: #6366f1; margin: 0 0 8px 0; font-size: 22px;">Welcome to PHD Services!</h2>
+        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Your artist account has been successfully verified and activated.</p>
+      </div>
+      <p style="color: #e5e7eb; font-size: 14px; margin-bottom: 16px;">
+        Hello <strong>${params.artistName}</strong>, welcome to the PHD Services Release Management & Rights Clearance Portal. Your account is tied to authorized contract <strong style="color: #6366f1; font-family: monospace;">${params.contractNumber}</strong>.
+      </p>
+      <div style="background-color: #12151b; border: 1px solid #1f2430; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 6px 0; color: #9ca3af; width: 160px;">Artist Name:</td><td style="padding: 6px 0; color: #ffffff; font-weight: 600;">${params.artistName}</td></tr>
+          <tr><td style="padding: 6px 0; color: #9ca3af;">Account Email:</td><td style="padding: 6px 0; color: #ffffff;">${params.artistEmail}</td></tr>
+          <tr><td style="padding: 6px 0; color: #9ca3af;">Linked Contract:</td><td style="padding: 6px 0; color: #10b981; font-family: monospace; font-weight: bold;">${params.contractNumber}</td></tr>
+        </table>
+      </div>
+      <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
+        You can now register your music releases, upload lossless masters and cover artwork, download statutory split agreements, and track distribution readiness directly from your artist dashboard.
+      </p>
+      <div style="margin: 28px 0;">
+        <a href="${portalUrl}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+          Go to Artist Portal
+        </a>
+      </div>
+      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
+        PHD Services Release Management & Rights Clearance Engine • Automated Onboarding Notification.
+      </p>
+    </div>
+  `;
+
+  return sendNotificationEmail({
+    to: params.artistEmail,
+    subject: `Welcome to PHD Services – Account Verified [${params.contractNumber}]`,
+    html,
+    templateType: 'ARTIST_WELCOME',
+  });
+}
+
+// 11. New Artist Registration Notification to PHD Operations
+export async function sendNewArtistRegistrationAdminAlertEmail(params: {
+  adminEmail: string;
+  artistName: string;
+  artistEmail: string;
+  contractNumber: string;
+  appUrl: string;
+}) {
+  const adminUrl = `${params.appUrl}/admin/contracts`;
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
+      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
+        <h2 style="color: #10b981; margin: 0 0 8px 0; font-size: 22px;">New Artist Registration Verified</h2>
+        <p style="color: #9ca3af; margin: 0; font-size: 14px;">An artist has registered and claimed their authorized contract.</p>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Artist Name:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.artistName}</td></tr>
+        <tr><td style="padding: 8px 0; color: #9ca3af;">Registered Email:</td><td style="padding: 8px 0; color: #ffffff;">${params.artistEmail}</td></tr>
+        <tr><td style="padding: 8px 0; color: #9ca3af;">Claimed Contract:</td><td style="padding: 8px 0; color: #10b981; font-family: monospace; font-weight: bold;">${params.contractNumber}</td></tr>
+        <tr><td style="padding: 8px 0; color: #9ca3af;">Timestamp:</td><td style="padding: 8px 0; color: #ffffff;">${new Date().toUTCString()}</td></tr>
+      </table>
+      <div style="margin: 28px 0;">
+        <a href="${adminUrl}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+          View Contracts Console
+        </a>
+      </div>
+      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
+        PHD Services Administrative Operations Dispatcher.
+      </p>
+    </div>
+  `;
+
+  return sendNotificationEmail({
+    to: params.adminEmail,
+    subject: `New Artist Registered: ${params.artistName} [${params.contractNumber}]`,
+    html,
+    templateType: 'ADMIN_ARTIST_REGISTERED',
   });
 }
 

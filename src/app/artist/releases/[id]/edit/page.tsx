@@ -19,6 +19,7 @@ export default async function EditReleasePage({ params }: { params: { id: string
       deliverables: true,
       budgetItems: true,
       signatures: true,
+      revisionRequests: { orderBy: { createdAt: 'desc' }, take: 1 },
     },
   });
 

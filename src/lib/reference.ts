@@ -43,3 +43,45 @@ export async function generateReleaseReferenceNumber(customPrefix?: string): Pro
   });
 }
 
+/**
+ * Concurrency-safe, sequential contract number generator.
+ * Format: PHD-CTR-{YEAR}-{SEQ} (e.g., PHD-CTR-2026-001)
+ */
+export async function generateContractNumber(customPrefix?: string): Promise<string> {
+  const currentYear = new Date().getFullYear();
+  const prefix = (customPrefix || 'PHD').trim().toUpperCase();
+  const pattern = `${prefix}-CTR-${currentYear}-`;
+
+  return await prisma.$transaction(async (tx) => {
+    const matchingContracts = await tx.artistContract.findMany({
+      where: {
+        contractNumber: {
+          startsWith: pattern,
+        },
+      },
+      select: {
+        contractNumber: true,
+      },
+      orderBy: {
+        contractNumber: 'desc',
+      },
+      take: 20,
+    });
+
+    let maxSeq = 0;
+    for (const ctr of matchingContracts) {
+      const parts = ctr.contractNumber.split('-');
+      if (parts.length >= 4) {
+        const num = parseInt(parts[3], 10);
+        if (!isNaN(num) && num > maxSeq) {
+          maxSeq = num;
+        }
+      }
+    }
+
+    const nextSeq = maxSeq + 1;
+    const formattedSeq = nextSeq.toString().padStart(3, '0');
+    return `${pattern}${formattedSeq}`;
+  });
+}
+

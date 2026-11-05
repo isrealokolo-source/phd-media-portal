@@ -165,49 +165,70 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     // Handle nested tracks update if provided
     if (Array.isArray(body.tracks)) {
-      // Upsert tracks
-      for (const trackData of body.tracks) {
-        if (trackData.id && !trackData.id.startsWith('temp_')) {
+      // 1. Fetch current database tracks for this release ordered by trackNumber
+      const currentDbTracks = await prisma.track.findMany({
+        where: { releaseId: params.id },
+        orderBy: { trackNumber: 'asc' },
+      });
+      const currentDbTrackMap = new Map(currentDbTracks.map((t) => [t.id, t]));
+      const matchedDbIds = new Set<string>();
+
+      for (let i = 0; i < body.tracks.length; i++) {
+        const trackData = body.tracks[i];
+        const targetTrackNumber = trackData.trackNumber || (i + 1);
+
+        // Match existing track by ID or by index position to prevent phantom duplicates
+        let existingTrack: any = null;
+        if (trackData.id && !trackData.id.startsWith('temp_') && currentDbTrackMap.has(trackData.id)) {
+          existingTrack = currentDbTrackMap.get(trackData.id);
+        } else if (i < currentDbTracks.length) {
+          existingTrack = currentDbTracks[i];
+        }
+
+        const trackPayload = {
+          trackNumber: targetTrackNumber,
+          title: trackData.title || `Track ${targetTrackNumber}`,
+          versionRemix: trackData.versionRemix || null,
+          primaryArtist: trackData.primaryArtist || updateData.primaryArtist || currentRelease.primaryArtist,
+          featuredArtists: trackData.featuredArtists || null,
+          producerBeatmaker: trackData.producerBeatmaker || null,
+          songwritersComposers: trackData.songwritersComposers || null,
+          masterOwnerLegalName: trackData.masterOwnerLegalName || null,
+          masterOwnershipPercentage: Number(trackData.masterOwnershipPercentage) || 100,
+          isrc: trackData.isrc || null,
+          recordingCompletionDate: trackData.recordingCompletionDate ? new Date(trackData.recordingCompletionDate) : null,
+          explicitContent: Boolean(trackData.explicitContent),
+          language: trackData.language || 'English',
+          duration: trackData.duration || null,
+          lyricsText: trackData.lyricsText || null,
+          lyricsDelivered: trackData.lyricsDelivered || 'No',
+          finalMasterDelivered: trackData.finalMasterDelivered || (trackData.audioFileUrl || existingTrack?.audioFileUrl ? 'Yes' : 'No'),
+          artworkMetadataDelivered: trackData.artworkMetadataDelivered || 'No',
+          rightsClearanceStatus: trackData.rightsClearanceStatus || 'Pending',
+          existingLicenceOrRestriction: trackData.existingLicenceOrRestriction || null,
+          audioFileUrl: trackData.audioFileUrl || existingTrack?.audioFileUrl || null,
+          audioFileName: trackData.audioFileName || existingTrack?.audioFileName || null,
+          audioFileSize: trackData.audioFileSize ?? existingTrack?.audioFileSize ?? null,
+          audioSampleRate: trackData.audioSampleRate || existingTrack?.audioSampleRate || null,
+          audioBitDepth: trackData.audioBitDepth || existingTrack?.audioBitDepth || null,
+          audioChannels: trackData.audioChannels || existingTrack?.audioChannels || null,
+          audioIsLossless: trackData.audioIsLossless ?? existingTrack?.audioIsLossless ?? null,
+        };
+
+        if (existingTrack) {
+          matchedDbIds.add(existingTrack.id);
           await prisma.track.update({
-            where: { id: trackData.id },
-            data: {
-              trackNumber: trackData.trackNumber,
-              title: trackData.title,
-              versionRemix: trackData.versionRemix,
-              primaryArtist: trackData.primaryArtist,
-              featuredArtists: trackData.featuredArtists,
-              producerBeatmaker: trackData.producerBeatmaker,
-              songwritersComposers: trackData.songwritersComposers,
-              masterOwnerLegalName: trackData.masterOwnerLegalName,
-              masterOwnershipPercentage: Number(trackData.masterOwnershipPercentage) || 100,
-              isrc: trackData.isrc,
-              recordingCompletionDate: trackData.recordingCompletionDate ? new Date(trackData.recordingCompletionDate) : null,
-              explicitContent: Boolean(trackData.explicitContent),
-              language: trackData.language,
-              duration: trackData.duration,
-              lyricsText: trackData.lyricsText,
-              lyricsDelivered: trackData.lyricsDelivered,
-              finalMasterDelivered: trackData.finalMasterDelivered,
-              artworkMetadataDelivered: trackData.artworkMetadataDelivered,
-              rightsClearanceStatus: trackData.rightsClearanceStatus,
-              existingLicenceOrRestriction: trackData.existingLicenceOrRestriction,
-              audioFileUrl: trackData.audioFileUrl,
-              audioFileName: trackData.audioFileName,
-              audioFileSize: trackData.audioFileSize,
-              audioSampleRate: trackData.audioSampleRate,
-              audioBitDepth: trackData.audioBitDepth,
-              audioChannels: trackData.audioChannels,
-              audioIsLossless: trackData.audioIsLossless,
-            },
+            where: { id: existingTrack.id },
+            data: trackPayload,
           });
 
           // Handle contributors if present
           if (Array.isArray(trackData.contributors)) {
-            await prisma.trackContributor.deleteMany({ where: { trackId: trackData.id } });
+            await prisma.trackContributor.deleteMany({ where: { trackId: existingTrack.id } });
             if (trackData.contributors.length > 0) {
               await prisma.trackContributor.createMany({
                 data: trackData.contributors.map((c: any) => ({
-                  trackId: trackData.id,
+                  trackId: existingTrack.id,
                   contributorName: c.contributorName,
                   role: c.role || 'Producer',
                   feeRoyaltyShare: c.feeRoyaltyShare,
@@ -218,35 +239,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             }
           }
         } else {
-          // New track
-          await prisma.track.create({
+          // New track insertion
+          const createdTrack = await prisma.track.create({
             data: {
+              ...trackPayload,
               releaseId: params.id,
-              trackNumber: trackData.trackNumber || (currentRelease.tracks.length + 1),
-              title: trackData.title || 'Untitled Track',
-              versionRemix: trackData.versionRemix,
-              primaryArtist: trackData.primaryArtist || updateData.primaryArtist || currentRelease.primaryArtist,
-              featuredArtists: trackData.featuredArtists,
-              producerBeatmaker: trackData.producerBeatmaker,
-              songwritersComposers: trackData.songwritersComposers,
-              masterOwnerLegalName: trackData.masterOwnerLegalName,
-              masterOwnershipPercentage: Number(trackData.masterOwnershipPercentage) || 100,
-              isrc: trackData.isrc,
-              explicitContent: Boolean(trackData.explicitContent),
-              language: trackData.language || 'English',
-              duration: trackData.duration,
-              lyricsText: trackData.lyricsText,
-              lyricsDelivered: trackData.lyricsDelivered || 'No',
-              finalMasterDelivered: trackData.finalMasterDelivered || 'No',
-              artworkMetadataDelivered: trackData.artworkMetadataDelivered || 'No',
-              rightsClearanceStatus: trackData.rightsClearanceStatus || 'Pending',
-              audioFileUrl: trackData.audioFileUrl,
-              audioFileName: trackData.audioFileName,
-              audioFileSize: trackData.audioFileSize,
-              audioSampleRate: trackData.audioSampleRate,
-              audioBitDepth: trackData.audioBitDepth,
-              audioChannels: trackData.audioChannels,
-              audioIsLossless: trackData.audioIsLossless,
               contributors: {
                 create: Array.isArray(trackData.contributors)
                   ? trackData.contributors.map((c: any) => ({
@@ -259,7 +256,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
               },
             },
           });
+          matchedDbIds.add(createdTrack.id);
         }
+      }
+
+      // 3. Delete any tracks removed by artist
+      const excessDbTracks = currentDbTracks.filter((t) => !matchedDbIds.has(t.id));
+      if (excessDbTracks.length > 0) {
+        await prisma.track.deleteMany({
+          where: { id: { in: excessDbTracks.map((t) => t.id) } },
+        });
       }
     }
 

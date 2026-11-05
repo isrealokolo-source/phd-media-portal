@@ -106,6 +106,14 @@ export function Navbar({ user }: NavbarProps) {
                   Artists
                 </Link>
                 <Link
+                  href="/admin/contracts"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    pathname === '/admin/contracts' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  Contracts
+                </Link>
+                <Link
                   href="/admin/users"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     pathname === '/admin/users' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
