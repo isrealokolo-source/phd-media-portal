@@ -250,7 +250,7 @@ export function AdminReviewConsole({
               {release.status.replace(/_/g, ' ')}
             </span>
           </div>
-          <h1 className="text-xl font-bold text-white mt-1.5">{release.title}</h1>
+          <h1 className="text-xl font-bold text-[#171717] mt-1.5">{release.title}</h1>
           <p className="text-xs text-[#777777]">
             Artist: {release.primaryArtist} • Submitted:{' '}
             {release.submittedAt ? new Date(release.submittedAt).toLocaleDateString('en-GB') : 'Draft'}
@@ -709,7 +709,7 @@ export function AdminReviewConsole({
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#171717]">
                   Production Asset Distribution
                 </span>
-                <h3 className="text-base font-bold text-white mt-0.5 flex items-center space-x-2">
+                <h3 className="text-base font-bold text-[#171717] mt-0.5 flex items-center space-x-2">
                   <FileDown className="w-5 h-5 text-[#171717]" />
                   <span>Release Asset Archive & Audio Masters</span>
                 </h3>
@@ -1341,7 +1341,7 @@ export function AdminReviewConsole({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-xl bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5 shadow-2xl my-8">
             <div className="border-b border-[#E8E8E8] pb-3">
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+              <h3 className="text-base font-bold text-[#171717] flex items-center space-x-2">
                 <PenTool className="w-4 h-4 text-[#171717]" />
                 <span>PHD Countersignature & Legal Execution</span>
               </h3>

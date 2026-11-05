@@ -198,7 +198,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
       {/* Top Banner & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8E8E8]">
         <div>
-          <h1 className="text-xl font-bold text-white flex items-center space-x-2.5">
+          <h1 className="text-xl font-bold text-[#171717] flex items-center space-x-2.5">
             <ShieldCheck className="w-6 h-6 text-[#171717]" />
             <span>Artist Contracts & Registration Authorizations</span>
           </h1>
@@ -298,7 +298,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                       <td className="px-5 py-4">
                         <div className="flex items-center space-x-2">
                           <User className="w-3.5 h-3.5 text-[#777777]" />
-                          <span className="font-bold text-white text-sm">{c.artistName}</span>
+                          <span className="font-bold text-[#171717] text-sm">{c.artistName}</span>
                         </div>
                         {c.notes && <p className="text-[11px] text-[#999999] mt-0.5">{c.notes}</p>}
                       </td>
@@ -373,20 +373,20 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-[#E8E8E8]">
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+              <h3 className="text-base font-bold text-[#171717] flex items-center space-x-2">
                 <FileCheck className="w-4 h-4 text-[#171717]" />
                 <span>Upload & Authorize Artist Contract</span>
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-[#999999] hover:text-white text-xs font-semibold"
+                className="text-[#999999] hover:text-[#171717] text-xs font-semibold"
               >
                 Close
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-rose-300 flex items-center space-x-2">
+              <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B] flex items-center space-x-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{formError}</span>
               </div>
@@ -503,7 +503,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
               <CheckCircle2 className="w-6 h-6" />
             </div>
 
-            <h3 className="text-base font-bold text-white">Contract Issued Successfully!</h3>
+            <h3 className="text-base font-bold text-[#171717]">Contract Issued Successfully!</h3>
             <p className="text-xs text-[#777777]">
               Contract has been logged and is ready for artist registration. Share the details below with the artist.
             </p>
@@ -515,7 +515,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                   <span className="font-mono font-bold text-[#171717] text-base">{showSuccessModal.contractNumber}</span>
                   <button
                     onClick={() => handleCopy(showSuccessModal.contractNumber, 'modal_num')}
-                    className="flex items-center space-x-1 px-2 py-1 bg-indigo-950 text-[#171717] border border-indigo-800 rounded text-[11px]"
+                    className="flex items-center space-x-1 px-2 py-1 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded text-[11px] transition-colors"
                   >
                     {copiedId === 'modal_num' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedId === 'modal_num' ? 'Copied' : 'Copy'}</span>
@@ -525,7 +525,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
 
               <div className="pt-2 border-t border-[#E8E8E8]">
                 <span className="text-[10px] text-[#999999] uppercase tracking-wider font-semibold">Authorized Artist Name</span>
-                <div className="font-bold text-white text-sm mt-0.5">{showSuccessModal.artistName}</div>
+                <div className="font-bold text-[#171717] text-sm mt-0.5">{showSuccessModal.artistName}</div>
               </div>
             </div>
 

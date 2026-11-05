@@ -344,3 +344,4 @@ export function Navbar({ user }: { user: any }) {
   // Return null or minimalist header if imported standalone
   return null;
 }
+

@@ -534,19 +534,19 @@ export function ArtistDashboardConsole({ initialReleases, user }: ArtistDashboar
               title: 'Producer Agreement',
               ref: 'PHD-DOC-AGR-001',
               desc: 'Master production rights assignment, producer royalty points, and beat clearance.',
-              file: '/sample-documents/Producer-Agreement-Sample.pdf',
+              file: '/templates/agreements/PHD-Producer-Split-Sheet.pdf',
             },
             {
               title: 'Featured Artist Consent / Release',
               ref: 'PHD-DOC-FEAT-002',
               desc: 'Side-artist vocal clearance, name & likeness consent, and performance waivers.',
-              file: '/sample-documents/Featured-Artist-Consent-Sample.pdf',
+              file: '/templates/agreements/PHD-Collaboration-Featured-Artist-Split-Sheet.pdf',
             },
             {
               title: 'Songwriter / Composer Split Sheet',
               ref: 'PHD-DOC-SPLIT-003',
               desc: 'Publishing and underlying musical composition share allocations among lyricists and composers.',
-              file: '/sample-documents/Songwriter-Split-Agreement-Sample.pdf',
+              file: '/templates/agreements/PHD-Songwriter-Composer-Split-Sheet.pdf',
             },
           ].map((doc) => (
             <div

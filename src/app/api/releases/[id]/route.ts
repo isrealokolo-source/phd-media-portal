@@ -272,20 +272,47 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Handle clearance items update if provided
     if (Array.isArray(body.clearanceItems)) {
       for (const item of body.clearanceItems) {
-        if (item.id) {
-          await prisma.clearanceItem.update({
-            where: { id: item.id },
-            data: {
-              status: item.status,
-              documentReference: item.documentReference,
-              supportingDocUrl: item.supportingDocUrl,
-              notes: item.notes,
-              rightsHolder: item.rightsHolder,
-              dateReceived: item.dateReceived ? new Date(item.dateReceived) : null,
-              reviewStatus: item.reviewStatus,
-              reviewNotes: item.reviewNotes,
-            },
+        const itemData = {
+          status: item.status,
+          documentReference: item.documentReference,
+          supportingDocUrl: item.supportingDocUrl,
+          notes: item.notes,
+          rightsHolder: item.rightsHolder,
+          dateReceived: item.dateReceived ? new Date(item.dateReceived) : null,
+          reviewStatus: item.reviewStatus,
+          reviewNotes: item.reviewNotes,
+        };
+
+        if (item.id && !String(item.id).startsWith('temp_')) {
+          const exists = await prisma.clearanceItem.findUnique({ where: { id: item.id } });
+          if (exists) {
+            await prisma.clearanceItem.update({
+              where: { id: item.id },
+              data: itemData,
+            });
+            continue;
+          }
+        }
+
+        // Fallback: match by releaseId and category
+        if (item.category) {
+          const existingCat = await prisma.clearanceItem.findFirst({
+            where: { releaseId: params.id, category: item.category },
           });
+          if (existingCat) {
+            await prisma.clearanceItem.update({
+              where: { id: existingCat.id },
+              data: itemData,
+            });
+          } else {
+            await prisma.clearanceItem.create({
+              data: {
+                releaseId: params.id,
+                category: item.category,
+                ...itemData,
+              },
+            });
+          }
         }
       }
     }
@@ -392,10 +419,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       where: { id: params.id },
       data: updateData,
       include: {
-        tracks: { include: { contributors: true } },
-        clearanceItems: true,
-        deliverables: true,
-        budgetItems: true,
+        tracks: {
+          include: { contributors: true },
+          orderBy: { trackNumber: 'asc' },
+        },
+        clearanceItems: {
+          orderBy: { createdAt: 'asc' },
+        },
+        deliverables: {
+          orderBy: { id: 'asc' },
+        },
+        budgetItems: {
+          orderBy: { id: 'asc' },
+        },
       },
     });
 

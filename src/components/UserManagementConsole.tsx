@@ -204,7 +204,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
           <span className="text-xs font-mono uppercase tracking-widest text-[#171717]">
             Identity & Access Administration
           </span>
-          <h1 className="text-xl font-bold text-white mt-1">Users & Team Management</h1>
+          <h1 className="text-xl font-bold text-[#171717] mt-1">Users & Team Management</h1>
           <p className="text-xs text-[#777777] mt-0.5">
             Provision user accounts, assign role permissions, and manage platform credentials.
           </p>
@@ -268,7 +268,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
             <span className="text-[10px] text-[#777777] font-medium block uppercase tracking-wider">
               {item.label}
             </span>
-            <span className="text-xl font-bold font-mono text-white mt-1 block">
+            <span className="text-xl font-bold font-mono text-[#171717] mt-1 block">
               {item.count}
             </span>
           </button>
@@ -407,14 +407,14 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 <AlertTriangle className="w-5 h-5 text-[#D64B4B]" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Permanently Delete User</h3>
-                <p className="text-xs text-rose-300/80">This action cannot be undone</p>
+                <h3 className="text-base font-bold text-[#171717]">Permanently Delete User</h3>
+                <p className="text-xs text-[#D64B4B]/80">This action cannot be undone</p>
               </div>
             </div>
 
             <div className="p-3.5 bg-[#FEF2F2] border border-rose-900/40 rounded-lg space-y-2 mb-4 text-xs">
               <p className="text-[#171717]">
-                Are you sure you want to permanently delete <strong className="text-white">{userToDelete.name}</strong> (<span className="font-mono text-[#777777]">{userToDelete.email}</span>)?
+                Are you sure you want to permanently delete <strong className="text-[#171717]">{userToDelete.name}</strong> (<span className="font-mono text-[#777777]">{userToDelete.email}</span>)?
               </p>
               <div className="text-[#777777] text-[11px] space-y-1">
                 <div>Role: <strong className="text-[#171717]">{userToDelete.role}</strong></div>
@@ -427,7 +427,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
             </div>
 
             {deleteError && (
-              <div className="mb-4 p-3 rounded-lg bg-[#FEF2F2] border border-rose-800 text-rose-200 text-xs">
+              <div className="mb-4 p-3 rounded-lg bg-[#FEF2F2] border border-[#FECACA] text-[#D64B4B] text-xs">
                 {deleteError}
               </div>
             )}
@@ -440,7 +440,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                   setUserToDelete(null);
                   setDeleteError('');
                 }}
-                className="px-4 py-2 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -488,9 +488,9 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">User Successfully Created!</h3>
+                  <h3 className="text-lg font-bold text-[#171717]">User Successfully Created!</h3>
                   <p className="text-xs text-[#777777] mt-1">
-                    An account for <strong className="text-white">{createdSuccess.user.name}</strong> ({createdSuccess.user.email}) has been provisioned.
+                    An account for <strong className="text-[#171717]">{createdSuccess.user.name}</strong> ({createdSuccess.user.email}) has been provisioned.
                   </p>
                 </div>
 
@@ -499,14 +499,14 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                     <span className="text-[10px] font-mono uppercase text-[#171717] block">
                       Generated Initial Password:
                     </span>
-                    <div className="flex items-center justify-between bg-[#151922] p-2.5 rounded-lg border border-[#E8E8E8]">
+                    <div className="flex items-center justify-between bg-white p-2.5 rounded-lg border border-[#E8E8E8]">
                       <span className="font-mono text-sm text-[#269568] font-bold">
                         {createdSuccess.temporaryPassword}
                       </span>
                       <button
                         type="button"
                         onClick={() => copyToClipboard(createdSuccess.temporaryPassword!)}
-                        className="flex items-center space-x-1 px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 rounded text-xs text-indigo-200 transition-colors"
+                        className="flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-[#EAEAEA] border border-[#E8E8E8] rounded text-xs text-[#171717] transition-colors"
                       >
                         <Copy className="w-3.5 h-3.5" />
                         <span>{copiedPass ? 'Copied!' : 'Copy'}</span>
@@ -534,7 +534,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
             ) : (
               <form onSubmit={handleCreateUser} className="space-y-4">
                 <div className="border-b border-[#E8E8E8] pb-3">
-                  <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                  <h3 className="text-base font-bold text-[#171717] flex items-center space-x-2">
                     <UserPlus className="w-4 h-4 text-[#171717]" />
                     <span>Create & Provision New Portal User</span>
                   </h3>
@@ -544,7 +544,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 </div>
 
                 {errorMessage && (
-                  <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-rose-300">
+                  <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B]">
                     {errorMessage}
                   </div>
                 )}
@@ -583,11 +583,11 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                         onClick={() => setRole(item.key as any)}
                         className={`p-2.5 rounded-lg border text-left transition-all ${
                           role === item.key
-                            ? 'bg-[#EFF6FF] border-indigo-600 shadow-sm'
-                            : 'bg-[#F4F4F2] border-[#E8E8E8] hover:border-[#E8E8E8]'
+                            ? 'bg-[#EFF6FF] border-[#171717] shadow-sm'
+                            : 'bg-[#F4F4F2] border-[#E8E8E8] hover:border-[#171717]'
                         }`}
                       >
-                        <span className="font-semibold text-xs text-white block">
+                        <span className="font-semibold text-xs text-[#171717] block">
                           {item.label}
                         </span>
                         <span className="text-[10px] text-[#777777] block mt-0.5 leading-tight">

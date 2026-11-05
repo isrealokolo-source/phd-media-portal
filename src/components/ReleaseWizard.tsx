@@ -77,9 +77,30 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   const [isUploading, setIsUploading] = useState<Record<string, boolean>>({});
   const [uploadError, setUploadError] = useState<Record<string, string>>({});
 
+  // Helper to ensure all 14 statutory categories are always represented in stable canonical order
+  const getOrderedClearances = (items: any[]) => {
+    const map = new Map((items || []).map((c) => [c.category, c]));
+    return CLEARANCE_CATEGORIES.map((cat) => {
+      if (map.has(cat.id)) {
+        return map.get(cat.id);
+      }
+      return {
+        id: `temp_${cat.id}`,
+        category: cat.id,
+        status: 'Pending',
+        documentReference: '',
+        rightsHolder: '',
+        supportingDocUrl: null,
+        notes: `Clearance category: ${cat.label}`,
+      };
+    });
+  };
+
   // Form states
   const [tracks, setTracks] = useState<any[]>(initialRelease.tracks || []);
-  const [clearanceItems, setClearanceItems] = useState<any[]>(initialRelease.clearanceItems || []);
+  const [clearanceItems, setClearanceItems] = useState<any[]>(() =>
+    getOrderedClearances(initialRelease.clearanceItems || [])
+  );
   const [deliverables, setDeliverables] = useState<any[]>(initialRelease.deliverables || []);
   const [budgetItems, setBudgetItems] = useState<any[]>(initialRelease.budgetItems || []);
 
@@ -127,7 +148,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
           setTracks(data.release.tracks);
         }
         if (Array.isArray(data.release.clearanceItems)) {
-          setClearanceItems(data.release.clearanceItems);
+          setClearanceItems(getOrderedClearances(data.release.clearanceItems));
         }
         if (Array.isArray(data.release.deliverables)) {
           setDeliverables(data.release.deliverables);
@@ -608,7 +629,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 Version {release.currentVersion} • Draft
               </span>
             </div>
-            <h1 className="text-xl font-bold text-white mt-1">{release.title}</h1>
+            <h1 className="text-xl font-bold text-[#171717] mt-1">{release.title}</h1>
           </div>
         </div>
 
@@ -1435,7 +1456,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               <div className="p-3.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex items-start space-x-3 text-xs text-[#171717]">
                 <Info className="w-4 h-4 text-[#171717] flex-shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
-                  <span className="font-semibold text-indigo-200">Non-Compulsory for Initial Submission:</span>
+                  <span className="font-semibold text-[#171717]">Non-Compulsory for Initial Submission:</span>
                   <p className="text-[11px] text-[#171717] leading-relaxed">
                     You can submit this release now with or without attached clearance documents. The PHD review team makes the final decision on whether the release proceeds to stores without documents, or they will request specific signed agreements from you.
                   </p>
@@ -1456,15 +1477,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                   {/* Card 1: Producer Agreement */}
-                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-md">
+                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-sm">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono text-[10px] text-[#171717] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
                           {release.referenceNumber}-DOC-PROD
                         </span>
-                        <span className="text-[10px] text-[#999999] font-medium">Producer Split</span>
+                        <span className="text-[10px] text-[#777777] font-medium">Producer Split</span>
                       </div>
-                      <h4 className="text-xs font-bold text-white mt-2">Music Producer Split Sheet</h4>
+                      <h4 className="text-xs font-bold text-[#171717] mt-2">Music Producer Split Sheet</h4>
                       <p className="text-[11px] text-[#777777] mt-1 line-clamp-3">
                         Statutory agreement establishing producer master ownership share, publishing percentage, advance fees, and production credits.
                       </p>
@@ -1474,7 +1495,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       <a
                         href="/templates/agreements/PHD-Producer-Split-Sheet.pdf"
                         download="PHD-Producer-Split-Sheet.pdf"
-                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-semibold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Download Sample Template</span>
@@ -1483,15 +1504,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   </div>
 
                   {/* Card 2: Featured Artist Consent */}
-                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-md">
+                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-sm">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono text-[10px] text-[#171717] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
                           {release.referenceNumber}-DOC-FEAT
                         </span>
-                        <span className="text-[10px] text-[#999999] font-medium">Guest Artist Release</span>
+                        <span className="text-[10px] text-[#777777] font-medium">Guest Artist Release</span>
                       </div>
-                      <h4 className="text-xs font-bold text-white mt-2">Featured-Artist Consent / Release</h4>
+                      <h4 className="text-xs font-bold text-[#171717] mt-2">Featured-Artist Consent / Release</h4>
                       <p className="text-[11px] text-[#777777] mt-1 line-clamp-3">
                         Commercial consent and release granting name, image, and likeness rights along with agreed featured artist royalty shares.
                       </p>
@@ -1501,7 +1522,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       <a
                         href="/templates/agreements/PHD-Collaboration-Featured-Artist-Split-Sheet.pdf"
                         download="PHD-Collaboration-Featured-Artist-Split-Sheet.pdf"
-                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-semibold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Download Sample Template</span>
@@ -1510,15 +1531,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   </div>
 
                   {/* Card 3: Songwriter Split Sheet */}
-                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-md">
+                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-sm">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono text-[10px] text-[#171717] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
                           {release.referenceNumber}-DOC-SPLIT
                         </span>
-                        <span className="text-[10px] text-[#999999] font-medium">Composition Split</span>
+                        <span className="text-[10px] text-[#777777] font-medium">Composition Split</span>
                       </div>
-                      <h4 className="text-xs font-bold text-white mt-2">Songwriter / Composer Split Agreement</h4>
+                      <h4 className="text-xs font-bold text-[#171717] mt-2">Songwriter / Composer Split Agreement</h4>
                       <p className="text-[11px] text-[#777777] mt-1 line-clamp-3">
                         Legal composition split defining lyrical and musical publishing splits across co-writers, composers, and lyricists.
                       </p>
@@ -1528,7 +1549,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       <a
                         href="/templates/agreements/PHD-Songwriter-Composer-Split-Sheet.pdf"
                         download="PHD-Songwriter-Composer-Split-Sheet.pdf"
-                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-semibold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Download Sample Template</span>
@@ -1573,20 +1594,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             <button
                               key={st}
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
                                 const updated = [...clearanceItems];
                                 updated[idx] = { ...updated[idx], status: st };
                                 setClearanceItems(updated);
-                                saveChanges();
+                                await saveChanges({ clearanceItems: updated });
                               }}
                               className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                                 item.status === st
                                   ? st === 'Obtained'
-                                    ? 'bg-emerald-600 text-white shadow-sm'
+                                    ? 'bg-[#269568] text-white shadow-sm'
                                     : st === 'Pending'
-                                    ? 'bg-amber-600 text-white shadow-sm'
-                                    : 'bg-zinc-700 text-white'
-                                  : 'bg-white text-[#777777] hover:text-[#171717]'
+                                    ? 'bg-[#D69E36] text-white shadow-sm'
+                                    : 'bg-[#171717] text-white'
+                                  : 'bg-white text-[#777777] border border-[#E8E8E8] hover:text-[#171717]'
                               }`}
                             >
                               {st}
@@ -1608,9 +1629,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               updated[idx] = { ...updated[idx], documentReference: e.target.value };
                               setClearanceItems(updated);
                             }}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ clearanceItems })}
                             placeholder="e.g. REF-AGR-2026-001"
-                            className="w-full px-3 py-1 bg-white border border-[#E8E8E8] rounded text-xs text-[#171717] font-mono"
+                            className="w-full px-3 py-1 bg-white border border-[#E8E8E8] rounded text-xs text-[#171717] font-mono focus:outline-none focus:border-[#171717]"
                           />
                         </div>
 
@@ -1626,9 +1647,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               updated[idx] = { ...updated[idx], rightsHolder: e.target.value };
                               setClearanceItems(updated);
                             }}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ clearanceItems })}
                             placeholder="e.g. Beatstars Licensor, Dekaf"
-                            className="w-full px-3 py-1 bg-white border border-[#E8E8E8] rounded text-xs text-[#171717]"
+                            className="w-full px-3 py-1 bg-white border border-[#E8E8E8] rounded text-xs text-[#171717] focus:outline-none focus:border-[#171717]"
                           />
                         </div>
                       </div>
@@ -1682,7 +1703,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               </div>
                             </div>
                           ) : item.supportingDocUrl ? (
-                            <div className="p-3 bg-[#121620] border border-[#A7F3D0] rounded-lg flex items-center justify-between gap-3">
+                            <div className="p-3 bg-white border border-[#A7F3D0] rounded-lg flex items-center justify-between gap-3 shadow-sm">
                               <div className="flex items-center space-x-2.5 min-w-0">
                                 <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center text-[#269568] flex-shrink-0">
                                   <FileText className="w-4 h-4" />
@@ -1702,12 +1723,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                   href={item.supportingDocUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="px-2.5 py-1 rounded bg-white hover:bg-[#252C3D] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] transition-colors flex items-center space-x-1"
+                                  className="px-2.5 py-1 rounded bg-white hover:bg-[#EAEAEA] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] transition-colors flex items-center space-x-1"
                                 >
                                   <ExternalLink className="w-3 h-3" />
                                   <span>View PDF</span>
                                 </a>
-                                <label className="px-2.5 py-1 rounded bg-white hover:bg-[#252C3D] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] cursor-pointer transition-colors">
+                                <label className="px-2.5 py-1 rounded bg-white hover:bg-[#EAEAEA] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] cursor-pointer transition-colors">
                                   <span>Replace</span>
                                   <input
                                     type="file"
@@ -1722,7 +1743,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                 <button
                                   type="button"
                                   onClick={() => handleClearancePdfDelete(idx)}
-                                  className="p-1.5 rounded text-[#D64B4B] hover:text-white hover:bg-[#FEF2F2] border border-[#FECACA] transition-colors"
+                                  className="p-1.5 rounded text-[#D64B4B] hover:text-white hover:bg-[#D64B4B] border border-[#FECACA] transition-colors"
                                   title="Remove PDF"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1779,7 +1800,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -1787,7 +1808,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    saveChanges();
+                    saveChanges({ clearanceItems });
                     setCurrentStep(4);
                   }}
                   className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
@@ -1997,7 +2018,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] text-xs text-[#171717] flex items-start space-x-3">
                   <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#171717]" />
                   <p className="leading-relaxed">
-                    <strong className="font-semibold text-white">Suggested Budget Notice:</strong> All figures entered on this screen constitute the Artist's <strong>Suggested Budget</strong>. PHD Services review officers will evaluate each category and return an <strong>Approved Rate</strong> in accordance with Schedule A before execution.
+                    <strong className="font-semibold text-[#171717]">Suggested Budget Notice:</strong> All figures entered on this screen constitute the Artist's <strong>Suggested Budget</strong>. PHD Services review officers will evaluate each category and return an <strong>Approved Rate</strong> in accordance with Schedule A before execution.
                   </p>
                 </div>
 
@@ -2237,7 +2258,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       {release.releaseType} • {release.primaryArtist}
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-white truncate">{release.title}</h3>
+                  <h3 className="text-sm font-bold text-[#171717] truncate">{release.title}</h3>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#777777] pt-0.5">
                     <span>
                       <strong>Tracks:</strong> {tracks.length} registered ({tracks.filter((t) => t.audioFileUrl).length} with master audio)
