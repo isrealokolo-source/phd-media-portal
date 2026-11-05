@@ -30,6 +30,7 @@ import {
   ExternalLink,
   FileText,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   CLEARANCE_CATEGORIES,
@@ -1983,231 +1984,352 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
           )}
 
           {/* STEP 5: BUDGET & RECOUPMENT */}
-          {currentStep === 5 && (
-            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-[#E8E8E8] pb-3">
-                <div>
-                  <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-[#171717]" />
-                    <span>Release Budget & Recoupment (Schedule A – Part IV)</span>
-                  </h2>
-                  <p className="text-xs text-[#777777] mt-0.5">
-                    Track approved recoupable costs and simulate the 70% Artist / 30% PHD allocation.
+          {currentStep === 5 && (() => {
+            const totalSuggested = budgetItems.reduce((acc, b) => acc + (Number(b.suggestedAmount) || 0), 0);
+            const totalApproved = budgetItems.reduce((acc, b) => acc + (Number(b.approvedAmount) || 0), 0);
+            const totalActual = budgetItems.reduce((acc, b) => acc + (Number(b.actualAmount) || 0), 0);
+            const totalRecoupable = budgetItems
+              .filter((b) => b.isEligibleRecoupable)
+              .reduce((acc, b) => acc + (Number(b.approvedAmount || b.suggestedAmount) || 0), 0);
+
+            return (
+              <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E8E8E8] pb-3">
+                  <div>
+                    <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-[#171717]" />
+                      <span>Release Budget & Recoupment (Schedule A – Part IV)</span>
+                    </h2>
+                    <p className="text-xs text-[#777777] mt-0.5">
+                      Track approved recoupable costs and simulate the 70% Artist / 30% PHD allocation.
+                    </p>
+                  </div>
+
+                  {/* Currency selector */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-[#777777]">Currency:</span>
+                    <select
+                      value={release.currency || 'NGN'}
+                      onChange={(e) => {
+                        setRelease({ ...release, currency: e.target.value });
+                        saveChanges({ currency: e.target.value });
+                      }}
+                      className="px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] font-mono font-bold focus:outline-none focus:border-[#171717]"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 3-Card Aggregate Summary Bar */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8]">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#777777]">
+                      Total Suggested Budget
+                    </span>
+                    <p className="text-lg font-bold font-mono text-[#171717] mt-1">
+                      {release.currency || 'NGN'} {totalSuggested.toLocaleString()}
+                    </p>
+                    <span className="text-[10px] text-[#999999]">Proposed by Artist</span>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0]">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#269568]">
+                      Total Approved Rate
+                    </span>
+                    <p className="text-lg font-bold font-mono text-[#269568] mt-1">
+                      {release.currency || 'NGN'} {totalApproved.toLocaleString()}
+                    </p>
+                    <span className="text-[10px] text-[#269568]/80">Approved Recoupable Cap</span>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8]">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#777777]">
+                      Actual Incurred Spend
+                    </span>
+                    <p className="text-lg font-bold font-mono text-[#171717] mt-1">
+                      {release.currency || 'NGN'} {totalActual.toLocaleString()}
+                    </p>
+                    <span className="text-[10px] text-[#999999]">Logged Disbursed Receipts</span>
+                  </div>
+                </div>
+
+                {/* Expense Ledger */}
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] text-xs text-[#171717] flex items-start space-x-3">
+                    <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#171717]" />
+                    <p className="leading-relaxed">
+                      <strong className="font-semibold text-[#171717]">Suggested Budget Notice:</strong> All figures entered on this screen constitute the Artist&apos;s <strong>Suggested Budget</strong>. PHD Services review officers will evaluate each category and return an <strong>Approved Rate</strong> in accordance with Schedule A before execution.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#777777]">
+                        Expense Ledger ({budgetItems.length} Categories)
+                      </h3>
+                      <p className="text-[11px] text-[#999999]">
+                        Proposed expenses to be recouped prior to 70/30 distribution split
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const unusedCat = EXPENSE_CATEGORIES.find(
+                          (c) => !budgetItems.some((b) => b.expenseCategory === c)
+                        ) || EXPENSE_CATEGORIES[0];
+
+                        const updated = [
+                          ...budgetItems,
+                          {
+                            id: `temp_${Date.now()}`,
+                            expenseCategory: unusedCat,
+                            suggestedAmount: 0,
+                            approvedAmount: 0,
+                            actualAmount: 0,
+                            approvalReference: `PHD-PROP-${Date.now().toString().slice(-4)}`,
+                            approvalStatus: 'PENDING_REVIEW',
+                            isEligibleRecoupable: true,
+                            notes: '',
+                          },
+                        ];
+                        setBudgetItems(updated);
+                        saveChanges({ budgetItems: updated });
+                      }}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#171717] hover:bg-[#262626] text-white rounded text-xs font-medium transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Expense Entry</span>
+                    </button>
+                  </div>
+
+                  {budgetItems.length === 0 ? (
+                    <div className="p-8 rounded-lg border border-dashed border-[#E8E8E8] text-center space-y-2 bg-[#F4F4F2]">
+                      <DollarSign className="w-8 h-8 text-[#999999] mx-auto" />
+                      <h4 className="text-xs font-semibold text-[#171717]">No Expense Entries Logged</h4>
+                      <p className="text-[11px] text-[#777777] max-w-md mx-auto leading-relaxed">
+                        If you have production, studio, mixing/mastering, or promotional costs that should be approved and recouped under Schedule A, add an expense item below.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [
+                            {
+                              id: `temp_${Date.now()}`,
+                              expenseCategory: EXPENSE_CATEGORIES[0],
+                              suggestedAmount: 0,
+                              approvedAmount: 0,
+                              actualAmount: 0,
+                              approvalReference: `PHD-PROP-${Date.now().toString().slice(-4)}`,
+                              approvalStatus: 'PENDING_REVIEW',
+                              isEligibleRecoupable: true,
+                              notes: '',
+                            },
+                          ];
+                          setBudgetItems(updated);
+                          saveChanges({ budgetItems: updated });
+                        }}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded text-xs font-medium transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add First Expense Entry</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {budgetItems.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-3 text-xs"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8E8E8] pb-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-bold text-[#171717]">{item.expenseCategory}</span>
+                              <span
+                                className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
+                                  item.approvalStatus === 'REJECTED'
+                                    ? 'bg-[#FEF2F2] text-[#D64B4B] border-[#FECACA]'
+                                    : item.approvalStatus === 'ADJUSTED'
+                                    ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                                    : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
+                                    ? 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
+                                    : 'bg-[#FFFBEB] text-[#D69E36] border-[#FDE68A]'
+                                }`}
+                              >
+                                {item.approvalStatus === 'REJECTED'
+                                  ? 'Disallowed by PHD'
+                                  : item.approvalStatus === 'ADJUSTED'
+                                  ? `Adjusted Rate: ${release.currency} ${Number(item.approvedAmount).toLocaleString()}`
+                                  : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
+                                  ? `Approved Rate: ${release.currency} ${Number(item.approvedAmount).toLocaleString()}`
+                                  : 'Pending PHD Review'}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center space-x-3">
+                              {item.approvalReference && (
+                                <span className="text-[10px] font-mono text-[#777777]">
+                                  Ref: {item.approvalReference}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`Remove "${item.expenseCategory}" from budget items?`)) {
+                                    const updated = budgetItems.filter((_, i) => i !== idx);
+                                    setBudgetItems(updated);
+                                    saveChanges({ budgetItems: updated });
+                                  }
+                                }}
+                                className="p-1 rounded text-[#777777] hover:text-[#D64B4B] hover:bg-[#FEF2F2] transition-colors"
+                                title="Remove expense entry"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-[10px] text-[#777777] mb-1">
+                                Expense Category
+                              </label>
+                              <select
+                                value={item.expenseCategory}
+                                onChange={(e) => {
+                                  const updated = [...budgetItems];
+                                  updated[idx] = { ...updated[idx], expenseCategory: e.target.value };
+                                  setBudgetItems(updated);
+                                  saveChanges({ budgetItems: updated });
+                                }}
+                                className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] focus:outline-none focus:border-[#171717]"
+                              >
+                                {EXPENSE_CATEGORIES.map((c) => (
+                                  <option key={c} value={c}>
+                                    {c}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-medium text-[#171717] mb-1">
+                                Artist Suggested Budget ({release.currency || 'NGN'}) *
+                              </label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={item.suggestedAmount === 0 ? '' : item.suggestedAmount ?? ''}
+                                onChange={(e) => {
+                                  const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                  const updated = [...budgetItems];
+                                  updated[idx] = { ...updated[idx], suggestedAmount: val };
+                                  setBudgetItems(updated);
+                                }}
+                                onBlur={() => saveChanges({ budgetItems })}
+                                placeholder="0"
+                                className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] font-mono font-medium focus:outline-none focus:border-[#171717]"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] text-[#777777] mb-1">
+                                Actual Expenditure Incurred ({release.currency || 'NGN'})
+                              </label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={item.actualAmount === 0 ? '' : item.actualAmount ?? ''}
+                                onChange={(e) => {
+                                  const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                  const updated = [...budgetItems];
+                                  updated[idx] = { ...updated[idx], actualAmount: val };
+                                  setBudgetItems(updated);
+                                }}
+                                onBlur={() => saveChanges({ budgetItems })}
+                                placeholder="0"
+                                className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] font-mono focus:outline-none focus:border-[#171717]"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] text-[#777777] mb-1">Notes / Budget Justification</label>
+                            <input
+                              type="text"
+                              value={item.notes || ''}
+                              onChange={(e) => {
+                                const updated = [...budgetItems];
+                                updated[idx] = { ...updated[idx], notes: e.target.value };
+                                setBudgetItems(updated);
+                              }}
+                              onBlur={() => saveChanges({ budgetItems })}
+                              placeholder="e.g. 2 days studio time at Soundcity Studios..."
+                              className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] text-xs focus:outline-none focus:border-[#171717]"
+                            />
+                          </div>
+
+                          {item.reviewerNotes && (
+                            <div className="p-2.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717]">
+                              <span className="font-semibold text-[#171717]">PHD Reviewer Feedback: </span>
+                              <span className="text-[#777777]">{item.reviewerNotes}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Revenue Waterfall Simulator */}
+                <RevenueSimulator
+                  currency={release.currency || 'NGN'}
+                  totalApprovedRecoupableCosts={totalRecoupable}
+                />
+
+                {/* Statutory Recoupment Legal Notice */}
+                <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg space-y-1.5">
+                  <span className="text-xs font-bold text-[#171717] flex items-center space-x-1.5">
+                    <ShieldCheck className="w-4 h-4 text-[#171717]" />
+                    <span>Schedule A – Part IV Statutory Recoupment Protections</span>
+                  </span>
+                  <p className="text-[11px] text-[#777777] leading-relaxed italic">
+                    &ldquo;{RECOUPMENT_LEGAL_NOTICE}&rdquo;
                   </p>
                 </div>
 
-                {/* Currency selector */}
-                <select
-                  value={release.currency || 'NGN'}
-                  onChange={(e) => {
-                    setRelease({ ...release, currency: e.target.value });
-                    saveChanges({ currency: e.target.value });
-                  }}
-                  className="px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] font-mono font-bold"
-                >
-                  {CURRENCIES.map((c) => (
-                    <option key={c} value={c}>
-                      Currency: {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Expense Ledger */}
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] text-xs text-[#171717] flex items-start space-x-3">
-                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#171717]" />
-                  <p className="leading-relaxed">
-                    <strong className="font-semibold text-[#171717]">Suggested Budget Notice:</strong> All figures entered on this screen constitute the Artist's <strong>Suggested Budget</strong>. PHD Services review officers will evaluate each category and return an <strong>Approved Rate</strong> in accordance with Schedule A before execution.
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#777777]">
-                    Expense Ledger (Suggested vs Approved)
-                  </h3>
+                <div className="pt-4 border-t border-[#E8E8E8] flex justify-between">
                   <button
                     type="button"
                     onClick={() => {
-                      setBudgetItems([
-                        ...budgetItems,
-                        {
-                          expenseCategory: EXPENSE_CATEGORIES[0],
-                          suggestedAmount: 0,
-                          approvedAmount: 0,
-                          actualAmount: 0,
-                          approvalReference: `PHD-PROP-${Date.now().toString().slice(-4)}`,
-                          approvalStatus: 'PENDING_REVIEW',
-                          isEligibleRecoupable: true,
-                          notes: '',
-                        },
-                      ]);
+                      saveChanges({ budgetItems });
+                      setCurrentStep(4);
                     }}
-                    className="flex items-center space-x-1 text-xs text-[#171717] hover:text-[#171717] font-medium"
+                    className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-medium transition-colors"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Expense Entry</span>
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      saveChanges({ budgetItems });
+                      setCurrentStep(6);
+                    }}
+                    className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium transition-colors"
+                  >
+                    <span>Proceed to Final Execution & Signing</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
-
-                <div className="space-y-3">
-                  {budgetItems.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-3 text-xs"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8E8E8] pb-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-bold text-[#171717]">{item.expenseCategory}</span>
-                          <span
-                            className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
-                              item.approvalStatus === 'REJECTED'
-                                ? 'bg-rose-950 text-[#D64B4B] border-rose-800'
-                                : item.approvalStatus === 'ADJUSTED'
-                                ? 'bg-blue-950 text-blue-300 border-blue-800'
-                                : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
-                                ? 'bg-emerald-950 text-[#269568] border-emerald-800'
-                                : 'bg-amber-950 text-[#D69E36] border-amber-800'
-                            }`}
-                          >
-                            {item.approvalStatus === 'REJECTED'
-                              ? 'Disallowed by PHD'
-                              : item.approvalStatus === 'ADJUSTED'
-                              ? `Adjusted Rate: ${release.currency} ${Number(item.approvedAmount).toLocaleString()}`
-                              : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
-                              ? `Approved Rate: ${release.currency} ${Number(item.approvedAmount).toLocaleString()}`
-                              : 'Pending PHD Review'}
-                          </span>
-                        </div>
-                        {item.approvalReference && (
-                          <span className="text-[10px] font-mono text-[#999999]">
-                            Ref: {item.approvalReference}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-[10px] text-[#777777] mb-1">
-                            Expense Category
-                          </label>
-                          <select
-                            value={item.expenseCategory}
-                            onChange={(e) => {
-                              const updated = [...budgetItems];
-                              updated[idx].expenseCategory = e.target.value;
-                              setBudgetItems(updated);
-                            }}
-                            onBlur={() => saveChanges()}
-                            className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717]"
-                          >
-                            {EXPENSE_CATEGORIES.map((c) => (
-                              <option key={c} value={c}>
-                                {c}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-medium text-[#171717] mb-1">
-                            Artist Suggested Budget ({release.currency}) *
-                          </label>
-                          <input
-                            type="number"
-                            value={item.suggestedAmount ?? item.approvedAmount ?? 0}
-                            onChange={(e) => {
-                              const updated = [...budgetItems];
-                              updated[idx].suggestedAmount = Number(e.target.value);
-                              setBudgetItems(updated);
-                            }}
-                            onBlur={() => saveChanges()}
-                            placeholder="e.g. 500000"
-                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-700/50 rounded text-[#171717] font-mono font-medium focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] text-[#777777] mb-1">
-                            Actual Expenditure Incurred ({release.currency})
-                          </label>
-                          <input
-                            type="number"
-                            value={item.actualAmount || 0}
-                            onChange={(e) => {
-                              const updated = [...budgetItems];
-                              updated[idx].actualAmount = Number(e.target.value);
-                              setBudgetItems(updated);
-                            }}
-                            onBlur={() => saveChanges()}
-                            className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] text-[#777777] mb-1">Notes / Budget Justification</label>
-                        <input
-                          type="text"
-                          value={item.notes || ''}
-                          onChange={(e) => {
-                            const updated = [...budgetItems];
-                            updated[idx].notes = e.target.value;
-                            setBudgetItems(updated);
-                          }}
-                          onBlur={() => saveChanges()}
-                          placeholder="e.g. 2 days studio time at Soundcity Studios..."
-                          className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] text-xs"
-                        />
-                      </div>
-
-                      {item.reviewerNotes && (
-                        <div className="p-2.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717]">
-                          <span className="font-semibold text-indigo-200">PHD Reviewer Feedback: </span>
-                          {item.reviewerNotes}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
               </div>
-
-              {/* Revenue Waterfall Simulator */}
-              {(() => {
-                const totalRecoupable = budgetItems
-                  .filter((b) => b.isEligibleRecoupable)
-                  .reduce((acc, b) => acc + (Number(b.approvedAmount || b.suggestedAmount) || 0), 0);
-                return (
-                  <RevenueSimulator
-                    currency={release.currency || 'NGN'}
-                    totalApprovedRecoupableCosts={totalRecoupable}
-                  />
-                );
-              })()}
-
-              <div className="pt-4 border-t border-[#E8E8E8] flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(4)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    saveChanges();
-                    setCurrentStep(6);
-                  }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
-                >
-                  <span>Proceed to Final Execution & Signing</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* STEP 6: REVIEW & DIGITAL SIGNATURES */}
           {currentStep === 6 && (

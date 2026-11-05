@@ -28,16 +28,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     for (const item of items) {
       if (item.id) {
-        await prisma.budgetItem.update({
-          where: { id: item.id },
-          data: {
-            approvedAmount: Number(item.approvedAmount) || 0,
-            approvalReference: item.approvalReference || `PHD-APPR-${item.id.slice(-4)}`,
-            approvalStatus: item.approvalStatus || 'APPROVED',
-            reviewerNotes: item.reviewerNotes,
-            isEligibleRecoupable: item.isEligibleRecoupable !== false,
-          },
-        });
+        const exists = await prisma.budgetItem.findUnique({ where: { id: item.id } });
+        if (exists) {
+          await prisma.budgetItem.update({
+            where: { id: item.id },
+            data: {
+              approvedAmount: Number(item.approvedAmount) || 0,
+              approvalReference: item.approvalReference || `PHD-APPR-${item.id.slice(-4)}`,
+              approvalStatus: item.approvalStatus || 'APPROVED',
+              reviewerNotes: item.reviewerNotes,
+              isEligibleRecoupable: item.isEligibleRecoupable !== false,
+            },
+          });
+        }
       }
     }
 

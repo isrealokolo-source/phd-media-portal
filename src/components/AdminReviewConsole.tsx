@@ -951,12 +951,12 @@ export function AdminReviewConsole({
                     <span
                       className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
                         b.approvalStatus === 'APPROVED'
-                          ? 'bg-emerald-950 text-[#269568] border-emerald-800'
+                          ? 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
                           : b.approvalStatus === 'ADJUSTED'
-                          ? 'bg-blue-950 text-blue-300 border-blue-800'
+                          ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
                           : b.approvalStatus === 'REJECTED'
-                          ? 'bg-rose-950 text-[#D64B4B] border-rose-800'
-                          : 'bg-amber-950 text-[#D69E36] border-amber-800'
+                          ? 'bg-[#FEF2F2] text-[#D64B4B] border-[#FECACA]'
+                          : 'bg-[#FFFBEB] text-[#D69E36] border-[#FDE68A]'
                       }`}
                     >
                       {b.approvalStatus || 'PENDING_REVIEW'}
@@ -972,7 +972,7 @@ export function AdminReviewConsole({
                         updated[idx].approvalStatus = 'APPROVED';
                         setAdminBudgetItems(updated);
                       }}
-                      className="text-[10px] text-[#171717] hover:text-[#171717] bg-[#F4F4F2] px-2 py-0.5 rounded border border-[#E8E8E8] transition-colors"
+                      className="text-[10px] text-[#171717] hover:text-[#171717] bg-white hover:bg-[#EAEAEA] px-2 py-0.5 rounded border border-[#E8E8E8] transition-colors"
                     >
                       Match Suggested ({release.currency} {Number(b.suggestedAmount || 0).toLocaleString()})
                     </button>
@@ -995,10 +995,11 @@ export function AdminReviewConsole({
                     </label>
                     <input
                       type="number"
-                      value={b.approvedAmount || 0}
+                      min={0}
+                      value={b.approvedAmount === 0 ? '' : b.approvedAmount ?? ''}
                       onChange={(e) => {
                         const updated = [...adminBudgetItems];
-                        const val = Number(e.target.value);
+                        const val = e.target.value === '' ? 0 : Number(e.target.value);
                         updated[idx].approvedAmount = val;
                         if (val !== updated[idx].suggestedAmount && val > 0) {
                           updated[idx].approvalStatus = 'ADJUSTED';
@@ -1007,7 +1008,8 @@ export function AdminReviewConsole({
                         }
                         setAdminBudgetItems(updated);
                       }}
-                      className="w-full px-2.5 py-1.5 bg-white border border-emerald-700/60 rounded text-[#269568] font-mono font-bold focus:outline-none focus:border-emerald-500"
+                      placeholder="0"
+                      className="w-full px-2.5 py-1.5 bg-white border border-[#A7F3D0] rounded text-[#269568] font-mono font-bold focus:outline-none focus:border-[#269568]"
                     />
                   </div>
 

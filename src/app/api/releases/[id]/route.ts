@@ -376,18 +376,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Handle budget items update if provided
     if (Array.isArray(body.budgetItems)) {
       const existingItems = await prisma.budgetItem.findMany({ where: { releaseId: params.id } });
-      const existingMap = new Map(existingItems.map((item) => [item.expenseCategory, item]));
+      const existingById = new Map(existingItems.map((item) => [item.id, item]));
+      const existingByCat = new Map(existingItems.map((item) => [item.expenseCategory, item]));
 
       await prisma.budgetItem.deleteMany({ where: { releaseId: params.id } });
       if (body.budgetItems.length > 0) {
         await prisma.budgetItem.createMany({
           data: body.budgetItems.map((b: any) => {
-            const prev = existingMap.get(b.expenseCategory);
+            const prev = (b.id && existingById.get(b.id)) || existingByCat.get(b.expenseCategory);
             // If admin is updating, they can set approvedAmount and approvalReference
             // If artist is updating, they set suggestedAmount, and existing approvedAmount is preserved
             const approvedAmount = isPhdAdmin(user.role) && b.approvedAmount !== undefined
               ? Number(b.approvedAmount) || 0
-              : prev?.approvedAmount ?? (Number(b.approvedAmount) || 0);
+              : prev?.approvedAmount ?? (b.approvedAmount !== undefined ? Number(b.approvedAmount) || 0 : 0);
 
             const approvalReference = isPhdAdmin(user.role) && b.approvalReference !== undefined
               ? b.approvalReference
@@ -395,12 +396,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
             const approvalStatus = isPhdAdmin(user.role) && b.approvalStatus !== undefined
               ? b.approvalStatus
-              : prev?.approvalStatus ?? (b.suggestedAmount ? 'PENDING_REVIEW' : 'PENDING_REVIEW');
+              : prev?.approvalStatus ?? 'PENDING_REVIEW';
+
+            const suggestedAmount = b.suggestedAmount !== undefined
+              ? Number(b.suggestedAmount) || 0
+              : (prev?.suggestedAmount ?? (Number(b.approvedAmount) || 0));
 
             return {
               releaseId: params.id,
               expenseCategory: b.expenseCategory,
-              suggestedAmount: Number(b.suggestedAmount) || Number(b.approvedAmount) || 0,
+              suggestedAmount,
               approvedAmount,
               actualAmount: Number(b.actualAmount) || 0,
               approvalReference,
