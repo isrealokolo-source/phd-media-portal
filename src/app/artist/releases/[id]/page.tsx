@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { ArtworkPreview } from '@/components/ArtworkPreview';
+import { ReleaseTimeline } from '@/components/ReleaseTimeline';
 import {
   FileDown,
   Clock,
@@ -16,6 +17,10 @@ import {
   ShieldCheck,
   Disc3,
   Hash,
+  Copy,
+  ExternalLink,
+  FileText,
+  Music,
 } from 'lucide-react';
 
 export default async function ArtistReleaseDetailPage({
@@ -54,6 +59,7 @@ export default async function ArtistReleaseDetailPage({
   const artwork = release.deliverables.find((d) => d.deliverableKey === 'cover_artwork');
   const isExecuted = release.status === 'FULLY_EXECUTED_APPROVED';
   const isRevisionRequested = release.status === 'REVISION_REQUESTED';
+  const isDraft = release.status === 'DRAFT';
 
   const artistSig = release.signatures.find((s) => s.signerType === 'ARTIST');
   const phdSig = release.signatures.find((s) => s.signerType === 'PHD_REPRESENTATIVE');
@@ -63,6 +69,7 @@ export default async function ArtistReleaseDetailPage({
       <Navbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Navigation & Actions */}
         <div className="flex items-center justify-between">
           <Link
             href="/artist"
@@ -72,14 +79,16 @@ export default async function ArtistReleaseDetailPage({
             <span>Back to Dashboard</span>
           </Link>
 
-          {!isExecuted && release.status !== 'SUBMITTED_PENDING_APPROVAL' && (
-            <Link
-              href={`/artist/releases/${release.id}/edit`}
-              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
-            >
-              Resume Editing
-            </Link>
-          )}
+          <div className="flex items-center space-x-2">
+            {!isExecuted && release.status !== 'SUBMITTED_PENDING_APPROVAL' && (
+              <Link
+                href={`/artist/releases/${release.id}/edit`}
+                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+              >
+                {isDraft ? 'Resume Editing' : 'Complete Revisions'}
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Status Callout Banner */}
@@ -116,34 +125,54 @@ export default async function ArtistReleaseDetailPage({
               </p>
             </div>
 
-            {/* Document Download Actions if Executed */}
-            {isExecuted && (
-              <div className="flex flex-wrap items-center gap-2">
-                <a
-                  href={`/api/releases/${release.id}/pdf?type=schedA`}
-                  className="flex items-center space-x-1.5 px-3 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-200 rounded-lg text-xs font-medium border border-[#2A3142] transition-colors"
-                >
-                  <FileDown className="w-4 h-4 text-indigo-400" />
-                  <span>Download Schedule A PDF</span>
-                </a>
-                <a
-                  href={`/api/releases/${release.id}/pdf?type=schedB`}
-                  className="flex items-center space-x-1.5 px-3 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-200 rounded-lg text-xs font-medium border border-[#2A3142] transition-colors"
-                >
-                  <FileDown className="w-4 h-4 text-indigo-400" />
-                  <span>Download Schedule B PDF</span>
-                </a>
-                <a
-                  href={`/api/releases/${release.id}/pdf?type=combined`}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-emerald-900/30"
-                >
-                  <FileDown className="w-4 h-4" />
-                  <span>Combined Agreement PDF</span>
-                </a>
-              </div>
-            )}
+            {/* Document & Production Asset Download Actions */}
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href={`/api/releases/${release.id}/download?type=bundle`}
+                className="flex items-center space-x-1.5 px-3.5 py-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 rounded-lg text-xs font-bold border border-indigo-700/60 transition-all shadow-sm"
+                title="Download complete archive of cover art and master audio tracks"
+              >
+                <FileDown className="w-4 h-4 text-indigo-400" />
+                <span>Download Assets (.ZIP)</span>
+              </a>
+
+              {isExecuted && (
+                <>
+                  <a
+                    href={`/api/releases/${release.id}/pdf?type=schedA`}
+                    className="flex items-center space-x-1.5 px-3 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-200 rounded-lg text-xs font-medium border border-[#2A3142] transition-colors"
+                  >
+                    <FileDown className="w-4 h-4 text-indigo-400" />
+                    <span>Schedule A PDF</span>
+                  </a>
+                  <a
+                    href={`/api/releases/${release.id}/pdf?type=schedB`}
+                    className="flex items-center space-x-1.5 px-3 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-200 rounded-lg text-xs font-medium border border-[#2A3142] transition-colors"
+                  >
+                    <FileDown className="w-4 h-4 text-indigo-400" />
+                    <span>Schedule B PDF</span>
+                  </a>
+                  <a
+                    href={`/api/releases/${release.id}/pdf?type=combined`}
+                    className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-emerald-900/30"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    <span>Combined Agreement PDF</span>
+                  </a>
+                </>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Release Lifecycle Timeline */}
+        <ReleaseTimeline
+          status={release.status}
+          createdAt={release.createdAt}
+          submittedAt={release.submittedAt}
+          executedAt={release.executedAt}
+          onHoldReason={release.onHoldReason}
+        />
 
         {/* Revision Feedback if Requested */}
         {isRevisionRequested && release.revisionRequests.length > 0 && (
@@ -202,15 +231,27 @@ export default async function ArtistReleaseDetailPage({
         {/* Release Metadata & Artwork */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-4">
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Cover Artwork
-              </h3>
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-4 shadow-lg">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  Cover Artwork
+                </h3>
+                {artwork?.fileUrl && (
+                  <a
+                    href={`/api/releases/${release.id}/download?type=artwork`}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center space-x-1"
+                    title="Download Cover Art"
+                  >
+                    <FileDown className="w-3.5 h-3.5" />
+                    <span>Download</span>
+                  </a>
+                )}
+              </div>
               <ArtworkPreview url={artwork?.fileUrl} width={3000} height={3000} />
             </div>
 
             {/* Execution Signatures Card */}
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-3 text-xs">
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-3 text-xs shadow-lg">
               <h3 className="font-bold uppercase tracking-wider text-zinc-400 text-[11px]">
                 Execution Audit Records
               </h3>
@@ -249,15 +290,57 @@ export default async function ArtistReleaseDetailPage({
                 )}
               </div>
             </div>
+
+            {/* Attached Rights Clearances Overview */}
+            {release.clearanceItems.some((c) => c.supportingDocUrl) && (
+              <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-3 text-xs shadow-lg">
+                <h3 className="font-bold uppercase tracking-wider text-zinc-400 text-[11px] flex items-center space-x-1.5">
+                  <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Executed Clearance Documents</span>
+                </h3>
+
+                <div className="space-y-2">
+                  {release.clearanceItems
+                    .filter((c) => c.supportingDocUrl)
+                    .map((c) => (
+                      <div
+                        key={c.id}
+                        className="p-2.5 rounded-lg bg-[#0E1015] border border-[#1F2430] flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <span className="text-zinc-200 font-semibold block truncate">{c.category}</span>
+                          <span className="text-[10px] text-zinc-500 font-mono block">
+                            Ref: {c.documentReference || 'N/A'}
+                          </span>
+                        </div>
+                        <a
+                          href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${c.id}`}
+                          className="p-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-emerald-300 text-[11px] font-medium border border-emerald-900/40 flex items-center space-x-1 flex-shrink-0"
+                          title="Download PDF"
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                          <span>PDF</span>
+                        </a>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Master Recordings & Audio Preview */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
-                <Disc3 className="w-4 h-4 text-indigo-400" />
-                <span>Master Recordings ({release.tracks.length})</span>
-              </h3>
+            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4 shadow-lg">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
+                  <Disc3 className="w-4 h-4 text-indigo-400" />
+                  <span>Master Recordings ({release.tracks.length})</span>
+                </h3>
+
+                <span className="text-xs font-mono text-zinc-400">
+                  {release.tracks.filter((t) => t.audioFileUrl).length} of {release.tracks.length} audio masters ready
+                </span>
+              </div>
 
               <div className="space-y-4">
                 {release.tracks.map((t) => (
@@ -278,7 +361,19 @@ export default async function ArtistReleaseDetailPage({
                           )}
                         </div>
                       </div>
-                      <span className="text-xs font-mono text-zinc-400">{t.duration || '03:20'}</span>
+                      <div className="flex items-center space-x-2.5">
+                        {t.audioFileUrl && (
+                          <a
+                            href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 text-[11px] font-medium border border-[#2B3447] transition-colors"
+                            title={`Download master WAV for ${t.title}`}
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span>Download WAV</span>
+                          </a>
+                        )}
+                        <span className="text-xs font-mono text-zinc-400">{t.duration || '03:20'}</span>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-zinc-400 pt-2 border-t border-[#1F2430]">
@@ -314,6 +409,7 @@ export default async function ArtistReleaseDetailPage({
                     {t.audioFileUrl && (
                       <AudioPlayer
                         url={t.audioFileUrl}
+                        downloadUrl={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
                         title={t.title}
                         sampleRate={t.audioSampleRate}
                         bitDepth={t.audioBitDepth}
@@ -331,4 +427,3 @@ export default async function ArtistReleaseDetailPage({
     </div>
   );
 }
-

@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, AlertTriangle, CheckCircle2, Music, Trash2, RefreshCw } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, AlertTriangle, CheckCircle2, Music, Trash2, RefreshCw, FileDown } from 'lucide-react';
 
 interface AudioPlayerProps {
   url: string;
+  downloadUrl?: string;
   title?: string;
   artist?: string;
   fileName?: string | null;
@@ -19,6 +20,7 @@ interface AudioPlayerProps {
 
 export function AudioPlayer({
   url,
+  downloadUrl,
   title = 'Master Audio File',
   artist,
   fileName,
@@ -144,6 +146,17 @@ export function AudioPlayer({
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#1A1F2B] text-zinc-300 border border-[#262D3D]">
               {bitDepth}
             </span>
+          )}
+
+          {downloadUrl && (
+            <a
+              href={downloadUrl}
+              className="inline-flex items-center space-x-1 text-[11px] px-2.5 py-1 rounded-md bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 border border-[#262D3D] transition-colors"
+              title="Download audio file"
+            >
+              <FileDown className="w-3 h-3 text-indigo-400" />
+              <span>Download</span>
+            </a>
           )}
 
           {onReplace && (

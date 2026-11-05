@@ -27,6 +27,7 @@ import { AudioPlayer } from '@/components/AudioPlayer';
 import { ArtworkPreview } from '@/components/ArtworkPreview';
 import { SignaturePad } from '@/components/SignaturePad';
 import { RevenueSimulator } from '@/components/RevenueSimulator';
+import { ReleaseTimeline } from '@/components/ReleaseTimeline';
 import { CLEARANCE_CATEGORIES, PENDING_CLEARANCE_WARNING } from '@/lib/constants';
 
 interface AdminReviewConsoleProps {
@@ -332,8 +333,17 @@ export function AdminReviewConsole({
 
       {/* 1. OVERVIEW */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
+          <ReleaseTimeline
+            status={release.status}
+            createdAt={release.createdAt}
+            submittedAt={release.submittedAt}
+            executedAt={release.executedAt}
+            onHoldReason={release.onHoldReason}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
             <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
                 <FileText className="w-4 h-4 text-indigo-400" />
@@ -406,6 +416,7 @@ export function AdminReviewConsole({
                     {t.audioFileUrl ? (
                       <AudioPlayer
                         url={t.audioFileUrl}
+                        downloadUrl={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
                         title={t.title}
                         sampleRate={t.audioSampleRate}
                         bitDepth={t.audioBitDepth}
@@ -473,6 +484,7 @@ export function AdminReviewConsole({
             </div>
           </div>
         </div>
+      </div>
       )}
 
       {/* 2. RELEASE INFO */}
@@ -581,6 +593,7 @@ export function AdminReviewConsole({
                 {t.audioFileUrl && (
                   <AudioPlayer
                     url={t.audioFileUrl}
+                    downloadUrl={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
                     title={t.title}
                     sampleRate={t.audioSampleRate}
                     bitDepth={t.audioBitDepth}

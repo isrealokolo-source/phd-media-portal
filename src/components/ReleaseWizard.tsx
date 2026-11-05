@@ -941,7 +941,23 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Primary Artist *</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] text-zinc-400">Primary Artist *</label>
+                            {tracks.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const artist = track.primaryArtist || release.primaryArtist;
+                                  const updated = tracks.map((t) => ({ ...t, primaryArtist: artist }));
+                                  setTracks(updated);
+                                  saveChanges({ tracks: updated });
+                                }}
+                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                              >
+                                Apply to all tracks
+                              </button>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={track.primaryArtist || release.primaryArtist || ''}
@@ -977,7 +993,23 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Producer / Beatmaker</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] text-zinc-400">Producer / Beatmaker</label>
+                            {tracks.length > 1 && track.producerBeatmaker && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const prod = track.producerBeatmaker;
+                                  const updated = tracks.map((t) => ({ ...t, producerBeatmaker: prod }));
+                                  setTracks(updated);
+                                  saveChanges({ tracks: updated });
+                                }}
+                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                              >
+                                Apply to all
+                              </button>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={track.producerBeatmaker || ''}
@@ -989,7 +1021,23 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Songwriters / Composers</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] text-zinc-400">Songwriters / Composers</label>
+                            {tracks.length > 1 && track.songwritersComposers && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const sw = track.songwritersComposers;
+                                  const updated = tracks.map((t) => ({ ...t, songwritersComposers: sw }));
+                                  setTracks(updated);
+                                  saveChanges({ tracks: updated });
+                                }}
+                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                              >
+                                Apply to all
+                              </button>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={track.songwritersComposers || ''}
@@ -1001,14 +1049,32 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">ISRC Code</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] text-zinc-400">ISRC Code</label>
+                            {!track.isrc && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const trackNum = (idx + 1).toString().padStart(2, '0');
+                                  const year = new Date().getFullYear().toString().slice(-2);
+                                  const candidate = `NG-PHD-${year}-${trackNum}001`;
+                                  updateTrack(idx, 'isrc', candidate);
+                                  saveChanges();
+                                }}
+                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-mono transition-colors"
+                                title="Generate standard format placeholder ISRC"
+                              >
+                                Auto-Fill Placeholder
+                              </button>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={track.isrc || ''}
-                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value)}
+                            onChange={(e) => updateTrack(idx, 'isrc', e.target.value.toUpperCase())}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. NG-PHD-26-00101"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono uppercase"
                           />
                         </div>
 
@@ -1048,9 +1114,25 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       {/* Master Ownership Percentage & Legal Owner */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-[#12151B] rounded-lg border border-[#1F2430]">
                         <div>
-                          <label className="block text-[11px] font-medium text-zinc-300 mb-1">
-                            Legal Master Owner Name *
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] font-medium text-zinc-300">
+                              Legal Master Owner Name *
+                            </label>
+                            {tracks.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const owner = track.masterOwnerLegalName || artistLegalName;
+                                  const updated = tracks.map((t) => ({ ...t, masterOwnerLegalName: owner }));
+                                  setTracks(updated);
+                                  saveChanges({ tracks: updated });
+                                }}
+                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                              >
+                                Apply to all tracks
+                              </button>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={track.masterOwnerLegalName || artistLegalName}
@@ -1119,6 +1201,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           <div className="space-y-2">
                             <AudioPlayer
                               url={track.audioFileUrl}
+                              downloadUrl={track.id && !track.id.startsWith('temp_') ? `/api/releases/${release.id}/download?type=track&trackId=${track.id}` : undefined}
                               title={track.title}
                               artist={track.primaryArtist}
                               fileName={track.audioFileName}
