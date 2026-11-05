@@ -65,12 +65,17 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
 
         if (response.Body) {
           const stream = response.Body as any;
+          const webStream = typeof stream.transformToWebStream === 'function'
+            ? stream.transformToWebStream()
+            : stream;
           const mime = response.ContentType || getMimeType(key);
 
-          return new NextResponse(stream, {
+          return new NextResponse(webStream, {
             headers: {
               'Content-Type': mime,
+              'Content-Length': response.ContentLength ? response.ContentLength.toString() : '',
               'Cache-Control': 'private, max-age=86400',
+              'Accept-Ranges': 'bytes',
             },
           });
         }

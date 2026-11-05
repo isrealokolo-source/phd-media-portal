@@ -58,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (!readiness.submissionReady) {
       return NextResponse.json(
         {
-          error: 'Release is not submission ready',
+          error: `Release is not submission ready: ${readiness.criticalBlockers.join(' • ')}`,
           criticalBlockers: readiness.criticalBlockers,
         },
         { status: 400 }

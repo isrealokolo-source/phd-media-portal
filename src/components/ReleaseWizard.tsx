@@ -25,6 +25,9 @@ import {
   Check,
   AlertTriangle,
   Lock,
+  RefreshCw,
+  Image as ImageIcon,
+  ExternalLink,
 } from 'lucide-react';
 import {
   CLEARANCE_CATEGORIES,
@@ -42,6 +45,7 @@ import { SignaturePad } from '@/components/SignaturePad';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { ArtworkPreview } from '@/components/ArtworkPreview';
 import { RevenueSimulator } from '@/components/RevenueSimulator';
+import { evaluateReleaseReadiness } from '@/lib/readiness';
 
 interface ReleaseWizardProps {
   initialRelease: any;
@@ -66,6 +70,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // Upload progress & states
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [isUploading, setIsUploading] = useState<Record<string, boolean>>({});
+  const [uploadError, setUploadError] = useState<Record<string, string>>({});
+
   // Form states
   const [tracks, setTracks] = useState<any[]>(initialRelease.tracks || []);
   const [clearanceItems, setClearanceItems] = useState<any[]>(initialRelease.clearanceItems || []);
@@ -80,16 +89,27 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   const [signatureType, setSignatureType] = useState<'DRAWN' | 'TYPED'>('DRAWN');
   const [confirmDeclarations, setConfirmDeclarations] = useState(false);
 
-  // Auto-save logic
+  // Compute live readiness dynamically based on current client state
+  const currentReadiness = evaluateReleaseReadiness({
+    ...release,
+    tracks,
+    clearanceItems,
+    deliverables,
+    budgetItems,
+  });
+
+  const artworkDeliverable = deliverables.find((d) => d.deliverableKey === 'cover_artwork');
+
+  // Synchronous auto-save logic with explicit payload override
   const saveChanges = async (updates: any = {}) => {
     setIsSaving(true);
     try {
       const payload = {
+        tracks: updates.tracks !== undefined ? updates.tracks : tracks,
+        clearanceItems: updates.clearanceItems !== undefined ? updates.clearanceItems : clearanceItems,
+        deliverables: updates.deliverables !== undefined ? updates.deliverables : deliverables,
+        budgetItems: updates.budgetItems !== undefined ? updates.budgetItems : budgetItems,
         ...updates,
-        tracks,
-        clearanceItems,
-        deliverables,
-        budgetItems,
       };
 
       const res = await fetch(`/api/releases/${release.id}`, {
@@ -102,12 +122,192 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       if (data.success && data.release) {
         setRelease(data.release);
         setLastSaved(new Date());
+        return data.release;
+      } else {
+        throw new Error(data.error || 'Failed to save changes');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Auto-save error:', err);
+      throw err;
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Upload helper using XMLHttpRequest for real progress events
+  const uploadWithProgress = (
+    file: File,
+    category: 'master' | 'artwork' | 'document' | 'lyrics',
+    onProgress: (percent: number) => void
+  ): Promise<{ fileUrl: string; metadata: any }> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', category);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success) {
+              resolve({ fileUrl: data.fileUrl, metadata: data.metadata });
+            } else {
+              reject(new Error(data.error || 'Upload failed'));
+            }
+          } catch (err) {
+            reject(new Error('Invalid response from upload server'));
+          }
+        } else {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            reject(new Error(data.error || `Upload failed (Status ${xhr.status})`));
+          } catch {
+            reject(new Error(`Upload failed (Status ${xhr.status})`));
+          }
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error during file upload'));
+      xhr.open('POST', '/api/upload');
+      xhr.send(formData);
+    });
+  };
+
+  // Handle master audio file upload for track
+  const handleAudioUpload = async (trackIdx: number, file: File) => {
+    const trackKey = `track_${trackIdx}`;
+    setIsUploading((prev) => ({ ...prev, [trackKey]: true }));
+    setUploadProgress((prev) => ({ ...prev, [trackKey]: 0 }));
+    setUploadError((prev) => ({ ...prev, [trackKey]: '' }));
+
+    try {
+      const { fileUrl, metadata } = await uploadWithProgress(
+        file,
+        'master',
+        (percent) => setUploadProgress((prev) => ({ ...prev, [trackKey]: percent }))
+      );
+
+      const updatedTracks = tracks.map((t, i) =>
+        i === trackIdx
+          ? {
+              ...t,
+              audioFileUrl: fileUrl,
+              audioFileName: file.name,
+              audioFileSize: file.size,
+              finalMasterDelivered: 'Yes',
+              audioSampleRate: metadata?.sampleRate || t.audioSampleRate,
+              audioBitDepth: metadata?.bitDepth || t.audioBitDepth,
+              audioChannels: metadata?.channels || t.audioChannels,
+              audioIsLossless: metadata?.isLossless !== undefined ? metadata.isLossless : true,
+            }
+          : t
+      );
+
+      setTracks(updatedTracks);
+      await saveChanges({ tracks: updatedTracks });
+    } catch (err: any) {
+      setUploadError((prev) => ({ ...prev, [trackKey]: err.message || 'Audio upload failed' }));
+    } finally {
+      setIsUploading((prev) => ({ ...prev, [trackKey]: false }));
+    }
+  };
+
+  // Handle master audio deletion for track
+  const handleAudioDelete = async (trackIdx: number) => {
+    if (!confirm(`Are you sure you want to remove the audio master for "${tracks[trackIdx]?.title || 'Track'}"?`)) {
+      return;
+    }
+
+    const updatedTracks = tracks.map((t, i) =>
+      i === trackIdx
+        ? {
+            ...t,
+            audioFileUrl: null,
+            audioFileName: null,
+            audioFileSize: null,
+            finalMasterDelivered: 'No',
+            audioSampleRate: null,
+            audioBitDepth: null,
+            audioChannels: null,
+            audioIsLossless: null,
+          }
+        : t
+    );
+
+    setTracks(updatedTracks);
+    await saveChanges({ tracks: updatedTracks });
+  };
+
+  // Handle cover artwork upload
+  const handleArtworkUpload = async (file: File) => {
+    setIsUploading((prev) => ({ ...prev, artwork: true }));
+    setUploadProgress((prev) => ({ ...prev, artwork: 0 }));
+    setUploadError((prev) => ({ ...prev, artwork: '' }));
+
+    try {
+      const { fileUrl, metadata } = await uploadWithProgress(
+        file,
+        'artwork',
+        (percent) => setUploadProgress((prev) => ({ ...prev, artwork: percent }))
+      );
+
+      const existingIdx = deliverables.findIndex((d) => d.deliverableKey === 'cover_artwork');
+      const artworkItem = {
+        deliverableKey: 'cover_artwork',
+        name: 'Cover Artwork (Front)',
+        responsibleParty: 'Artist / agreed designer',
+        fileUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        status: 'Uploaded',
+        metadataJson: JSON.stringify(metadata || {}),
+      };
+
+      let updatedDeliverables;
+      if (existingIdx >= 0) {
+        updatedDeliverables = deliverables.map((d, i) =>
+          i === existingIdx ? { ...d, ...artworkItem } : d
+        );
+      } else {
+        updatedDeliverables = [...deliverables, artworkItem];
+      }
+
+      setDeliverables(updatedDeliverables);
+      await saveChanges({ deliverables: updatedDeliverables });
+    } catch (err: any) {
+      setUploadError((prev) => ({ ...prev, artwork: err.message || 'Artwork upload failed' }));
+    } finally {
+      setIsUploading((prev) => ({ ...prev, artwork: false }));
+    }
+  };
+
+  // Handle cover artwork delete
+  const handleArtworkDelete = async () => {
+    if (!confirm('Are you sure you want to remove the cover artwork?')) return;
+
+    const updatedDeliverables = deliverables.map((d) =>
+      d.deliverableKey === 'cover_artwork'
+        ? {
+            ...d,
+            fileUrl: null,
+            fileName: null,
+            fileSize: null,
+            status: 'Not Started',
+            metadataJson: null,
+          }
+        : d
+    );
+
+    setDeliverables(updatedDeliverables);
+    await saveChanges({ deliverables: updatedDeliverables });
   };
 
   // Track helpers
@@ -133,12 +333,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       rightsClearanceStatus: 'Pending',
       contributors: [],
     };
-    setTracks([...tracks, newTrack]);
+    const updated = [...tracks, newTrack];
+    setTracks(updated);
+    saveChanges({ tracks: updated });
   };
 
   const removeTrack = (index: number) => {
     const updated = tracks.filter((_, i) => i !== index);
     setTracks(updated);
+    saveChanges({ tracks: updated });
   };
 
   const updateTrack = (index: number, field: string, val: any) => {
@@ -147,56 +350,78 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
     setTracks(updated);
   };
 
-  // File upload helper
-  const handleFileUpload = async (
-    file: File,
-    category: 'master' | 'artwork' | 'document' | 'lyrics',
-    callback: (url: string, metadata?: any) => void
-  ) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('category', category);
+  // General document deliverable upload helper
+  const handleDeliverableUpload = async (index: number, file: File) => {
+    const key = `deliverable_${index}`;
+    setIsUploading((prev) => ({ ...prev, [key]: true }));
+    setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const { fileUrl } = await uploadWithProgress(
+        file,
+        'document',
+        (percent) => setUploadProgress((prev) => ({ ...prev, [key]: percent }))
+      );
 
-    const data = await res.json();
-    if (data.success) {
-      callback(data.fileUrl, data.metadata);
-      saveChanges();
-    } else {
-      alert(data.error || 'Upload failed');
+      const updated = [...deliverables];
+      updated[index] = {
+        ...updated[index],
+        fileUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        status: 'Uploaded',
+      };
+
+      setDeliverables(updated);
+      await saveChanges({ deliverables: updated });
+    } catch (err: any) {
+      alert(err.message || 'Document upload failed');
+    } finally {
+      setIsUploading((prev) => ({ ...prev, [key]: false }));
     }
   };
 
-  // Submit Release
+  // Submit Release with robust validation and blocker feedback
   const handleSubmitRelease = async () => {
     setSubmitError('');
+
+    // Pre-flight check against critical blockers
+    if (currentReadiness.criticalBlockers.length > 0) {
+      setSubmitError(
+        `Cannot submit release. The following items must be resolved first:\n• ${currentReadiness.criticalBlockers.join('\n• ')}`
+      );
+      return;
+    }
+
     if (!signatureData) {
       setSubmitError('Digital signature is required to execute Schedule A and B.');
       return;
     }
     if (!artistLegalName.trim()) {
-      setSubmitError('Artist legal name is required.');
+      setSubmitError('Artist legal name is required for legal execution.');
       return;
     }
     if (!confirmDeclarations) {
-      setSubmitError('You must confirm the statutory declarations.');
+      setSubmitError('You must confirm the statutory Schedule A & B declarations.');
       return;
     }
 
     setSubmitting(true);
     try {
-      // First save all current states
-      await saveChanges();
+      // 1. Force explicit database synchronization of all latest client states
+      await saveChanges({
+        tracks,
+        clearanceItems,
+        deliverables,
+        budgetItems,
+      });
 
+      // 2. Submit to execution endpoint
       const res = await fetch(`/api/releases/${release.id}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          legalName: artistLegalName,
+          legalName: artistLegalName.trim(),
           signatureData,
           signatureType,
           confirmDeclarations,
@@ -205,7 +430,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Submission failed');
+        let msg = data.error || 'Submission failed';
+        if (Array.isArray(data.criticalBlockers) && data.criticalBlockers.length > 0) {
+          msg = `Cannot submit release: ${data.criticalBlockers.join(' • ')}`;
+        }
+        throw new Error(msg);
       }
 
       router.push(`/artist/releases/${release.id}`);
@@ -217,22 +446,33 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
     }
   };
 
-  const artworkDeliverable = deliverables.find((d) => d.deliverableKey === 'cover_artwork');
-
   return (
     <div className="space-y-6">
       {/* Wizard Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#12151B] border border-[#1F2430]">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/70 px-2 py-0.5 rounded border border-indigo-800/50">
-              {release.referenceNumber}
-            </span>
-            <span className="text-xs text-zinc-400 font-mono">
-              Version {release.currentVersion} • Draft
-            </span>
+        <div className="flex items-center space-x-3.5">
+          <div className="w-14 h-14 rounded-xl bg-[#0E1015] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+            {artworkDeliverable?.fileUrl ? (
+              <img
+                src={artworkDeliverable.fileUrl}
+                alt={release.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Disc3 className="w-7 h-7 text-zinc-700 animate-spin-slow" />
+            )}
           </div>
-          <h1 className="text-xl font-bold text-white mt-1">{release.title}</h1>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/70 px-2 py-0.5 rounded border border-indigo-800/50">
+                {release.referenceNumber}
+              </span>
+              <span className="text-xs text-zinc-400 font-mono">
+                Version {release.currentVersion} • Draft
+              </span>
+            </div>
+            <h1 className="text-xl font-bold text-white mt-1">{release.title}</h1>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -299,6 +539,88 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <p className="text-xs text-zinc-400 mt-0.5">
                   General legal metadata for this release schedule.
                 </p>
+              </div>
+
+              {/* Cover Artwork Quick Card in Step 1 */}
+              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-24 h-24 rounded-lg bg-[#12151B] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                  {artworkDeliverable?.fileUrl ? (
+                    <img
+                      src={artworkDeliverable.fileUrl}
+                      alt="Cover Artwork"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-2 text-center text-zinc-500">
+                      <ImageIcon className="w-6 h-6 mb-1 text-zinc-600" />
+                      <span className="text-[9px]">No Artwork</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0 space-y-2 w-full">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-xs font-bold text-zinc-200">Cover Artwork (Schedule A – Part III Deliverable)</h4>
+                      {artworkDeliverable?.fileUrl && (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 border border-emerald-800/50">
+                          ✓ Uploaded (3000×3000)
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      DSPs strictly require a square 1:1 image, at least 3000 × 3000 px in RGB format (PNG / JPG).
+                    </p>
+                  </div>
+
+                  {isUploading.artwork ? (
+                    <div className="space-y-1.5 p-2 bg-[#12151B] rounded-lg border border-indigo-900/40">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-indigo-400 flex items-center space-x-1.5 font-medium">
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <span>Uploading cover artwork...</span>
+                        </span>
+                        <span className="font-mono text-indigo-400 font-bold">{uploadProgress.artwork || 0}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[#1A1F2B] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-indigo-500 rounded-full transition-all duration-200"
+                          style={{ width: `${uploadProgress.artwork || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{artworkDeliverable?.fileUrl ? 'Replace Artwork' : 'Upload Cover Artwork'}</span>
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleArtworkUpload(f);
+                          }}
+                        />
+                      </label>
+                      {artworkDeliverable?.fileUrl && (
+                        <button
+                          type="button"
+                          onClick={handleArtworkDelete}
+                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-xs font-medium transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Remove</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {uploadError.artwork && (
+                    <p className="text-[11px] text-rose-400">{uploadError.artwork}</p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -678,27 +1000,69 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       {/* Audio Master Upload & Preview */}
                       <div className="space-y-2">
                         <label className="block text-[11px] font-medium text-zinc-300">
-                          Final Audio Master (Uncompressed WAV)
+                          Final Audio Master (Uncompressed WAV / AIFF) *
                         </label>
 
-                        {track.audioFileUrl ? (
-                          <AudioPlayer
-                            url={track.audioFileUrl}
-                            title={track.title}
-                            artist={track.primaryArtist}
-                            sampleRate={track.audioSampleRate}
-                            bitDepth={track.audioBitDepth}
-                            channels={track.audioChannels}
-                            isLossless={track.audioIsLossless}
-                          />
+                        {isUploading[`track_${idx}`] ? (
+                          <div className="p-4 bg-[#141820] border border-indigo-900/60 rounded-xl space-y-2.5">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="flex items-center space-x-2 text-indigo-300 font-medium">
+                                <Disc3 className="w-4 h-4 animate-spin text-indigo-400" />
+                                <span>Uploading WAV Audio Master for "{track.title}"...</span>
+                              </span>
+                              <span className="font-mono font-bold text-indigo-400">
+                                {uploadProgress[`track_${idx}`] || 0}%
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-[#1A1F2B] rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-200"
+                                style={{ width: `${uploadProgress[`track_${idx}`] || 0}%` }}
+                              />
+                            </div>
+                            <p className="text-[10px] text-zinc-500">
+                              Uploading lossless audio master directly to secure Cloudflare R2 object storage...
+                            </p>
+                          </div>
+                        ) : track.audioFileUrl ? (
+                          <div className="space-y-2">
+                            <AudioPlayer
+                              url={track.audioFileUrl}
+                              title={track.title}
+                              artist={track.primaryArtist}
+                              fileName={track.audioFileName}
+                              fileSize={track.audioFileSize}
+                              sampleRate={track.audioSampleRate}
+                              bitDepth={track.audioBitDepth}
+                              channels={track.audioChannels}
+                              isLossless={track.audioIsLossless}
+                              onDelete={() => handleAudioDelete(idx)}
+                              onReplace={() => {
+                                const input = document.getElementById(`audio_replace_input_${idx}`) as HTMLInputElement;
+                                input?.click();
+                              }}
+                            />
+                            <input
+                              id={`audio_replace_input_${idx}`}
+                              type="file"
+                              accept=".wav,.aif,.aiff,.flac"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleAudioUpload(idx, f);
+                              }}
+                            />
+                          </div>
                         ) : (
-                          <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#262D3D] hover:border-indigo-500/50 rounded-xl cursor-pointer bg-[#12151B] transition-colors text-center">
-                            <Upload className="w-5 h-5 text-indigo-400 mb-1" />
-                            <span className="text-xs text-zinc-300">
+                          <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#262D3D] hover:border-indigo-500/50 rounded-xl cursor-pointer bg-[#12151B] transition-colors text-center group">
+                            <div className="w-10 h-10 rounded-lg bg-indigo-950/40 border border-indigo-900/50 flex items-center justify-center text-indigo-400 mb-2 group-hover:scale-105 transition-transform">
+                              <Upload className="w-5 h-5" />
+                            </div>
+                            <span className="text-xs font-semibold text-zinc-200">
                               Upload WAV Audio Master for {track.title}
                             </span>
-                            <span className="text-[10px] text-zinc-500 mt-0.5">
-                              Accepts WAV / AIFF (24-bit uncompressed master)
+                            <span className="text-[10px] text-zinc-500 mt-1">
+                              Accepts uncompressed WAV / AIFF (24-bit 44.1kHz or higher)
                             </span>
                             <input
                               type="file"
@@ -706,23 +1070,17 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               className="hidden"
                               onChange={(e) => {
                                 const f = e.target.files?.[0];
-                                if (f) {
-                                  handleFileUpload(f, 'master', (url, meta) => {
-                                    updateTrack(idx, 'audioFileUrl', url);
-                                    updateTrack(idx, 'audioFileName', f.name);
-                                    updateTrack(idx, 'audioFileSize', f.size);
-                                    updateTrack(idx, 'finalMasterDelivered', 'Yes');
-                                    if (meta) {
-                                      updateTrack(idx, 'audioSampleRate', meta.sampleRate);
-                                      updateTrack(idx, 'audioBitDepth', meta.bitDepth);
-                                      updateTrack(idx, 'audioChannels', meta.channels);
-                                      updateTrack(idx, 'audioIsLossless', meta.isLossless);
-                                    }
-                                  });
-                                }
+                                if (f) handleAudioUpload(idx, f);
                               }}
                             />
                           </label>
+                        )}
+
+                        {uploadError[`track_${idx}`] && (
+                          <p className="text-[11px] text-rose-400 flex items-center space-x-1">
+                            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span>{uploadError[`track_${idx}`]}</span>
+                          </p>
                         )}
                       </div>
                     </div>
@@ -921,42 +1279,68 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   width={3000}
                   height={3000}
                 />
-                <div className="space-y-3 flex-1">
+                <div className="space-y-3 flex-1 w-full">
                   <div>
-                    <h3 className="text-sm font-bold text-zinc-200">Cover Artwork Delivery</h3>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-sm font-bold text-zinc-200">Cover Artwork Delivery</h3>
+                      {artworkDeliverable?.fileUrl && (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 border border-emerald-800/50">
+                          ✓ Uploaded (3000×3000)
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-zinc-400 mt-1">
                       DSPs strictly require 1:1 square artwork, at least 3000 x 3000 pixels, in RGB format without unapproved promotional stickers.
                     </p>
                   </div>
 
-                  <label className="inline-flex items-center space-x-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload Cover Artwork (PNG / JPG)</span>
-                    <input
-                      type="file"
-                      accept=".jpg,.jpeg,.png"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) {
-                          handleFileUpload(f, 'artwork', (url, meta) => {
-                            const updated = deliverables.map((d) =>
-                              d.deliverableKey === 'cover_artwork'
-                                ? {
-                                    ...d,
-                                    fileUrl: url,
-                                    fileName: f.name,
-                                    status: 'Uploaded',
-                                    metadataJson: JSON.stringify(meta || {}),
-                                  }
-                                : d
-                            );
-                            setDeliverables(updated);
-                          });
-                        }
-                      }}
-                    />
-                  </label>
+                  {isUploading.artwork ? (
+                    <div className="p-4 bg-[#12151B] border border-indigo-900/60 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-indigo-300 font-medium flex items-center space-x-2">
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                          <span>Uploading cover artwork to Cloudflare R2...</span>
+                        </span>
+                        <span className="font-mono text-indigo-400 font-bold">{uploadProgress.artwork || 0}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#1A1F2B] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-200"
+                          style={{ width: `${uploadProgress.artwork || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="inline-flex items-center space-x-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
+                        <Upload className="w-4 h-4" />
+                        <span>{artworkDeliverable?.fileUrl ? 'Replace Cover Artwork' : 'Upload Cover Artwork (PNG / JPG)'}</span>
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleArtworkUpload(f);
+                          }}
+                        />
+                      </label>
+                      {artworkDeliverable?.fileUrl && (
+                        <button
+                          type="button"
+                          onClick={handleArtworkDelete}
+                          className="inline-flex items-center space-x-1 px-3 py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-xs font-medium transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Remove Artwork</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {uploadError.artwork && (
+                    <p className="text-xs text-rose-400">{uploadError.artwork}</p>
+                  )}
                 </div>
               </div>
 
@@ -973,6 +1357,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <span className="font-semibold text-zinc-200">{d.name}</span>
                         <p className="text-[11px] text-zinc-500">
                           Responsible: {d.responsibleParty}
+                          {d.fileName && <span className="text-zinc-400 ml-2">({d.fileName})</span>}
                         </p>
                       </div>
 
@@ -989,28 +1374,23 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           {d.status}
                         </span>
 
-                        <label className="text-[11px] text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium">
-                          Upload File
-                          <input
-                            type="file"
-                            className="hidden"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0];
-                              if (f) {
-                                handleFileUpload(f, 'document', (url) => {
-                                  const updated = [...deliverables];
-                                  updated[idx] = {
-                                    ...updated[idx],
-                                    fileUrl: url,
-                                    fileName: f.name,
-                                    status: 'Uploaded',
-                                  };
-                                  setDeliverables(updated);
-                                });
-                              }
-                            }}
-                          />
-                        </label>
+                        {isUploading[`deliverable_${idx}`] ? (
+                          <span className="text-[11px] text-indigo-400 font-mono">
+                            {uploadProgress[`deliverable_${idx}`] || 0}%
+                          </span>
+                        ) : (
+                          <label className="text-[11px] text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium">
+                            {d.fileUrl ? 'Replace' : 'Upload File'}
+                            <input
+                              type="file"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleDeliverableUpload(idx, f);
+                              }}
+                            />
+                          </label>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1282,9 +1662,78 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               </div>
 
               {submitError && (
-                <div className="p-3 bg-rose-950/60 border border-rose-800/40 rounded-xl text-xs text-rose-300 flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{submitError}</span>
+                <div className="p-4 bg-rose-950/60 border border-rose-800/40 rounded-xl text-xs text-rose-300 space-y-1">
+                  <div className="flex items-center space-x-2 font-semibold text-rose-200">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>Submission Error</span>
+                  </div>
+                  <p className="whitespace-pre-line pl-6">{submitError}</p>
+                </div>
+              )}
+
+              {/* Release Execution Summary Hero with Cover Artwork */}
+              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-20 h-20 rounded-lg bg-[#12151B] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+                  {artworkDeliverable?.fileUrl ? (
+                    <img
+                      src={artworkDeliverable.fileUrl}
+                      alt={release.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-center p-1">
+                      <ImageIcon className="w-6 h-6 mx-auto mb-0.5 text-zinc-600" />
+                      <span className="text-[9px] text-zinc-500">No Art</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0 space-y-1 text-xs">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/40 font-bold">
+                      {release.referenceNumber}
+                    </span>
+                    <span className="text-zinc-400 font-medium truncate">
+                      {release.releaseType} • {release.primaryArtist}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-white truncate">{release.title}</h3>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-zinc-400 pt-0.5">
+                    <span>
+                      <strong>Tracks:</strong> {tracks.length} registered ({tracks.filter((t) => t.audioFileUrl).length} with master audio)
+                    </span>
+                    <span>
+                      <strong>Cover Artwork:</strong>{' '}
+                      {artworkDeliverable?.fileUrl ? (
+                        <span className="text-emerald-400 font-medium">✓ Uploaded</span>
+                      ) : (
+                        <span className="text-rose-400 font-medium">✗ Missing</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Readiness / Critical Blockers Checklist Callout */}
+              {currentReadiness.criticalBlockers.length > 0 ? (
+                <div className="p-4 bg-rose-950/40 border border-rose-800/60 rounded-xl space-y-2">
+                  <div className="flex items-center space-x-2 text-rose-300 font-bold text-xs">
+                    <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                    <span>Submission Blocked — {currentReadiness.criticalBlockers.length} Critical Blocker{currentReadiness.criticalBlockers.length > 1 ? 's' : ''} Must Be Resolved:</span>
+                  </div>
+                  <ul className="list-disc pl-5 space-y-1 text-xs text-rose-200">
+                    {currentReadiness.criticalBlockers.map((blocker, i) => (
+                      <li key={i}>{blocker}</li>
+                    ))}
+                  </ul>
+                  <p className="text-[11px] text-rose-300/80 pt-1">
+                    Please use the navigation above to return to previous steps and supply the missing assets or information before signing.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl flex items-center space-x-2 text-xs text-emerald-300">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>All statutory Schedule A and Schedule B requirements are satisfied. The release is ready for legal execution.</span>
                 </div>
               )}
 
@@ -1352,13 +1801,17 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
                 <button
                   type="button"
-                  disabled={submitting}
+                  disabled={submitting || currentReadiness.criticalBlockers.length > 0}
                   onClick={handleSubmitRelease}
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-50"
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PenTool className="w-4 h-4" />
                   <span>
-                    {submitting ? 'Submitting & Hashing...' : 'Sign & Submit Release to PHD'}
+                    {submitting
+                      ? 'Submitting & Hashing...'
+                      : currentReadiness.criticalBlockers.length > 0
+                      ? 'Resolve Blockers to Submit'
+                      : 'Sign & Submit Release to PHD'}
                   </span>
                 </button>
               </div>
@@ -1369,16 +1822,30 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
         {/* Sidebar: Health & Readiness Meter + Summary */}
         <div className="space-y-6">
           <ReadinessMeter
-            score={release.readinessScore || 0}
-            submissionReady={release.readinessScore >= 70}
-            clearanceReady={clearanceItems.some((c) => c.status === 'Obtained')}
+            score={currentReadiness.score}
+            submissionReady={currentReadiness.submissionReady}
+            clearanceReady={currentReadiness.clearanceReady}
+            criticalBlockers={currentReadiness.criticalBlockers}
+            warnings={currentReadiness.warnings}
+            completedItems={currentReadiness.completedItems}
           />
 
           <div className="bg-[#12151B] border border-[#1F2430] rounded-xl p-4 space-y-3 text-xs">
             <h4 className="font-semibold text-zinc-200 uppercase tracking-wider text-[11px]">
               Release Summary
             </h4>
-            <div className="space-y-1.5 text-zinc-400">
+
+            {artworkDeliverable?.fileUrl && (
+              <div className="aspect-square w-full rounded-lg overflow-hidden border border-[#1F2430] bg-[#0E1015]">
+                <img
+                  src={artworkDeliverable.fileUrl}
+                  alt={release.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2 text-zinc-400">
               <div className="flex justify-between">
                 <span>Reference:</span>
                 <span className="font-mono text-zinc-200">{release.referenceNumber}</span>
@@ -1386,6 +1853,18 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               <div className="flex justify-between">
                 <span>Total Tracks:</span>
                 <span className="text-zinc-200 font-medium">{tracks.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Audio Uploaded:</span>
+                <span className={tracks.filter((t) => t.audioFileUrl).length === tracks.length && tracks.length > 0 ? 'text-emerald-400 font-medium' : 'text-amber-400 font-medium'}>
+                  {tracks.filter((t) => t.audioFileUrl).length} of {tracks.length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Cover Artwork:</span>
+                <span className={artworkDeliverable?.fileUrl ? 'text-emerald-400 font-medium' : 'text-amber-400 font-medium'}>
+                  {artworkDeliverable?.fileUrl ? '✓ Uploaded' : '✗ Missing'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Currency:</span>

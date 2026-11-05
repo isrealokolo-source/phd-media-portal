@@ -1,26 +1,34 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, AlertTriangle, CheckCircle2, Music } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, AlertTriangle, CheckCircle2, Music, Trash2, RefreshCw } from 'lucide-react';
 
 interface AudioPlayerProps {
   url: string;
   title?: string;
   artist?: string;
+  fileName?: string | null;
+  fileSize?: number | null;
   sampleRate?: string | null;
   bitDepth?: string | null;
   channels?: string | null;
   isLossless?: boolean | null;
+  onDelete?: () => void;
+  onReplace?: () => void;
 }
 
 export function AudioPlayer({
   url,
   title = 'Master Audio File',
   artist,
+  fileName,
+  fileSize,
   sampleRate,
   bitDepth,
   channels,
   isLossless,
+  onDelete,
+  onReplace,
 }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -83,19 +91,37 @@ export function AudioPlayer({
     <div className="bg-[#12151B] border border-[#1F2430] rounded-xl p-4 space-y-3">
       <audio ref={audioRef} src={url} preload="metadata" />
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/40 flex items-center justify-center text-indigo-400">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center space-x-3 min-w-0">
+          <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/40 flex items-center justify-center text-indigo-400 flex-shrink-0">
             <Music className="w-5 h-5" />
           </div>
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-100">{title}</h4>
-            {artist && <p className="text-xs text-zinc-400">{artist}</p>}
+          <div className="min-w-0">
+            <h4 className="text-sm font-semibold text-zinc-100 truncate">{title}</h4>
+            <div className="flex items-center space-x-2 text-xs text-zinc-400 mt-0.5">
+              {artist && <span className="truncate">{artist}</span>}
+              {fileName && (
+                <>
+                  <span className="text-zinc-600">•</span>
+                  <span className="font-mono text-[11px] text-zinc-400 truncate max-w-[180px]" title={fileName}>
+                    {fileName}
+                  </span>
+                </>
+              )}
+              {fileSize && (
+                <>
+                  <span className="text-zinc-600">•</span>
+                  <span className="font-mono text-[10px] text-zinc-500">
+                    {(fileSize / (1024 * 1024)).toFixed(1)} MB
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Quality Badges */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* Quality Badges & Actions */}
+        <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-center">
           {isLossless !== false ? (
             <span className="flex items-center space-x-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 border border-emerald-800/50">
               <CheckCircle2 className="w-3 h-3" />
@@ -120,10 +146,28 @@ export function AudioPlayer({
             </span>
           )}
 
-          {channels && (
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#1A1F2B] text-zinc-300 border border-[#262D3D]">
-              {channels}
-            </span>
+          {onReplace && (
+            <button
+              type="button"
+              onClick={onReplace}
+              className="inline-flex items-center space-x-1 text-[11px] px-2.5 py-1 rounded-md bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-300 border border-[#262D3D] transition-colors"
+              title="Replace master audio file"
+            >
+              <RefreshCw className="w-3 h-3 text-indigo-400" />
+              <span>Replace</span>
+            </button>
+          )}
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="inline-flex items-center space-x-1 text-[11px] px-2.5 py-1 rounded-md bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 transition-colors"
+              title="Delete audio file from this track"
+            >
+              <Trash2 className="w-3 h-3 text-rose-400" />
+              <span>Delete Audio</span>
+            </button>
           )}
         </div>
       </div>

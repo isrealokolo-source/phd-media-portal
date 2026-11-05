@@ -242,6 +242,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
               rightsClearanceStatus: trackData.rightsClearanceStatus || 'Pending',
               audioFileUrl: trackData.audioFileUrl,
               audioFileName: trackData.audioFileName,
+              audioFileSize: trackData.audioFileSize,
+              audioSampleRate: trackData.audioSampleRate,
+              audioBitDepth: trackData.audioBitDepth,
+              audioChannels: trackData.audioChannels,
+              audioIsLossless: trackData.audioIsLossless,
               contributors: {
                 create: Array.isArray(trackData.contributors)
                   ? trackData.contributors.map((c: any) => ({
@@ -297,6 +302,40 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
               approvalDate: d.approvalDate ? new Date(d.approvalDate) : null,
             },
           });
+        } else if (d.deliverableKey) {
+          const existing = await prisma.deliverable.findFirst({
+            where: { releaseId: params.id, deliverableKey: d.deliverableKey },
+          });
+
+          if (existing) {
+            await prisma.deliverable.update({
+              where: { id: existing.id },
+              data: {
+                status: d.status || existing.status,
+                responsibleParty: d.responsibleParty || existing.responsibleParty,
+                fileUrl: d.fileUrl !== undefined ? d.fileUrl : existing.fileUrl,
+                fileName: d.fileName !== undefined ? d.fileName : existing.fileName,
+                fileSize: d.fileSize !== undefined ? d.fileSize : existing.fileSize,
+                fileMimeType: d.fileMimeType !== undefined ? d.fileMimeType : existing.fileMimeType,
+                metadataJson: d.metadataJson !== undefined ? d.metadataJson : existing.metadataJson,
+              },
+            });
+          } else {
+            await prisma.deliverable.create({
+              data: {
+                releaseId: params.id,
+                deliverableKey: d.deliverableKey,
+                name: d.name || 'Cover Artwork (Front)',
+                responsibleParty: d.responsibleParty || 'Artist / agreed designer',
+                status: d.status || 'Uploaded',
+                fileUrl: d.fileUrl,
+                fileName: d.fileName,
+                fileSize: d.fileSize,
+                fileMimeType: d.fileMimeType,
+                metadataJson: d.metadataJson,
+              },
+            });
+          }
         }
       }
     }
