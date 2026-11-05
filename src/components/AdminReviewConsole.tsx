@@ -225,33 +225,33 @@ export function AdminReviewConsole({
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#12151B] border border-[#1F2430]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-lg bg-white border border-[#E8E8E8]">
         <div>
           <div className="flex items-center space-x-2">
             <Link
               href="/admin"
-              className="text-xs text-zinc-400 hover:text-zinc-200 flex items-center space-x-1 mr-2"
+              className="text-xs text-[#777777] hover:text-[#171717] flex items-center space-x-1 mr-2"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Submissions</span>
             </Link>
-            <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">
+            <span className="text-xs font-mono font-bold text-[#171717] bg-[#F4F4F2] px-2 py-0.5 rounded border border-[#E8E8E8]">
               {release.referenceNumber}
             </span>
             <span
               className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${
                 isExecuted
-                  ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                  ? 'bg-emerald-950 text-[#269568] border-emerald-800'
                   : release.status === 'REVISION_REQUESTED'
-                  ? 'bg-amber-950 text-amber-300 border-amber-800'
-                  : 'bg-indigo-950 text-indigo-300 border-indigo-800'
+                  ? 'bg-amber-950 text-[#D69E36] border-amber-800'
+                  : 'bg-indigo-950 text-[#171717] border-indigo-800'
               }`}
             >
               {release.status.replace(/_/g, ' ')}
             </span>
           </div>
           <h1 className="text-xl font-bold text-white mt-1.5">{release.title}</h1>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-[#777777]">
             Artist: {release.primaryArtist} • Submitted:{' '}
             {release.submittedAt ? new Date(release.submittedAt).toLocaleDateString('en-GB') : 'Draft'}
           </p>
@@ -261,10 +261,10 @@ export function AdminReviewConsole({
         <div className="flex flex-wrap items-center gap-2">
           <a
             href={`/api/releases/${release.id}/download?type=bundle`}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 text-xs font-semibold transition-colors shadow-sm"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#F4F4F2] hover:bg-indigo-900 border border-indigo-700/60 text-[#171717] text-xs font-semibold transition-colors shadow-sm"
             title="Download formatted cover art, all audio masters, and clearance PDFs (.ZIP)"
           >
-            <FileDown className="w-3.5 h-3.5 text-indigo-400" />
+            <FileDown className="w-3.5 h-3.5 text-[#171717]" />
             <span>Download Assets (.ZIP)</span>
           </a>
 
@@ -273,7 +273,7 @@ export function AdminReviewConsole({
               <button
                 type="button"
                 onClick={() => setShowHoldModal(true)}
-                className="px-3 py-1.5 rounded-lg bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-300 border border-[#2A3142] text-xs font-medium transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#252C3D] text-[#171717] border border-[#E8E8E8] text-xs font-medium transition-colors"
               >
                 Place On Hold
               </button>
@@ -281,7 +281,7 @@ export function AdminReviewConsole({
               <button
                 type="button"
                 onClick={() => setShowRevisionModal(true)}
-                className="px-3.5 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-colors"
+                className="px-3.5 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-[#D69E36] border border-amber-500/30 text-xs font-medium transition-colors"
               >
                 Request Revisions
               </button>
@@ -289,7 +289,7 @@ export function AdminReviewConsole({
               <button
                 type="button"
                 onClick={() => setShowCountersignModal(true)}
-                className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-900/30"
+                className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-[#171717] hover:bg-[#262626] text-white text-xs font-bold transition-all shadow-md shadow-indigo-900/30"
               >
                 <PenTool className="w-3.5 h-3.5" />
                 <span>Countersign & Execute</span>
@@ -312,7 +312,7 @@ export function AdminReviewConsole({
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-1 overflow-x-auto border-b border-[#1F2430] pb-2 text-xs">
+      <div className="flex items-center space-x-1 overflow-x-auto border-b border-[#E8E8E8] pb-2 text-xs">
         {REVIEW_TABS.map((tab) => (
           <button
             key={tab.id}
@@ -320,8 +320,8 @@ export function AdminReviewConsole({
             onClick={() => setActiveTab(tab.id)}
             className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors ${
               activeTab === tab.id
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#1A1F2B]'
+                ? 'bg-[#171717] text-white shadow-sm'
+                : 'text-[#777777] hover:text-[#171717] hover:bg-white'
             }`}
           >
             {tab.label}
@@ -344,43 +344,43 @@ export function AdminReviewConsole({
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-indigo-400" />
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4">
+              <h3 className="text-sm font-bold text-[#171717] flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-[#171717]" />
                 <span>Executive Review Summary</span>
               </h3>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-3 bg-[#0E1015] rounded-xl border border-[#1F2430]">
-                  <span className="text-zinc-500 block">Total Masters</span>
-                  <span className="text-base font-bold font-mono text-zinc-100 mt-1 block">
+                <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+                  <span className="text-[#999999] block">Total Masters</span>
+                  <span className="text-base font-bold font-mono text-[#171717] mt-1 block">
                     {release.tracks.length} recording(s)
                   </span>
                 </div>
 
-                <div className="p-3 bg-[#0E1015] rounded-xl border border-[#1F2430]">
-                  <span className="text-zinc-500 block">Clearance Health</span>
-                  <span className="text-base font-bold font-mono text-emerald-400 mt-1 block">
+                <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+                  <span className="text-[#999999] block">Clearance Health</span>
+                  <span className="text-base font-bold font-mono text-[#269568] mt-1 block">
                     {release.clearanceItems.filter((c: any) => c.status === 'Obtained').length} /{' '}
                     {release.clearanceItems.length}
                   </span>
                 </div>
 
-                <div className="p-3 bg-[#0E1015] rounded-xl border border-[#1F2430]">
-                  <span className="text-zinc-500 block">Readiness Score</span>
-                  <span className="text-base font-bold font-mono text-indigo-400 mt-1 block">
+                <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+                  <span className="text-[#999999] block">Readiness Score</span>
+                  <span className="text-base font-bold font-mono text-[#171717] mt-1 block">
                     {readiness.score}%
                   </span>
                 </div>
               </div>
 
               {readiness.criticalBlockers.length > 0 && (
-                <div className="p-4 bg-rose-950/30 border border-rose-800/40 rounded-xl space-y-2">
-                  <span className="text-xs font-bold text-rose-300 flex items-center space-x-1.5">
-                    <AlertOctagon className="w-4 h-4 text-rose-400" />
+                <div className="p-4 bg-[#FEF2F2] border border-[#FECACA] rounded-lg space-y-2">
+                  <span className="text-xs font-bold text-[#D64B4B] flex items-center space-x-1.5">
+                    <AlertOctagon className="w-4 h-4 text-[#D64B4B]" />
                     <span>Identified Critical Blockers ({readiness.criticalBlockers.length})</span>
                   </span>
-                  <ul className="text-xs text-zinc-300 list-disc pl-4 space-y-1">
+                  <ul className="text-xs text-[#171717] list-disc pl-4 space-y-1">
                     {readiness.criticalBlockers.map((b: string, i: number) => (
                       <li key={i}>{b}</li>
                     ))}
@@ -389,12 +389,12 @@ export function AdminReviewConsole({
               )}
 
               {readiness.warnings.length > 0 && (
-                <div className="p-4 bg-amber-950/30 border border-amber-800/40 rounded-xl space-y-2">
-                  <span className="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-lg space-y-2">
+                  <span className="text-xs font-bold text-[#D69E36] flex items-center space-x-1.5">
+                    <AlertTriangle className="w-4 h-4 text-[#D69E36]" />
                     <span>Pending Items & Clearances ({readiness.warnings.length})</span>
                   </span>
-                  <ul className="text-xs text-zinc-300 list-disc pl-4 space-y-1">
+                  <ul className="text-xs text-[#171717] list-disc pl-4 space-y-1">
                     {readiness.warnings.map((w: string, i: number) => (
                       <li key={i}>{w}</li>
                     ))}
@@ -404,9 +404,9 @@ export function AdminReviewConsole({
             </div>
 
             {/* Quick Track Audio Inspection */}
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
-                <Music className="w-4 h-4 text-indigo-400" />
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4">
+              <h3 className="text-sm font-bold text-[#171717] flex items-center space-x-2">
+                <Music className="w-4 h-4 text-[#171717]" />
                 <span>Audio Master QA & Metadata Playback</span>
               </h3>
 
@@ -424,7 +424,7 @@ export function AdminReviewConsole({
                         isLossless={t.audioIsLossless}
                       />
                     ) : (
-                      <div className="p-3 bg-[#0E1015] border border-[#1F2430] rounded-xl text-xs text-amber-400 flex items-center justify-between">
+                      <div className="p-3 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#D69E36] flex items-center justify-between">
                         <span>{t.title} — No master audio file uploaded</span>
                         <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-950 border border-amber-800">
                           Missing Master
@@ -439,15 +439,15 @@ export function AdminReviewConsole({
 
           {/* Sidebar: Artwork & Execution Data */}
           <div className="space-y-6">
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-3">
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#777777]">
                   Cover Artwork Deliverable
                 </h4>
                 {artwork?.fileUrl && (
                   <a
                     href={`/api/releases/${release.id}/download?type=artwork`}
-                    className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center space-x-1 font-medium"
+                    className="text-[11px] text-[#171717] hover:text-[#171717] flex items-center space-x-1 font-medium"
                     title="Download clean formatted cover artwork"
                   >
                     <FileDown className="w-3.5 h-3.5" />
@@ -458,26 +458,26 @@ export function AdminReviewConsole({
               <ArtworkPreview url={artwork?.fileUrl} width={3000} height={3000} />
             </div>
 
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-3 text-xs">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-5 space-y-3 text-xs">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#777777]">
                 Signing Information
               </h4>
-              <div className="p-3 bg-[#0E1015] rounded-xl border border-[#1F2430] space-y-1">
-                <span className="text-zinc-500 text-[10px] block">Artist Signatory</span>
-                <p className="font-semibold text-zinc-200">
+              <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8] space-y-1">
+                <span className="text-[#999999] text-[10px] block">Artist Signatory</span>
+                <p className="font-semibold text-[#171717]">
                   {artistSig?.signerLegalName || 'Declared in Form'}
                 </p>
-                <p className="text-[10px] text-zinc-400">
+                <p className="text-[10px] text-[#777777]">
                   {artistSig?.signedAt ? new Date(artistSig.signedAt).toLocaleString('en-GB') : 'Pending'}
                 </p>
               </div>
 
-              <div className="p-3 bg-[#0E1015] rounded-xl border border-[#1F2430] space-y-1">
-                <span className="text-zinc-500 text-[10px] block">PHD Signatory</span>
-                <p className="font-semibold text-zinc-200">
+              <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8] space-y-1">
+                <span className="text-[#999999] text-[10px] block">PHD Signatory</span>
+                <p className="font-semibold text-[#171717]">
                   {phdSig?.signerLegalName || (isExecuted ? 'Authorised Officer' : 'Not yet countersigned')}
                 </p>
-                <p className="text-[10px] text-zinc-400">
+                <p className="text-[10px] text-[#777777]">
                   {phdSig?.signerPosition || 'Head of Legal & Business Affairs'}
                 </p>
               </div>
@@ -489,44 +489,44 @@ export function AdminReviewConsole({
 
       {/* 2. RELEASE INFO */}
       {activeTab === 'release_info' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-bold text-zinc-100">Schedule A – Part I: Release Information</h3>
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4">
+          <h3 className="text-sm font-bold text-[#171717]">Schedule A – Part I: Release Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Release Title</span>
-              <span className="text-zinc-100 font-medium">{release.title}</span>
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Release Title</span>
+              <span className="text-[#171717] font-medium">{release.title}</span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Reference Number</span>
-              <span className="font-mono text-indigo-400 font-bold">{release.referenceNumber}</span>
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Reference Number</span>
+              <span className="font-mono text-[#171717] font-bold">{release.referenceNumber}</span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Release Type</span>
-              <span className="text-zinc-100">{release.releaseType}</span>
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Release Type</span>
+              <span className="text-[#171717]">{release.releaseType}</span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Primary Artist</span>
-              <span className="text-zinc-100">{release.primaryArtist}</span>
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Primary Artist</span>
+              <span className="text-[#171717]">{release.primaryArtist}</span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Featured Artists</span>
-              <span className="text-zinc-100">{release.featuredArtists || 'None'}</span>
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Featured Artists</span>
+              <span className="text-[#171717]">{release.featuredArtists || 'None'}</span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Genre / Subgenre</span>
-              <span className="text-zinc-100">
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Genre / Subgenre</span>
+              <span className="text-[#171717]">
                 {release.genre} {release.subgenre ? `/ ${release.subgenre}` : ''}
               </span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Territory</span>
-              <span className="text-zinc-100">
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Territory</span>
+              <span className="text-[#171717]">
                 {release.territoryType === 'Worldwide' ? 'Worldwide' : release.territoryDetails}
               </span>
             </div>
-            <div className="p-3 bg-[#0E1015] rounded-lg border border-[#1F2430]">
-              <span className="text-zinc-500 block">Planned Release Date</span>
-              <span className="font-mono text-zinc-100">
+            <div className="p-3 bg-[#F4F4F2] rounded-lg border border-[#E8E8E8]">
+              <span className="text-[#999999] block">Planned Release Date</span>
+              <span className="font-mono text-[#171717]">
                 {release.plannedReleaseDate
                   ? new Date(release.plannedReleaseDate).toLocaleDateString('en-GB')
                   : 'TBD'}
@@ -538,53 +538,53 @@ export function AdminReviewConsole({
 
       {/* 3. TRACK REGISTER */}
       {activeTab === 'track_register' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-5">
-          <h3 className="text-sm font-bold text-zinc-100">
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5">
+          <h3 className="text-sm font-bold text-[#171717]">
             Schedule A – Part II: Master Recording Register ({release.tracks.length} tracks)
           </h3>
 
           <div className="space-y-4">
             {release.tracks.map((t: any) => (
-              <div key={t.id} className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-3">
+              <div key={t.id} className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <span className="font-mono font-bold text-indigo-400">0{t.trackNumber}</span>
-                    <span className="text-sm font-bold text-zinc-100">{t.title}</span>
+                    <span className="font-mono font-bold text-[#171717]">0{t.trackNumber}</span>
+                    <span className="text-sm font-bold text-[#171717]">{t.title}</span>
                     {t.versionRemix && (
-                      <span className="text-xs text-zinc-500">({t.versionRemix})</span>
+                      <span className="text-xs text-[#999999]">({t.versionRemix})</span>
                     )}
                   </div>
                   <div className="flex items-center space-x-2.5">
                     {t.audioFileUrl && (
                       <a
                         href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 text-[11px] font-medium border border-[#2B3447] transition-colors"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#252C3D] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] transition-colors"
                         title={`Download audio master for ${t.title}`}
                       >
                         <FileDown className="w-3.5 h-3.5" />
                         <span>Download Master WAV</span>
                       </a>
                     )}
-                    <span className="text-xs font-mono text-zinc-400">{t.duration || '03:20'}</span>
+                    <span className="text-xs font-mono text-[#777777]">{t.duration || '03:20'}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs pt-2 border-t border-[#1F2430]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs pt-2 border-t border-[#E8E8E8]">
                   <div>
-                    <span className="text-zinc-500 block text-[10px]">Producer</span>
-                    <span className="text-zinc-200">{t.producerBeatmaker || 'Disclosed'}</span>
+                    <span className="text-[#999999] block text-[10px]">Producer</span>
+                    <span className="text-[#171717]">{t.producerBeatmaker || 'Disclosed'}</span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 block text-[10px]">Songwriters</span>
-                    <span className="text-zinc-200">{t.songwritersComposers || 'Disclosed'}</span>
+                    <span className="text-[#999999] block text-[10px]">Songwriters</span>
+                    <span className="text-[#171717]">{t.songwritersComposers || 'Disclosed'}</span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 block text-[10px]">Master Owner</span>
-                    <span className="text-zinc-200">{t.masterOwnerLegalName}</span>
+                    <span className="text-[#999999] block text-[10px]">Master Owner</span>
+                    <span className="text-[#171717]">{t.masterOwnerLegalName}</span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 block text-[10px]">Ownership Share</span>
-                    <span className="text-emerald-400 font-bold font-mono">
+                    <span className="text-[#999999] block text-[10px]">Ownership Share</span>
+                    <span className="text-[#269568] font-bold font-mono">
                       {t.masterOwnershipPercentage}%
                     </span>
                   </div>
@@ -609,29 +609,29 @@ export function AdminReviewConsole({
 
       {/* 4. OWNERSHIP & CONTRIBUTORS */}
       {activeTab === 'ownership_contributors' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-          <div className="border-b border-[#1F2430] pb-3">
-            <h3 className="text-sm font-bold text-zinc-100">
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+          <div className="border-b border-[#E8E8E8] pb-3">
+            <h3 className="text-sm font-bold text-[#171717]">
               Schedule B – Part III: Producer & Contributor Splits Register
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-[#777777] mt-0.5">
               Strictly verify the legal distinction between Master ownership, songwriting shares, and producer fees.
             </p>
           </div>
 
-          <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl overflow-hidden bg-[#0E1015] text-xs">
+          <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2] text-xs">
             {release.tracks.flatMap((t: any) =>
               t.contributors.map((c: any, i: number) => (
                 <div key={c.id || i} className="p-3.5 flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-zinc-200">{c.contributorName}</span>
-                    <p className="text-[11px] text-zinc-400">
-                      Role: <strong className="text-indigo-400">{c.role}</strong> • Track: {t.title}
+                    <span className="font-bold text-[#171717]">{c.contributorName}</span>
+                    <p className="text-[11px] text-[#777777]">
+                      Role: <strong className="text-[#171717]">{c.role}</strong> • Track: {t.title}
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-zinc-200 font-medium">{c.feeRoyaltyShare || 'Agreed'}</span>
-                    <p className="text-[10px] text-zinc-500 font-mono">
+                    <span className="text-[#171717] font-medium">{c.feeRoyaltyShare || 'Agreed'}</span>
+                    <p className="text-[10px] text-[#999999] font-mono">
                       Ref: {c.rightsAgreementRef || 'On File'}
                     </p>
                   </div>
@@ -644,12 +644,12 @@ export function AdminReviewConsole({
 
       {/* 5. RIGHTS CLEARANCES (14 Categories) */}
       {activeTab === 'rights_clearance' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-5">
-          <div className="border-b border-[#1F2430] pb-3">
-            <h3 className="text-sm font-bold text-zinc-100">
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5">
+          <div className="border-b border-[#E8E8E8] pb-3">
+            <h3 className="text-sm font-bold text-[#171717]">
               Schedule B – Part II: 14-Point Statutory Rights Clearance Checklist
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">{PENDING_CLEARANCE_WARNING}</p>
+            <p className="text-xs text-[#777777] mt-0.5">{PENDING_CLEARANCE_WARNING}</p>
           </div>
 
           <div className="space-y-3">
@@ -660,13 +660,13 @@ export function AdminReviewConsole({
               return (
                 <div
                   key={item.id || idx}
-                  className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                 >
                   <div className="space-y-0.5">
-                    <span className="font-bold text-zinc-200">
+                    <span className="font-bold text-[#171717]">
                       {idx + 1}. {catDef?.label || item.category}
                     </span>
-                    <p className="text-[11px] text-zinc-400">
+                    <p className="text-[11px] text-[#777777]">
                       Ref: {item.documentReference || 'No reference'} • Holder: {item.rightsHolder || 'None declared'}
                     </p>
                   </div>
@@ -675,7 +675,7 @@ export function AdminReviewConsole({
                     {item.supportingDocUrl && (
                       <a
                         href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${item.id}`}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-emerald-300 text-[11px] font-medium border border-emerald-900/40 transition-colors"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-[#252C3D] text-[#269568] text-[11px] font-medium border border-[#A7F3D0] transition-colors"
                         title="Download signed clearance agreement PDF"
                       >
                         <FileDown className="w-3.5 h-3.5" />
@@ -685,8 +685,8 @@ export function AdminReviewConsole({
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
                         isObtained
-                          ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                          : 'bg-amber-950 text-amber-300 border-amber-800'
+                          ? 'bg-emerald-950 text-[#269568] border-emerald-800'
+                          : 'bg-amber-950 text-[#D69E36] border-amber-800'
                       }`}
                     >
                       {item.status}
@@ -703,24 +703,24 @@ export function AdminReviewConsole({
       {activeTab === 'deliverables' && (
         <div className="space-y-6">
           {/* Admin Asset Download Hub */}
-          <div className="bg-[#12151B] border border-indigo-900/50 rounded-2xl p-6 space-y-5 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2430] pb-4">
+          <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8E8E8] pb-4">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-indigo-400">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#171717]">
                   Production Asset Distribution
                 </span>
                 <h3 className="text-base font-bold text-white mt-0.5 flex items-center space-x-2">
-                  <FileDown className="w-5 h-5 text-indigo-400" />
+                  <FileDown className="w-5 h-5 text-[#171717]" />
                   <span>Release Asset Archive & Audio Masters</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-[#777777] mt-1">
                   Download all release assets bundled into a structured ZIP file or download individual clean-named files.
                 </p>
               </div>
 
               <a
                 href={`/api/releases/${release.id}/download?type=bundle`}
-                className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-900/40 flex-shrink-0"
+                className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-900/40 flex-shrink-0"
               >
                 <FileDown className="w-4 h-4" />
                 <span>Download Complete Archive (.ZIP)</span>
@@ -730,20 +730,20 @@ export function AdminReviewConsole({
             {/* Quick Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Cover Artwork Card */}
-              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex items-center justify-between gap-3">
+              <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex items-center justify-between gap-3">
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-12 h-12 rounded-lg bg-[#141820] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg bg-white border border-[#E8E8E8] overflow-hidden flex-shrink-0 flex items-center justify-center">
                     {artwork?.fileUrl ? (
                       <img src={artwork.fileUrl} alt="Cover" className="w-full h-full object-cover" />
                     ) : (
-                      <Disc3 className="w-6 h-6 text-zinc-600" />
+                      <Disc3 className="w-6 h-6 text-[#999999]" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-xs font-bold text-zinc-100 block truncate">
+                    <span className="text-xs font-bold text-[#171717] block truncate">
                       Cover Artwork (3000×3000)
                     </span>
-                    <span className="text-[11px] text-zinc-500 font-mono block">
+                    <span className="text-[11px] text-[#999999] font-mono block">
                       {artwork?.fileUrl ? 'Standard DSP Square Artwork' : 'Not Uploaded'}
                     </span>
                   </div>
@@ -752,7 +752,7 @@ export function AdminReviewConsole({
                 {artwork?.fileUrl && (
                   <a
                     href={`/api/releases/${release.id}/download?type=artwork`}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold border border-[#2B3447] transition-colors flex-shrink-0"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors flex-shrink-0"
                     title="Download clean formatted cover artwork"
                   >
                     <FileDown className="w-3.5 h-3.5" />
@@ -762,16 +762,16 @@ export function AdminReviewConsole({
               </div>
 
               {/* Master Audio Summary Card */}
-              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex items-center justify-between gap-3">
+              <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex items-center justify-between gap-3">
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-12 h-12 rounded-lg bg-indigo-950/60 border border-indigo-800/50 flex-shrink-0 flex items-center justify-center text-indigo-400">
+                  <div className="w-12 h-12 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] flex-shrink-0 flex items-center justify-center text-[#171717]">
                     <Music className="w-6 h-6" />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-xs font-bold text-zinc-100 block">
+                    <span className="text-xs font-bold text-[#171717] block">
                       {release.tracks.length} Master Recording{release.tracks.length > 1 ? 's' : ''}
                     </span>
-                    <span className="text-[11px] text-zinc-500 font-mono block">
+                    <span className="text-[11px] text-[#999999] font-mono block">
                       {release.tracks.filter((t: any) => t.audioFileUrl).length} of {release.tracks.length} master files ready
                     </span>
                   </div>
@@ -779,7 +779,7 @@ export function AdminReviewConsole({
 
                 <a
                   href={`/api/releases/${release.id}/download?type=bundle`}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold border border-[#2B3447] transition-colors flex-shrink-0"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors flex-shrink-0"
                 >
                   <FileDown className="w-3.5 h-3.5" />
                   <span>Download All</span>
@@ -789,17 +789,17 @@ export function AdminReviewConsole({
 
             {/* Individual Audio Masters List */}
             <div className="space-y-2 pt-1">
-              <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-[#171717] uppercase tracking-wider block">
                 Individual Audio Masters
               </span>
-              <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl bg-[#0E1015] overflow-hidden">
+              <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg bg-[#F4F4F2] overflow-hidden">
                 {release.tracks.map((t: any, idx: number) => (
                   <div key={t.id} className="p-3 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center space-x-3 min-w-0">
-                      <span className="font-mono text-indigo-400 font-bold w-6">0{t.trackNumber || idx + 1}</span>
+                      <span className="font-mono text-[#171717] font-bold w-6">0{t.trackNumber || idx + 1}</span>
                       <div className="min-w-0">
-                        <span className="font-semibold text-zinc-200 block truncate">{t.title}</span>
-                        <span className="text-[11px] text-zinc-500 font-mono block">
+                        <span className="font-semibold text-[#171717] block truncate">{t.title}</span>
+                        <span className="text-[11px] text-[#999999] font-mono block">
                           {t.primaryArtist || release.primaryArtist} {t.isrc ? `• ISRC: ${t.isrc}` : ''}
                         </span>
                       </div>
@@ -807,12 +807,12 @@ export function AdminReviewConsole({
 
                     {t.audioFileUrl ? (
                       <div className="flex items-center space-x-2 flex-shrink-0">
-                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-[#269568] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded">
                           WAV / Lossless
                         </span>
                         <a
                           href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
-                          className="flex items-center space-x-1 px-3 py-1 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-medium border border-[#2B3447] transition-colors"
+                          className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-medium border border-[#E8E8E8] transition-colors"
                           title={`Download master WAV for ${t.title}`}
                         >
                           <FileDown className="w-3.5 h-3.5" />
@@ -830,19 +830,19 @@ export function AdminReviewConsole({
             {/* Attached Signed Clearance Agreements List */}
             {release.clearanceItems.some((c: any) => c.supportingDocUrl) && (
               <div className="space-y-2 pt-1">
-                <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-[#171717] uppercase tracking-wider block">
                   Signed Rights Clearance Agreements (PDF)
                 </span>
-                <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl bg-[#0E1015] overflow-hidden">
+                <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg bg-[#F4F4F2] overflow-hidden">
                   {release.clearanceItems
                     .filter((c: any) => c.supportingDocUrl)
                     .map((c: any) => (
                       <div key={c.id} className="p-3 flex items-center justify-between gap-3 text-xs">
                         <div className="flex items-center space-x-3 min-w-0">
-                          <FileText className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <FileText className="w-4 h-4 text-[#269568] flex-shrink-0" />
                           <div className="min-w-0">
-                            <span className="font-semibold text-zinc-200 block truncate">{c.category}</span>
-                            <span className="text-[11px] text-zinc-500 font-mono block">
+                            <span className="font-semibold text-[#171717] block truncate">{c.category}</span>
+                            <span className="text-[11px] text-[#999999] font-mono block">
                               Ref: {c.documentReference || 'N/A'} {c.rightsHolder ? `• Licensor: ${c.rightsHolder}` : ''}
                             </span>
                           </div>
@@ -850,7 +850,7 @@ export function AdminReviewConsole({
 
                         <a
                           href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${c.id}`}
-                          className="flex items-center space-x-1 px-3 py-1 bg-[#1A1F2B] hover:bg-[#252C3D] text-emerald-300 rounded-lg text-xs font-medium border border-emerald-900/50 transition-colors flex-shrink-0"
+                          className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#252C3D] text-[#269568] rounded-lg text-xs font-medium border border-[#A7F3D0] transition-colors flex-shrink-0"
                           title="Download signed PDF document"
                         >
                           <FileDown className="w-3.5 h-3.5" />
@@ -864,25 +864,25 @@ export function AdminReviewConsole({
           </div>
 
           {/* Schedule A – Part III Checklist */}
-          <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-            <h3 className="text-sm font-bold text-zinc-100">
+          <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4">
+            <h3 className="text-sm font-bold text-[#171717]">
               Schedule A – Part III: Deliverables Verification Checklist
             </h3>
-            <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl overflow-hidden bg-[#0E1015] text-xs">
+            <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2] text-xs">
               {release.deliverables.map((d: any) => (
                 <div key={d.id} className="p-3.5 flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-zinc-200">{d.name}</span>
-                    <p className="text-[11px] text-zinc-500">Party: {d.responsibleParty}</p>
+                    <span className="font-semibold text-[#171717]">{d.name}</span>
+                    <p className="text-[11px] text-[#999999]">Party: {d.responsibleParty}</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
                         d.status === 'Approved'
-                          ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                          ? 'bg-emerald-950 text-[#269568] border-emerald-800'
                           : d.status === 'Uploaded'
-                          ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
-                          : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                          ? 'bg-indigo-950 text-[#171717] border-indigo-800'
+                          : 'bg-zinc-800 text-[#777777] border-zinc-700'
                       }`}
                     >
                       {d.status}
@@ -892,7 +892,7 @@ export function AdminReviewConsole({
                         href={d.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center space-x-1"
+                        className="text-xs text-[#171717] hover:text-[#171717] flex items-center space-x-1"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Preview</span>
@@ -908,14 +908,14 @@ export function AdminReviewConsole({
 
       {/* 7. BUDGET & RECOUPMENT */}
       {activeTab === 'budget' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2430] pb-4">
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8E8E8] pb-4">
             <div>
-              <h3 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
-                <DollarSign className="w-4 h-4 text-indigo-400" />
+              <h3 className="text-sm font-bold text-[#171717] flex items-center space-x-2">
+                <DollarSign className="w-4 h-4 text-[#171717]" />
                 <span>Schedule A – Part IV: Reviewer Budget Rate Approval Console</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-[#777777] mt-0.5">
                 Inspect each suggested budget figure submitted by the Artist and determine the approved rate and reference.
               </p>
             </div>
@@ -924,7 +924,7 @@ export function AdminReviewConsole({
               type="button"
               onClick={handleSaveBudgetRates}
               disabled={savingBudget}
-              className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-900/30 disabled:opacity-50"
+              className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-900/30 disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{savingBudget ? 'Saving Rates...' : 'Save Approved Rates'}</span>
@@ -932,7 +932,7 @@ export function AdminReviewConsole({
           </div>
 
           {budgetSavedSuccess && (
-            <div className="p-3 bg-emerald-950/60 border border-emerald-800/40 rounded-xl text-xs text-emerald-300 flex items-center space-x-2">
+            <div className="p-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded-lg text-xs text-[#269568] flex items-center space-x-2">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
               <span>Approved budget rates successfully updated and locked in release register.</span>
             </div>
@@ -943,20 +943,20 @@ export function AdminReviewConsole({
             {adminBudgetItems.map((b: any, idx: number) => (
               <div
                 key={b.id || idx}
-                className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-3 text-xs"
+                className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-3 text-xs"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1F2430] pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8E8E8] pb-2">
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold text-zinc-100">{b.expenseCategory}</span>
+                    <span className="font-bold text-[#171717]">{b.expenseCategory}</span>
                     <span
                       className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
                         b.approvalStatus === 'APPROVED'
-                          ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                          ? 'bg-emerald-950 text-[#269568] border-emerald-800'
                           : b.approvalStatus === 'ADJUSTED'
                           ? 'bg-blue-950 text-blue-300 border-blue-800'
                           : b.approvalStatus === 'REJECTED'
-                          ? 'bg-rose-950 text-rose-300 border-rose-800'
-                          : 'bg-amber-950 text-amber-300 border-amber-800'
+                          ? 'bg-rose-950 text-[#D64B4B] border-rose-800'
+                          : 'bg-amber-950 text-[#D69E36] border-amber-800'
                       }`}
                     >
                       {b.approvalStatus || 'PENDING_REVIEW'}
@@ -972,7 +972,7 @@ export function AdminReviewConsole({
                         updated[idx].approvalStatus = 'APPROVED';
                         setAdminBudgetItems(updated);
                       }}
-                      className="text-[10px] text-indigo-400 hover:text-indigo-300 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-800/40 transition-colors"
+                      className="text-[10px] text-[#171717] hover:text-[#171717] bg-[#F4F4F2] px-2 py-0.5 rounded border border-[#E8E8E8] transition-colors"
                     >
                       Match Suggested ({release.currency} {Number(b.suggestedAmount || 0).toLocaleString()})
                     </button>
@@ -981,16 +981,16 @@ export function AdminReviewConsole({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                   {/* Artist Suggested (Read-only) */}
-                  <div className="p-2.5 bg-[#12151B] rounded-lg border border-[#1F2430]">
-                    <span className="text-[10px] text-zinc-500 block">Artist Suggested Budget</span>
-                    <span className="font-mono text-zinc-200 font-semibold text-xs mt-0.5 block">
+                  <div className="p-2.5 bg-white rounded-lg border border-[#E8E8E8]">
+                    <span className="text-[10px] text-[#999999] block">Artist Suggested Budget</span>
+                    <span className="font-mono text-[#171717] font-semibold text-xs mt-0.5 block">
                       {release.currency} {Number(b.suggestedAmount ?? b.approvedAmount ?? 0).toLocaleString()}
                     </span>
                   </div>
 
                   {/* Reviewer Approved Rate (Input) */}
                   <div>
-                    <label className="block text-[10px] font-medium text-emerald-400 mb-1">
+                    <label className="block text-[10px] font-medium text-[#269568] mb-1">
                       PHD Approved Rate ({release.currency}) *
                     </label>
                     <input
@@ -1007,13 +1007,13 @@ export function AdminReviewConsole({
                         }
                         setAdminBudgetItems(updated);
                       }}
-                      className="w-full px-2.5 py-1.5 bg-[#141820] border border-emerald-700/60 rounded text-emerald-300 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                      className="w-full px-2.5 py-1.5 bg-white border border-emerald-700/60 rounded text-[#269568] font-mono font-bold focus:outline-none focus:border-emerald-500"
                     />
                   </div>
 
                   {/* Rate Decision / Status */}
                   <div>
-                    <label className="block text-[10px] text-zinc-400 mb-1">Approval Decision</label>
+                    <label className="block text-[10px] text-[#777777] mb-1">Approval Decision</label>
                     <select
                       value={b.approvalStatus || 'PENDING_REVIEW'}
                       onChange={(e) => {
@@ -1024,7 +1024,7 @@ export function AdminReviewConsole({
                         }
                         setAdminBudgetItems(updated);
                       }}
-                      className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-200"
+                      className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717]"
                     >
                       <option value="APPROVED">Approved in Full</option>
                       <option value="ADJUSTED">Adjusted / Capped Rate</option>
@@ -1035,7 +1035,7 @@ export function AdminReviewConsole({
 
                   {/* Approval Reference */}
                   <div>
-                    <label className="block text-[10px] text-zinc-400 mb-1">Approval Reference</label>
+                    <label className="block text-[10px] text-[#777777] mb-1">Approval Reference</label>
                     <input
                       type="text"
                       value={b.approvalReference || ''}
@@ -1045,14 +1045,14 @@ export function AdminReviewConsole({
                         setAdminBudgetItems(updated);
                       }}
                       placeholder="e.g. PHD-APPR-01"
-                      className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-200 font-mono"
+                      className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                   <div>
-                    <label className="block text-[10px] font-medium text-zinc-400 mb-1">
+                    <label className="block text-[10px] font-medium text-[#777777] mb-1">
                       Reviewer Feedback / Conditions
                     </label>
                     <input
@@ -1064,12 +1064,12 @@ export function AdminReviewConsole({
                         setAdminBudgetItems(updated);
                       }}
                       placeholder="e.g. Capped at standard mastering rate; receipts required"
-                      className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-300 text-xs"
+                      className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] text-xs"
                     />
                   </div>
 
                   <div className="flex items-center space-x-3 pt-4">
-                    <label className="flex items-center space-x-2 text-[11px] text-zinc-300 cursor-pointer">
+                    <label className="flex items-center space-x-2 text-[11px] text-[#171717] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={b.isEligibleRecoupable !== false}
@@ -1086,7 +1086,7 @@ export function AdminReviewConsole({
                 </div>
 
                 {b.notes && (
-                  <p className="text-[11px] text-zinc-400 italic">
+                  <p className="text-[11px] text-[#777777] italic">
                     Artist Justification: "{b.notes}"
                   </p>
                 )}
@@ -1111,20 +1111,20 @@ export function AdminReviewConsole({
 
       {/* 8. SIGNATURES */}
       {activeTab === 'signatures' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-5">
-          <h3 className="text-sm font-bold text-zinc-100">Digital Execution Audit Records</h3>
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5">
+          <h3 className="text-sm font-bold text-[#171717]">Digital Execution Audit Records</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-2">
-              <span className="text-[10px] uppercase font-mono text-indigo-400 block font-bold">
+            <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-2">
+              <span className="text-[10px] uppercase font-mono text-[#171717] block font-bold">
                 Artist Digital Signature
               </span>
-              <p className="text-sm font-bold text-zinc-100">{artistSig?.signerLegalName || 'Declared'}</p>
-              <p className="text-zinc-400">Position: Recording Artist / Master Owner</p>
-              <p className="text-zinc-400">
+              <p className="text-sm font-bold text-[#171717]">{artistSig?.signerLegalName || 'Declared'}</p>
+              <p className="text-[#777777]">Position: Recording Artist / Master Owner</p>
+              <p className="text-[#777777]">
                 Timestamp: {artistSig?.signedAt ? new Date(artistSig.signedAt).toLocaleString('en-GB') : 'Pending'}
               </p>
-              <p className="text-[10px] font-mono text-zinc-500 break-all">
+              <p className="text-[10px] font-mono text-[#999999] break-all">
                 Hash: {artistSig?.documentHash || 'Verified snapshot'}
               </p>
               {artistSig?.signatureData && (
@@ -1134,17 +1134,17 @@ export function AdminReviewConsole({
               )}
             </div>
 
-            <div className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-2">
-              <span className="text-[10px] uppercase font-mono text-emerald-400 block font-bold">
+            <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-2">
+              <span className="text-[10px] uppercase font-mono text-[#269568] block font-bold">
                 PHD Representative Countersignature
               </span>
-              <p className="text-sm font-bold text-zinc-100">
+              <p className="text-sm font-bold text-[#171717]">
                 {phdSig?.signerLegalName || (isExecuted ? 'Authorised Representative' : 'Awaiting Countersign')}
               </p>
-              <p className="text-zinc-400">
+              <p className="text-[#777777]">
                 Position: {phdSig?.signerPosition || 'Head of Legal & Business Affairs'}
               </p>
-              <p className="text-zinc-400">
+              <p className="text-[#777777]">
                 Timestamp: {phdSig?.signedAt ? new Date(phdSig.signedAt).toLocaleString('en-GB') : 'Pending'}
               </p>
               {phdSig?.signatureData && (
@@ -1159,20 +1159,20 @@ export function AdminReviewConsole({
 
       {/* 9. AUDIT HISTORY */}
       {activeTab === 'audit' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-bold text-zinc-100">Release Audit Trail</h3>
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4">
+          <h3 className="text-sm font-bold text-[#171717]">Release Audit Trail</h3>
           <div className="divide-y divide-[#1F2430] text-xs">
             {release.auditLogs.map((log: any) => (
               <div key={log.id} className="py-3 flex items-center justify-between">
                 <div>
-                  <span className="font-mono font-bold text-zinc-200">
+                  <span className="font-mono font-bold text-[#171717]">
                     {log.action.replace(/_/g, ' ')}
                   </span>
-                  <p className="text-[11px] text-zinc-400">
+                  <p className="text-[11px] text-[#777777]">
                     User: {log.userEmail || 'System'} • Entity: {log.entityType} ({log.ipAddress})
                   </p>
                 </div>
-                <span className="text-zinc-500 font-mono text-[11px]">
+                <span className="text-[#999999] font-mono text-[11px]">
                   {new Date(log.timestamp).toLocaleString('en-GB')}
                 </span>
               </div>
@@ -1184,25 +1184,25 @@ export function AdminReviewConsole({
       {/* ACTION MODAL A: REQUEST REVISION */}
       {showRevisionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-amber-400 flex items-center space-x-2">
+          <div className="w-full max-w-lg bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-base font-bold text-[#D69E36] flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4" />
               <span>Request Release Revisions</span>
             </h3>
 
             {actionError && (
-              <div className="p-3 bg-rose-950/60 border border-rose-800/40 rounded-lg text-xs text-rose-300">
+              <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B]">
                 {actionError}
               </div>
             )}
 
             <form onSubmit={handleRequestRevision} className="space-y-4 text-xs">
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">Relevant Section</label>
+                <label className="block text-[#171717] font-medium mb-1">Relevant Section</label>
                 <select
                   value={revisionSection}
                   onChange={(e) => setRevisionSection(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-zinc-200"
+                  className="w-full px-3 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-[#171717]"
                 >
                   <option value="release_info">Release Information (Schedule A – Part I)</option>
                   <option value="track_register">Master Recording Register (Part II)</option>
@@ -1214,10 +1214,10 @@ export function AdminReviewConsole({
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-medium mb-1.5">
+                <label className="block text-[#171717] font-medium mb-1.5">
                   Pick Specific Agreements & Documents to Request:
                 </label>
-                <div className="space-y-1.5 max-h-44 overflow-y-auto p-2 bg-[#0E1015] border border-[#262D3D] rounded-lg">
+                <div className="space-y-1.5 max-h-44 overflow-y-auto p-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg">
                   {[
                     'Producer Split Sheet Agreement',
                     'Featured-Artist Consent / Release',
@@ -1233,7 +1233,7 @@ export function AdminReviewConsole({
                       <label
                         key={docName}
                         className={`flex items-center space-x-2 p-1.5 rounded cursor-pointer transition-colors ${
-                          isChecked ? 'bg-indigo-950/40 text-indigo-300' : 'text-zinc-400 hover:text-zinc-200'
+                          isChecked ? 'bg-[#F4F4F2] text-[#171717]' : 'text-[#777777] hover:text-[#171717]'
                         }`}
                       >
                         <input
@@ -1253,13 +1253,13 @@ export function AdminReviewConsole({
                     );
                   })}
                 </div>
-                <p className="text-[10px] text-zinc-500 mt-1">
+                <p className="text-[10px] text-[#999999] mt-1">
                   Selected documents will be clearly flagged on the artist&apos;s portal with download links for statutory templates.
                 </p>
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">
+                <label className="block text-[#171717] font-medium mb-1">
                   Specific Feedback / Required Corrections *
                 </label>
                 <textarea
@@ -1268,15 +1268,15 @@ export function AdminReviewConsole({
                   value={revisionComments}
                   onChange={(e) => setRevisionComments(e.target.value)}
                   placeholder="Detail exact missing documentation, metadata errors or split percentage corrections required..."
-                  className="w-full px-3.5 py-2.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-zinc-200"
+                  className="w-full px-3.5 py-2.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-[#171717]"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#1F2430] flex justify-end space-x-2">
+              <div className="pt-3 border-t border-[#E8E8E8] flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowRevisionModal(false)}
-                  className="px-4 py-2 bg-[#1A1F2B] text-zinc-300 rounded-lg font-medium"
+                  className="px-4 py-2 bg-white text-[#171717] rounded-lg font-medium"
                 >
                   Cancel
                 </button>
@@ -1296,30 +1296,30 @@ export function AdminReviewConsole({
       {/* ACTION MODAL B: PLACE ON HOLD */}
       {showHoldModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-rose-400 flex items-center space-x-2">
+          <div className="w-full max-w-md bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4 shadow-2xl">
+            <h3 className="text-base font-bold text-[#D64B4B] flex items-center space-x-2">
               <AlertOctagon className="w-4 h-4" />
               <span>Place Release On Hold</span>
             </h3>
 
             <form onSubmit={handlePlaceOnHold} className="space-y-4 text-xs">
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">Reason for Administrative Hold *</label>
+                <label className="block text-[#171717] font-medium mb-1">Reason for Administrative Hold *</label>
                 <textarea
                   required
                   rows={3}
                   value={holdReason}
                   onChange={(e) => setHoldReason(e.target.value)}
                   placeholder="e.g. Legal dispute or pending trademark verification..."
-                  className="w-full px-3 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-zinc-200"
+                  className="w-full px-3 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-[#171717]"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#1F2430] flex justify-end space-x-2">
+              <div className="pt-3 border-t border-[#E8E8E8] flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowHoldModal(false)}
-                  className="px-4 py-2 bg-[#1A1F2B] text-zinc-300 rounded-lg font-medium"
+                  className="px-4 py-2 bg-white text-[#171717] rounded-lg font-medium"
                 >
                   Cancel
                 </button>
@@ -1339,19 +1339,19 @@ export function AdminReviewConsole({
       {/* ACTION MODAL C: COUNTERSIGN & EXECUTE */}
       {showCountersignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-xl bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-5 shadow-2xl my-8">
-            <div className="border-b border-[#1F2430] pb-3">
+          <div className="w-full max-w-xl bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5 shadow-2xl my-8">
+            <div className="border-b border-[#E8E8E8] pb-3">
               <h3 className="text-base font-bold text-white flex items-center space-x-2">
-                <PenTool className="w-4 h-4 text-indigo-400" />
+                <PenTool className="w-4 h-4 text-[#171717]" />
                 <span>PHD Countersignature & Legal Execution</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-[#777777] mt-0.5">
                 Execute Schedule A & B agreements for {release.referenceNumber}.
               </p>
             </div>
 
             {actionError && (
-              <div className="p-3 bg-rose-950/60 border border-rose-800/40 rounded-lg text-xs text-rose-300">
+              <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B]">
                 {actionError}
               </div>
             )}
@@ -1359,7 +1359,7 @@ export function AdminReviewConsole({
             <form onSubmit={handleCountersign} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-zinc-300 font-medium mb-1">
+                  <label className="block text-[#171717] font-medium mb-1">
                     Authorized Representative Name *
                   </label>
                   <input
@@ -1367,24 +1367,24 @@ export function AdminReviewConsole({
                     required
                     value={repName}
                     onChange={(e) => setRepName(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-zinc-200"
+                    className="w-full px-3 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 font-medium mb-1">Position / Office *</label>
+                  <label className="block text-[#171717] font-medium mb-1">Position / Office *</label>
                   <input
                     type="text"
                     required
                     value={repPosition}
                     onChange={(e) => setRepPosition(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-zinc-200"
+                    className="w-full px-3 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-[#171717]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">
+                <label className="block text-[#171717] font-medium mb-1">
                   Representative Signature Pad *
                 </label>
                 <SignaturePad
@@ -1396,7 +1396,7 @@ export function AdminReviewConsole({
                 />
               </div>
 
-              <label className="flex items-start space-x-2.5 p-3 rounded-lg bg-[#0E1015] border border-[#1F2430] cursor-pointer">
+              <label className="flex items-start space-x-2.5 p-3 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] cursor-pointer">
                 <input
                   type="checkbox"
                   required
@@ -1404,23 +1404,23 @@ export function AdminReviewConsole({
                   onChange={(e) => setConfirmedInspection(e.target.checked)}
                   className="mt-0.5 accent-indigo-600 rounded"
                 />
-                <span className="text-zinc-300 leading-relaxed font-medium">
+                <span className="text-[#171717] leading-relaxed font-medium">
                   I certify that I have inspected the release deliverables, rights documentation, and contributor splits, and am duly authorized to execute Schedules A & B on behalf of PHD Services.
                 </span>
               </label>
 
-              <div className="pt-3 border-t border-[#1F2430] flex justify-end space-x-2">
+              <div className="pt-3 border-t border-[#E8E8E8] flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowCountersignModal(false)}
-                  className="px-4 py-2 bg-[#1A1F2B] text-zinc-300 rounded-lg font-medium"
+                  className="px-4 py-2 bg-white text-[#171717] rounded-lg font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingAction}
-                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg shadow-md shadow-indigo-900/30"
+                  className="px-6 py-2 bg-[#171717] hover:bg-[#262626] text-white font-bold rounded-lg shadow-md shadow-indigo-900/30"
                 >
                   {submittingAction ? 'Executing & Generating PDFs...' : 'Confirm Execution & Generate Signed PDFs'}
                 </button>

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { evaluateReleaseReadiness } from '@/lib/readiness';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import {
   FileText,
   Clock,
@@ -76,107 +76,122 @@ export default async function AdminDashboardPage({
     return true;
   });
 
-  return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
+  const renderStatusBadge = (status: string) => {
+    switch (status) {
+      case 'FULLY_EXECUTED_APPROVED':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#ECFDF5] text-[#269568] border border-[#A7F3D0]">
+            Executed
+          </span>
+        );
+      case 'SUBMITTED_PENDING_APPROVAL':
+      case 'RESUBMITTED':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+            Pending Review
+          </span>
+        );
+      case 'REVISION_REQUESTED':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#FFFBEB] text-[#D69E36] border border-[#FDE68A]">
+            Revision
+          </span>
+        );
+      case 'ON_HOLD':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#FEF2F2] text-[#D64B4B] border border-[#FECACA]">
+            On Hold
+          </span>
+        );
+      case 'DRAFT':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#F4F4F2] text-[#777777] border border-[#E8E8E8]">
+            Draft
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#F4F4F2] text-[#777777] border border-[#E8E8E8]">
+            {status.replace(/_/g, ' ')}
+          </span>
+        );
+    }
+  };
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Executive Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-[#12151B] via-[#151922] to-[#12151B] border border-[#1F2430]">
+  return (
+    <AppLayout user={user} breadcrumb="Submissions Queue">
+      <div className="space-y-6 select-none">
+        {/* Top Header Card */}
+        <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-indigo-400">
-              Executive Administration & Legal Affairs
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#777777]">
+              Administrative & Legal Affairs
             </span>
-            <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
-              Release Submissions & Rights Clearance
+            <h1 className="text-2xl font-semibold tracking-tight text-[#171717] mt-1">
+              Release Submissions & Rights Review
             </h1>
-            <p className="text-xs text-zinc-400 mt-1">
-              Inspect submitted Schedule A & B registers, verify contributor splits, review technical deliverables, and execute countersignatures.
+            <p className="text-xs text-[#777777] mt-1 max-w-2xl leading-relaxed">
+              Inspect submitted Schedule A & B master registers, audit contributor splits, review technical WAV deliverables, and execute countersignatures.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <a
               href={`/api/admin/export/releases${searchParams.status ? `?status=${searchParams.status}` : ''}`}
-              className="flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-950/70 hover:bg-emerald-900/90 text-emerald-300 rounded-lg text-xs font-semibold border border-emerald-800/60 transition-all shadow-sm"
+              className="flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-[#F4F4F2] text-[#171717] rounded-md text-xs font-medium border border-[#E8E8E8] transition-colors shadow-sm"
               title="Export release catalogue metadata to standard CSV"
             >
-              <FileDown className="w-4 h-4 text-emerald-400" />
-              <span>Export Catalogue (.CSV)</span>
+              <FileDown className="w-4 h-4 text-[#777777]" />
+              <span>Export CSV</span>
             </a>
 
             {user.role === 'SUPER_ADMIN' && (
               <Link
                 href="/admin/users?create=true"
-                className="flex items-center space-x-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition-all shadow-md shadow-indigo-900/30"
+                className="flex items-center space-x-1.5 px-3.5 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-md text-xs font-medium transition-colors shadow-sm"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Create User</span>
               </Link>
             )}
-            <Link
-              href="/admin/users"
-              className="flex items-center space-x-1.5 px-3.5 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-200 rounded-lg text-xs font-medium border border-[#2A3142] transition-colors"
-            >
-              <Users className="w-4 h-4 text-indigo-400" />
-              <span>Users & Team</span>
-            </Link>
-            <Link
-              href="/admin/artists"
-              className="flex items-center space-x-1.5 px-3.5 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-200 rounded-lg text-xs font-medium border border-[#2A3142] transition-colors"
-            >
-              <Users className="w-4 h-4 text-zinc-400" />
-              <span>Artist Registry</span>
-            </Link>
           </div>
         </div>
 
-        {/* Executive Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="p-4 rounded-xl bg-[#12151B] border border-[#1F2430]">
-            <span className="text-[11px] text-zinc-400 font-medium">Total Registered</span>
-            <p className="text-2xl font-bold font-mono text-zinc-100 mt-1">{totalReleases}</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#12151B] border border-indigo-900/40">
-            <span className="text-[11px] text-indigo-400 font-medium">Pending Review</span>
-            <p className="text-2xl font-bold font-mono text-indigo-300 mt-1">{pendingReviews}</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#12151B] border border-amber-900/40">
-            <span className="text-[11px] text-amber-400 font-medium">Awaiting Revision</span>
-            <p className="text-2xl font-bold font-mono text-amber-300 mt-1">{revisionAwaiting}</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#12151B] border border-emerald-900/40">
-            <span className="text-[11px] text-emerald-400 font-medium">Fully Executed</span>
-            <p className="text-2xl font-bold font-mono text-emerald-300 mt-1">{fullyExecuted}</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#12151B] border border-rose-900/40">
-            <span className="text-[11px] text-rose-400 font-medium">On Hold</span>
-            <p className="text-2xl font-bold font-mono text-rose-300 mt-1">{onHold}</p>
-          </div>
+        {/* Quantitative Metric Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+          {[
+            { label: 'Total Registered', count: totalReleases, desc: 'All releases' },
+            { label: 'Pending Review', count: pendingReviews, desc: 'Awaiting action' },
+            { label: 'Awaiting Revision', count: revisionAwaiting, desc: 'Returned to artist' },
+            { label: 'Fully Executed', count: fullyExecuted, desc: 'Approved & live' },
+            { label: 'On Hold', count: onHold, desc: 'Legal clearance pause' },
+          ].map((stat) => (
+            <div key={stat.label} className="p-4 rounded-lg bg-white border border-[#E8E8E8] shadow-sm">
+              <span className="text-[11px] text-[#777777] font-medium block">{stat.label}</span>
+              <p className="text-2xl font-bold font-mono text-[#171717] mt-1">{stat.count}</p>
+              <p className="text-[10px] text-[#999999] mt-0.5">{stat.desc}</p>
+            </div>
+          ))}
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-[#12151B] border border-[#1F2430]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 bg-white border border-[#E8E8E8] rounded-lg shadow-sm">
           <form className="relative flex-1 max-w-md" method="GET">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-2.5" />
+            <Search className="w-4 h-4 text-[#777777] absolute left-3 top-2.5" />
             <input
               type="text"
               name="search"
               defaultValue={searchParams.search || ''}
               placeholder="Search by title, reference (PHD-2026-REL-...) or artist..."
-              className="w-full pl-9 pr-3.5 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-9 pr-3.5 py-1.5 bg-white border border-[#E8E8E8] rounded-md text-xs text-[#171717] placeholder-[#999999] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
             />
           </form>
 
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="text-zinc-500">Filter Status:</span>
+          <div className="flex items-center space-x-1.5 text-xs overflow-x-auto pb-1 md:pb-0">
+            <span className="text-[#777777] text-[11px] pr-1 hidden sm:inline">Status:</span>
             {[
               { key: 'ALL', label: 'All' },
-              { key: 'SUBMITTED_PENDING_APPROVAL', label: 'Pending Approval' },
+              { key: 'SUBMITTED_PENDING_APPROVAL', label: 'Pending' },
               { key: 'REVISION_REQUESTED', label: 'Revision' },
               { key: 'FULLY_EXECUTED_APPROVED', label: 'Executed' },
               { key: 'ON_HOLD', label: 'On Hold' },
@@ -184,10 +199,10 @@ export default async function AdminDashboardPage({
               <Link
                 key={f.key}
                 href={`/admin?status=${f.key}`}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors whitespace-nowrap ${
                   (searchParams.status || 'ALL') === f.key
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-[#1A1F2B] text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-[#171717] text-white shadow-sm'
+                    : 'bg-[#F4F4F2] text-[#777777] hover:text-[#171717] border border-[#E8E8E8]'
                 }`}
               >
                 {f.label}
@@ -196,28 +211,28 @@ export default async function AdminDashboardPage({
           </div>
         </div>
 
-        {/* Submissions Management Table */}
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl overflow-hidden shadow-lg">
+        {/* Professional Submissions Table */}
+        <div className="bg-white border border-[#E8E8E8] rounded-lg overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0E1015] border-b border-[#1F2430] text-zinc-400 uppercase tracking-wider text-[10px] font-mono">
+              <thead className="bg-[#F4F4F2] border-b border-[#E8E8E8] text-[#777777] uppercase tracking-wider text-[10px] font-mono">
                 <tr>
-                  <th className="py-3 px-4">Reference</th>
-                  <th className="py-3 px-4">Release Title</th>
-                  <th className="py-3 px-4">Artist</th>
-                  <th className="py-3 px-4">Planned Date</th>
-                  <th className="py-3 px-4">Tracks</th>
-                  <th className="py-3 px-4">Clearance Status</th>
-                  <th className="py-3 px-4">Readiness</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 font-semibold">Reference</th>
+                  <th className="py-3 px-4 font-semibold">Release Title</th>
+                  <th className="py-3 px-4 font-semibold">Artist</th>
+                  <th className="py-3 px-4 font-semibold">Planned Date</th>
+                  <th className="py-3 px-4 font-semibold">Tracks</th>
+                  <th className="py-3 px-4 font-semibold">Clearances</th>
+                  <th className="py-3 px-4 font-semibold">Readiness</th>
+                  <th className="py-3 px-4 font-semibold">Status</th>
+                  <th className="py-3 px-4 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1F2430]">
+              <tbody className="divide-y divide-[#E8E8E8]">
                 {filteredReleases.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-zinc-500 text-xs">
-                      No releases found matching the selected filters.
+                    <td colSpan={9} className="py-12 text-center text-[#777777] text-xs">
+                      No release submissions match your active filter.
                     </td>
                   </tr>
                 ) : (
@@ -230,87 +245,72 @@ export default async function AdminDashboardPage({
                     return (
                       <tr
                         key={release.id}
-                        className="hover:bg-[#151922] transition-colors group"
+                        className="hover:bg-[#F4F4F2] transition-colors"
                       >
-                        <td className="py-3.5 px-4 font-mono font-bold text-indigo-400">
+                        <td className="py-3.5 px-4 font-mono font-semibold text-[#171717]">
                           {release.referenceNumber}
                           {release.isDemo && (
-                            <span className="ml-1 text-[8px] bg-amber-950 text-amber-400 px-1 py-0.2 rounded border border-amber-800">
+                            <span className="ml-1 text-[8px] bg-[#F4F4F2] text-[#777777] px-1 py-0.5 rounded border border-[#E8E8E8] font-mono uppercase">
                               DEMO
                             </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-zinc-100">
+                        <td className="py-3.5 px-4 font-medium text-[#171717]">
                           {release.title}
                         </td>
-                        <td className="py-3.5 px-4 text-zinc-300">
+                        <td className="py-3.5 px-4 text-[#171717]">
                           {release.primaryArtist}
                         </td>
-                        <td className="py-3.5 px-4 text-zinc-400 font-mono">
+                        <td className="py-3.5 px-4 text-[#777777] font-mono">
                           {release.plannedReleaseDate
                             ? new Date(release.plannedReleaseDate).toLocaleDateString('en-GB')
                             : 'TBD'}
                         </td>
-                        <td className="py-3.5 px-4 text-zinc-300">
+                        <td className="py-3.5 px-4 text-[#777777] font-mono">
                           {release.tracks.length} track(s)
                         </td>
                         <td className="py-3.5 px-4">
                           {pendingClearances === 0 ? (
-                            <span className="text-[10px] font-medium text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-800/40">
-                              All Assessed
+                            <span className="text-[10px] font-medium text-[#269568] bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
+                              All Cleared
                             </span>
                           ) : (
-                            <span className="text-[10px] font-medium text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40">
+                            <span className="text-[10px] font-medium text-[#D69E36] bg-[#FFFBEB] px-2 py-0.5 rounded border border-[#FDE68A]">
                               {pendingClearances} Pending
                             </span>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex items-center space-x-2">
-                            <span className="font-mono text-xs font-bold text-zinc-200">
+                            <span className="font-mono text-xs font-semibold text-[#171717]">
                               {readiness.score}%
                             </span>
-                            <div className="w-12 h-1.5 bg-[#0E1015] rounded-full overflow-hidden">
+                            <div className="w-12 h-1.5 bg-[#F4F4F2] rounded-full overflow-hidden border border-[#E8E8E8]">
                               <div
-                                className="h-full bg-indigo-500 rounded-full"
+                                className="h-full bg-[#171717] rounded-full"
                                 style={{ width: `${readiness.score}%` }}
                               />
                             </div>
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
-                              release.status === 'FULLY_EXECUTED_APPROVED'
-                                ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                                : release.status === 'REVISION_REQUESTED'
-                                ? 'bg-amber-950 text-amber-300 border-amber-800'
-                                : release.status === 'SUBMITTED_PENDING_APPROVAL' ||
-                                  release.status === 'RESUBMITTED'
-                                ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
-                                : release.status === 'ON_HOLD'
-                                ? 'bg-rose-950 text-rose-300 border-rose-800'
-                                : 'bg-zinc-800 text-zinc-300 border-zinc-700'
-                            }`}
-                          >
-                            {release.status.replace(/_/g, ' ')}
-                          </span>
+                          {renderStatusBadge(release.status)}
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end space-x-1.5">
                             <a
                               href={`/api/releases/${release.id}/download?type=bundle`}
-                              className="p-1.5 rounded-lg bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-400 hover:text-indigo-300 border border-[#252C3D] transition-colors"
-                              title="Download Assets Archive (.ZIP)"
+                              className="p-1.5 rounded-md bg-white hover:bg-[#EAEAEA] text-[#777777] hover:text-[#171717] border border-[#E8E8E8] transition-colors"
+                              title="Download Master Assets (.ZIP)"
                             >
                               <FileDown className="w-3.5 h-3.5" />
                             </a>
                             <Link
                               href={`/admin/releases/${release.id}/review`}
-                              className="inline-flex items-center space-x-1 px-3 py-1 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded text-[11px] font-medium border border-indigo-500/30 transition-all"
+                              className="inline-flex items-center space-x-1 px-3 py-1 bg-[#171717] hover:bg-[#262626] text-white rounded-md text-[11px] font-medium transition-colors shadow-sm"
                             >
                               <Eye className="w-3 h-3" />
-                              <span>Review Console</span>
+                              <span>Inspect</span>
                             </Link>
                           </div>
                         </td>
@@ -322,8 +322,7 @@ export default async function AdminDashboardPage({
             </table>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
-

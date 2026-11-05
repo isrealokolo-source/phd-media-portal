@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { evaluateReleaseReadiness } from '@/lib/readiness';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import { AdminReviewConsole } from '@/components/AdminReviewConsole';
 
 export default async function AdminReviewPage({ params }: { params: { id: string } }) {
@@ -38,17 +38,13 @@ export default async function AdminReviewPage({ params }: { params: { id: string
   const settings = await prisma.systemSettings.findUnique({ where: { id: 'default' } });
 
   return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AdminReviewConsole
-          release={release}
-          user={user}
-          readiness={readiness}
-          settings={settings}
-        />
-      </main>
-    </div>
+    <AppLayout user={user} breadcrumb={`Review Workspace / ${release.referenceNumber}`}>
+      <AdminReviewConsole
+        release={release}
+        user={user}
+        readiness={readiness}
+        settings={settings}
+      />
+    </AppLayout>
   );
 }
-

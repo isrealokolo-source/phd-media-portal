@@ -586,9 +586,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   return (
     <div className="space-y-6">
       {/* Wizard Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#12151B] border border-[#1F2430]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-lg bg-white border border-[#E8E8E8]">
         <div className="flex items-center space-x-3.5">
-          <div className="w-14 h-14 rounded-xl bg-[#0E1015] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+          <div className="w-14 h-14 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] overflow-hidden flex-shrink-0 flex items-center justify-center text-[#999999] shadow-md">
             {artworkDeliverable?.fileUrl ? (
               <img
                 src={artworkDeliverable.fileUrl}
@@ -596,15 +596,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Disc3 className="w-7 h-7 text-zinc-700 animate-spin-slow" />
+              <Disc3 className="w-7 h-7 text-[#999999] animate-spin-slow" />
             )}
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/70 px-2 py-0.5 rounded border border-indigo-800/50">
+              <span className="text-xs font-mono font-bold text-[#171717] bg-[#F4F4F2] px-2 py-0.5 rounded border border-[#E8E8E8]">
                 {release.referenceNumber}
               </span>
-              <span className="text-xs text-zinc-400 font-mono">
+              <span className="text-xs text-[#777777] font-mono">
                 Version {release.currentVersion} • Draft
               </span>
             </div>
@@ -614,10 +614,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
         <div className="flex items-center space-x-4">
           <div className="text-right text-xs">
-            <span className="text-zinc-500 block">
+            <span className="text-[#999999] block">
               {isSaving ? 'Saving changes...' : 'All changes saved'}
             </span>
-            <span className="text-zinc-400 text-[10px] font-mono">
+            <span className="text-[#777777] text-[10px] font-mono">
               {lastSaved ? lastSaved.toLocaleTimeString('en-GB') : ''}
             </span>
           </div>
@@ -626,9 +626,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
             type="button"
             onClick={() => saveChanges()}
             disabled={isSaving}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-200 text-xs font-medium border border-[#262D3D] transition-colors"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#262D3D] text-[#171717] text-xs font-medium border border-[#E8E8E8] transition-colors"
           >
-            <Save className="w-3.5 h-3.5 text-indigo-400" />
+            <Save className="w-3.5 h-3.5 text-[#171717]" />
             <span>Save Draft</span>
           </button>
         </div>
@@ -644,20 +644,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               saveChanges();
               setCurrentStep(s.id);
             }}
-            className={`text-left p-3 rounded-xl border transition-all ${
+            className={`text-left p-3 rounded-lg border transition-all ${
               currentStep === s.id
-                ? 'bg-indigo-600/15 border-indigo-500 text-white shadow-sm'
+                ? 'bg-[#171717] border-[#171717] text-white shadow-sm'
                 : currentStep > s.id
-                ? 'bg-[#12151B] border-emerald-900/40 text-emerald-300 hover:border-emerald-700/60'
-                : 'bg-[#12151B] border-[#1F2430] text-zinc-400 hover:border-[#2E374A]'
+                ? 'bg-white border-[#E8E8E8] text-[#171717] hover:border-[#777777]'
+                : 'bg-[#F4F4F2] border-[#E8E8E8] text-[#777777] hover:border-[#999999]'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono font-bold">STEP 0{s.id}</span>
-              {currentStep > s.id && <Check className="w-3 h-3 text-emerald-400" />}
+              {currentStep > s.id && <Check className="w-3 h-3 text-[#269568]" />}
             </div>
-            <p className="text-xs font-semibold text-zinc-100 mt-1 truncate">{s.title}</p>
-            <p className="text-[10px] text-zinc-500 truncate mt-0.5">{s.desc}</p>
+            <p className="text-xs font-semibold text-[#171717] mt-1 truncate">{s.title}</p>
+            <p className="text-[10px] text-[#999999] truncate mt-0.5">{s.desc}</p>
           </button>
         ))}
       </div>
@@ -667,20 +667,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
         <div className="lg:col-span-2 space-y-6">
           {/* STEP 1: RELEASE INFORMATION */}
           {currentStep === 1 && (
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-5">
-              <div className="border-b border-[#1F2430] pb-3">
-                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                  <Tag className="w-4 h-4 text-indigo-400" />
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-5">
+              <div className="border-b border-[#E8E8E8] pb-3">
+                <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                  <Tag className="w-4 h-4 text-[#171717]" />
                   <span>Release Information (Schedule A – Part I)</span>
                 </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-[#777777] mt-0.5">
                   General legal metadata for this release schedule.
                 </p>
               </div>
 
               {/* Cover Artwork Quick Card in Step 1 */}
-              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex flex-col sm:flex-row items-center gap-4">
-                <div className="w-24 h-24 rounded-lg bg-[#12151B] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+              <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-24 h-24 rounded-lg bg-white border border-[#E8E8E8] overflow-hidden flex-shrink-0 flex items-center justify-center text-[#999999] shadow-md">
                   {artworkDeliverable?.fileUrl ? (
                     <img
                       src={artworkDeliverable.fileUrl}
@@ -688,8 +688,8 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-2 text-center text-zinc-500">
-                      <ImageIcon className="w-6 h-6 mb-1 text-zinc-600" />
+                    <div className="flex flex-col items-center justify-center p-2 text-center text-[#999999]">
+                      <ImageIcon className="w-6 h-6 mb-1 text-[#999999]" />
                       <span className="text-[9px]">No Artwork</span>
                     </div>
                   )}
@@ -698,37 +698,37 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <div className="flex-1 min-w-0 space-y-2 w-full">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h4 className="text-xs font-bold text-zinc-200">Cover Artwork (Schedule A – Part III Deliverable)</h4>
+                      <h4 className="text-xs font-bold text-[#171717]">Cover Artwork (Schedule A – Part III Deliverable)</h4>
                       {artworkDeliverable?.fileUrl && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 border border-emerald-800/50">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECFDF5] text-[#269568] border border-[#A7F3D0]">
                           ✓ Uploaded (3000×3000)
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                    <p className="text-[11px] text-[#777777] mt-0.5">
                       DSPs strictly require a square 1:1 image, at least 3000 × 3000 px in RGB format (PNG / JPG).
                     </p>
                   </div>
 
                   {isUploading.artwork ? (
-                    <div className="space-y-1.5 p-2 bg-[#12151B] rounded-lg border border-indigo-900/40">
+                    <div className="space-y-1.5 p-2 bg-white rounded-lg border border-[#E8E8E8]">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-indigo-400 flex items-center space-x-1.5 font-medium">
+                        <span className="text-[#171717] flex items-center space-x-1.5 font-medium">
                           <RefreshCw className="w-3 h-3 animate-spin" />
                           <span>Uploading cover artwork...</span>
                         </span>
-                        <span className="font-mono text-indigo-400 font-bold">{uploadProgress.artwork || 0}%</span>
+                        <span className="font-mono text-[#171717] font-bold">{uploadProgress.artwork || 0}%</span>
                       </div>
-                      <div className="w-full h-1.5 bg-[#1A1F2B] rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-white rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-indigo-500 rounded-full transition-all duration-200"
+                          className="h-full bg-[#171717] rounded-full transition-all duration-200"
                           style={{ width: `${uploadProgress.artwork || 0}%` }}
                         />
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-wrap items-center gap-2">
-                      <label className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
+                      <label className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
                         <Upload className="w-3.5 h-3.5" />
                         <span>{artworkDeliverable?.fileUrl ? 'Replace Artwork' : 'Upload Cover Artwork'}</span>
                         <input
@@ -745,7 +745,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <button
                           type="button"
                           onClick={handleArtworkDelete}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-[#FEF2F2] hover:bg-rose-900/60 text-[#D64B4B] border border-[#FECACA] rounded-lg text-xs font-medium transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Remove</span>
@@ -755,14 +755,14 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   )}
 
                   {uploadError.artwork && (
-                    <p className="text-[11px] text-rose-400">{uploadError.artwork}</p>
+                    <p className="text-[11px] text-[#D64B4B]">{uploadError.artwork}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-[#171717] mb-1">
                     Release Title *
                   </label>
                   <input
@@ -771,12 +771,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     onChange={(e) => setRelease({ ...release, title: e.target.value })}
                     onBlur={() => saveChanges({ title: release.title })}
                     placeholder="e.g. Midnight in Lagos EP"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-[#171717] mb-1">
                     Release Type *
                   </label>
                   <select
@@ -785,7 +785,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       setRelease({ ...release, releaseType: e.target.value });
                       saveChanges({ releaseType: e.target.value });
                     }}
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   >
                     <option value="Single">Single</option>
                     <option value="EP">EP</option>
@@ -796,7 +796,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-[#171717] mb-1">
                     Primary Artist *
                   </label>
                   <input
@@ -805,12 +805,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     onChange={(e) => setRelease({ ...release, primaryArtist: e.target.value })}
                     onBlur={() => saveChanges({ primaryArtist: release.primaryArtist })}
                     placeholder="e.g. Dekaf"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-[#171717] mb-1">
                     Record Label / Imprint
                   </label>
                   <input
@@ -819,12 +819,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     onChange={(e) => setRelease({ ...release, recordLabel: e.target.value })}
                     onBlur={() => saveChanges({ recordLabel: release.recordLabel })}
                     placeholder="e.g. Independent / Starfleet Records"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-[#171717] mb-1">
                     Planned Release Date
                   </label>
                   <input
@@ -839,41 +839,41 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       setRelease({ ...release, plannedReleaseDate: d });
                       saveChanges({ plannedReleaseDate: d });
                     }}
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">Genre</label>
+                  <label className="block text-xs font-medium text-[#171717] mb-1">Genre</label>
                   <input
                     type="text"
                     value={release.genre || ''}
                     onChange={(e) => setRelease({ ...release, genre: e.target.value })}
                     onBlur={() => saveChanges({ genre: release.genre })}
                     placeholder="e.g. Afrobeats"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">Subgenre</label>
+                  <label className="block text-xs font-medium text-[#171717] mb-1">Subgenre</label>
                   <input
                     type="text"
                     value={release.subgenre || ''}
                     onChange={(e) => setRelease({ ...release, subgenre: e.target.value })}
                     onBlur={() => saveChanges({ subgenre: release.subgenre })}
                     placeholder="e.g. Afro-fusion / Alté"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-[#171717] mb-1">
                   Territory
                 </label>
                 <div className="flex items-center space-x-4 mb-2">
-                  <label className="flex items-center space-x-2 text-xs text-zinc-300">
+                  <label className="flex items-center space-x-2 text-xs text-[#171717]">
                     <input
                       type="radio"
                       name="territoryType"
@@ -886,7 +886,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     />
                     <span>Worldwide</span>
                   </label>
-                  <label className="flex items-center space-x-2 text-xs text-zinc-300">
+                  <label className="flex items-center space-x-2 text-xs text-[#171717]">
                     <input
                       type="radio"
                       name="territoryType"
@@ -907,13 +907,13 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     onChange={(e) => setRelease({ ...release, territoryDetails: e.target.value })}
                     onBlur={() => saveChanges({ territoryDetails: release.territoryDetails })}
                     placeholder="Specify territories (e.g. UK, Nigeria, Ghana, South Africa)"
-                    className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                   />
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-[#171717] mb-1">
                   Release Description & Operational Notes
                 </label>
                 <textarea
@@ -922,18 +922,18 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   onChange={(e) => setRelease({ ...release, releaseDescription: e.target.value })}
                   onBlur={() => saveChanges({ releaseDescription: release.releaseDescription })}
                   placeholder="Outline key project concepts, marketing angles or operational guidelines..."
-                  className="w-full px-3.5 py-2 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                 />
               </div>
 
-              <div className="pt-4 border-t border-[#1F2430] flex justify-end">
+              <div className="pt-4 border-t border-[#E8E8E8] flex justify-end">
                 <button
                   type="button"
                   onClick={() => {
                     saveChanges();
                     setCurrentStep(2);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium transition-colors"
                 >
                   <span>Continue to Master Recording Register</span>
                   <ArrowRight className="w-4 h-4" />
@@ -944,14 +944,14 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
           {/* STEP 2: MASTER RECORDING REGISTER */}
           {currentStep === 2 && (
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-[#E8E8E8] pb-3">
                 <div>
-                  <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                    <Disc3 className="w-4 h-4 text-indigo-400" />
+                  <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                    <Disc3 className="w-4 h-4 text-[#171717]" />
                     <span>Master Recording Register (Schedule A – Part II)</span>
                   </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-xs text-[#777777] mt-0.5">
                     Register all individual sound recordings covered by the Agreement.
                   </p>
                 </div>
@@ -961,17 +961,17 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       type="button"
                       onClick={handleBatchGenerateIsrcs}
                       disabled={isGeneratingIsrcs}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#1A1F2B] hover:bg-[#262D3D] text-indigo-300 rounded-lg text-xs font-semibold border border-[#2B3447] transition-colors"
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors"
                       title="Auto-generate sequential ISRCs (Pattern: NGB772600300...)"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-[#171717]" />
                       <span>{isGeneratingIsrcs ? 'Allocating ISRCs...' : 'Auto-Generate ISRCs'}</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={addTrack}
-                    className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
+                    className="flex items-center space-x-1 px-3 py-1.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Track</span>
@@ -980,15 +980,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               </div>
 
               {tracks.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-[#262D3D] rounded-xl p-6 space-y-3">
-                  <Music className="w-8 h-8 text-zinc-600 mx-auto" />
-                  <p className="text-xs text-zinc-400">
+                <div className="text-center py-12 border border-dashed border-[#E8E8E8] rounded-lg p-6 space-y-3">
+                  <Music className="w-8 h-8 text-[#999999] mx-auto" />
+                  <p className="text-xs text-[#777777]">
                     No tracks in master recording register. Click "Add Track" to register your first master.
                   </p>
                   <button
                     type="button"
                     onClick={addTrack}
-                    className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium"
+                    className="px-3.5 py-1.5 bg-[#171717] text-white rounded-lg text-xs font-medium"
                   >
                     Add Track 1
                   </button>
@@ -998,21 +998,21 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   {tracks.map((track, idx) => (
                     <div
                       key={track.id || idx}
-                      className="p-5 rounded-xl bg-[#0E1015] border border-[#222836] space-y-4 shadow-sm"
+                      className="p-5 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-4 shadow-sm"
                     >
-                      <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+                      <div className="flex items-center justify-between border-b border-[#E8E8E8] pb-3">
                         <div className="flex items-center space-x-2">
-                          <span className="w-6 h-6 rounded-full bg-indigo-600/20 text-indigo-400 font-mono text-xs flex items-center justify-center font-bold">
+                          <span className="w-6 h-6 rounded-full bg-[#171717]/20 text-[#171717] font-mono text-xs flex items-center justify-center font-bold">
                             {track.trackNumber}
                           </span>
-                          <span className="text-sm font-bold text-zinc-200">
+                          <span className="text-sm font-bold text-[#171717]">
                             {track.title || `Track ${track.trackNumber}`}
                           </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => removeTrack(idx)}
-                          className="text-xs text-zinc-500 hover:text-rose-400 transition-colors p-1"
+                          className="text-xs text-[#999999] hover:text-[#D64B4B] transition-colors p-1"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1020,19 +1020,19 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Track Title *</label>
+                          <label className="block text-[11px] text-[#777777] mb-1">Track Title *</label>
                           <input
                             type="text"
                             value={track.title}
                             onChange={(e) => updateTrack(idx, 'title', e.target.value)}
                             onBlur={() => saveChanges()}
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[11px] text-zinc-400">Primary Artist *</label>
+                            <label className="text-[11px] text-[#777777]">Primary Artist *</label>
                             {tracks.length > 1 && (
                               <button
                                 type="button"
@@ -1042,7 +1042,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                   setTracks(updated);
                                   saveChanges({ tracks: updated });
                                 }}
-                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                                className="text-[10px] text-[#171717] hover:text-[#171717] font-semibold transition-colors"
                               >
                                 Apply to all tracks
                               </button>
@@ -1054,37 +1054,37 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             onChange={(e) => updateTrack(idx, 'primaryArtist', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder={release.primaryArtist || 'Primary Artist'}
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Featured Artist(s)</label>
+                          <label className="block text-[11px] text-[#777777] mb-1">Featured Artist(s)</label>
                           <input
                             type="text"
                             value={track.featuredArtists || ''}
                             onChange={(e) => updateTrack(idx, 'featuredArtists', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. Tems, Burna Boy"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Version / Remix</label>
+                          <label className="block text-[11px] text-[#777777] mb-1">Version / Remix</label>
                           <input
                             type="text"
                             value={track.versionRemix || ''}
                             onChange={(e) => updateTrack(idx, 'versionRemix', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. Original Master, Club Mix"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[11px] text-zinc-400">Producer / Beatmaker</label>
+                            <label className="text-[11px] text-[#777777]">Producer / Beatmaker</label>
                             {tracks.length > 1 && track.producerBeatmaker && (
                               <button
                                 type="button"
@@ -1094,7 +1094,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                   setTracks(updated);
                                   saveChanges({ tracks: updated });
                                 }}
-                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                                className="text-[10px] text-[#171717] hover:text-[#171717] font-semibold transition-colors"
                               >
                                 Apply to all
                               </button>
@@ -1106,13 +1106,13 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             onChange={(e) => updateTrack(idx, 'producerBeatmaker', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. Kel-P, Sarz"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[11px] text-zinc-400">Songwriters / Composers</label>
+                            <label className="text-[11px] text-[#777777]">Songwriters / Composers</label>
                             {tracks.length > 1 && track.songwritersComposers && (
                               <button
                                 type="button"
@@ -1122,7 +1122,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                   setTracks(updated);
                                   saveChanges({ tracks: updated });
                                 }}
-                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                                className="text-[10px] text-[#171717] hover:text-[#171717] font-semibold transition-colors"
                               >
                                 Apply to all
                               </button>
@@ -1134,18 +1134,18 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             onChange={(e) => updateTrack(idx, 'songwritersComposers', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. Dekaf, Kel-P"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[11px] text-zinc-400">ISRC Code</label>
+                            <label className="text-[11px] text-[#777777]">ISRC Code</label>
                             <button
                               type="button"
                               onClick={() => handleGenerateSingleIsrc(idx)}
                               disabled={isGeneratingIsrcs}
-                              className="text-[10px] text-indigo-400 hover:text-indigo-300 font-mono transition-colors"
+                              className="text-[10px] text-[#171717] hover:text-[#171717] font-mono transition-colors"
                               title="Auto-generate official sequential ISRC (Pattern: NGB772600300...)"
                             >
                               {track.isrc ? 'Regenerate' : 'Auto-Generate ISRC'}
@@ -1158,19 +1158,19 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             onBlur={() => saveChanges()}
                             placeholder="e.g. NGB772600300"
                             maxLength={12}
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono uppercase tracking-wider"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-mono uppercase tracking-wider"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] text-zinc-400 mb-1">Duration (MM:SS)</label>
+                          <label className="block text-[11px] text-[#777777] mb-1">Duration (MM:SS)</label>
                           <input
                             type="text"
                             value={track.duration || ''}
                             onChange={(e) => updateTrack(idx, 'duration', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder="03:24"
-                            className="w-full px-3 py-1.5 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                            className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-mono"
                           />
                         </div>
                       </div>
@@ -1178,10 +1178,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       {/* Track Lyrics (Optional) */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="block text-[11px] text-zinc-400">
+                          <label className="block text-[11px] text-[#777777]">
                             Track Lyrics (Optional)
                           </label>
-                          <span className="text-[10px] text-zinc-500">
+                          <span className="text-[10px] text-[#999999]">
                             Used for lyrics synchronization and DSP delivery
                           </span>
                         </div>
@@ -1191,15 +1191,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           onChange={(e) => updateTrack(idx, 'lyricsText', e.target.value)}
                           onBlur={() => saveChanges()}
                           placeholder="Type or paste lyrics for this track here..."
-                          className="w-full px-3 py-2 bg-[#141820] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-sans"
+                          className="w-full px-3 py-2 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-sans"
                         />
                       </div>
 
                       {/* Master Ownership Percentage & Legal Owner */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-[#12151B] rounded-lg border border-[#1F2430]">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-white rounded-lg border border-[#E8E8E8]">
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[11px] font-medium text-zinc-300">
+                            <label className="text-[11px] font-medium text-[#171717]">
                               Legal Master Owner Name *
                             </label>
                             {tracks.length > 1 && (
@@ -1211,7 +1211,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                   setTracks(updated);
                                   saveChanges({ tracks: updated });
                                 }}
-                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                                className="text-[10px] text-[#171717] hover:text-[#171717] font-semibold transition-colors"
                               >
                                 Apply to all tracks
                               </button>
@@ -1223,20 +1223,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             onChange={(e) => updateTrack(idx, 'masterOwnerLegalName', e.target.value)}
                             onBlur={() => saveChanges()}
                             placeholder="Legal Entity or Artist Legal Name"
-                            className="w-full px-3 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                            className="w-full px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[11px] font-medium text-zinc-300">
+                            <label className="text-[11px] font-medium text-[#171717]">
                               Master Ownership Share (%) *
                             </label>
                             <span
                               className={`text-[10px] font-mono font-bold ${
                                 Number(track.masterOwnershipPercentage) === 100
-                                  ? 'text-emerald-400'
-                                  : 'text-amber-400'
+                                  ? 'text-[#269568]'
+                                  : 'text-[#D69E36]'
                               }`}
                             >
                               {track.masterOwnershipPercentage || 100}%
@@ -1249,35 +1249,35 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             value={track.masterOwnershipPercentage || 100}
                             onChange={(e) => updateTrack(idx, 'masterOwnershipPercentage', Number(e.target.value))}
                             onBlur={() => saveChanges()}
-                            className="w-full px-3 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 font-mono"
+                            className="w-full px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-mono"
                           />
                         </div>
                       </div>
 
                       {/* Audio Master Upload & Preview */}
                       <div className="space-y-2">
-                        <label className="block text-[11px] font-medium text-zinc-300">
+                        <label className="block text-[11px] font-medium text-[#171717]">
                           Final Audio Master (Uncompressed WAV / AIFF) *
                         </label>
 
                         {isUploading[`track_${idx}`] ? (
-                          <div className="p-4 bg-[#141820] border border-indigo-900/60 rounded-xl space-y-2.5">
+                          <div className="p-4 bg-white border border-[#E8E8E8] rounded-lg space-y-2.5">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="flex items-center space-x-2 text-indigo-300 font-medium">
-                                <Disc3 className="w-4 h-4 animate-spin text-indigo-400" />
+                              <span className="flex items-center space-x-2 text-[#171717] font-medium">
+                                <Disc3 className="w-4 h-4 animate-spin text-[#171717]" />
                                 <span>Uploading WAV Audio Master for "{track.title}"...</span>
                               </span>
-                              <span className="font-mono font-bold text-indigo-400">
+                              <span className="font-mono font-bold text-[#171717]">
                                 {uploadProgress[`track_${idx}`] || 0}%
                               </span>
                             </div>
-                            <div className="w-full h-2 bg-[#1A1F2B] rounded-full overflow-hidden">
+                            <div className="w-full h-2 bg-white rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-200"
                                 style={{ width: `${uploadProgress[`track_${idx}`] || 0}%` }}
                               />
                             </div>
-                            <p className="text-[10px] text-zinc-500">
+                            <p className="text-[10px] text-[#999999]">
                               Uploading lossless audio master directly to secure Cloudflare R2 object storage...
                             </p>
                           </div>
@@ -1312,14 +1312,14 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             />
                           </div>
                         ) : (
-                          <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#262D3D] hover:border-indigo-500/50 rounded-xl cursor-pointer bg-[#12151B] transition-colors text-center group">
-                            <div className="w-10 h-10 rounded-lg bg-indigo-950/40 border border-indigo-900/50 flex items-center justify-center text-indigo-400 mb-2 group-hover:scale-105 transition-transform">
+                          <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#E8E8E8] hover:border-indigo-500/50 rounded-lg cursor-pointer bg-white transition-colors text-center group">
+                            <div className="w-10 h-10 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] flex items-center justify-center text-[#171717] mb-2 group-hover:scale-105 transition-transform">
                               <Upload className="w-5 h-5" />
                             </div>
-                            <span className="text-xs font-semibold text-zinc-200">
+                            <span className="text-xs font-semibold text-[#171717]">
                               Upload WAV Audio Master for {track.title}
                             </span>
-                            <span className="text-[10px] text-zinc-500 mt-1">
+                            <span className="text-[10px] text-[#999999] mt-1">
                               Accepts uncompressed WAV / AIFF (24-bit 44.1kHz or higher)
                             </span>
                             <input
@@ -1335,7 +1335,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         )}
 
                         {uploadError[`track_${idx}`] && (
-                          <p className="text-[11px] text-rose-400 flex items-center space-x-1">
+                          <p className="text-[11px] text-[#D64B4B] flex items-center space-x-1">
                             <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                             <span>{uploadError[`track_${idx}`]}</span>
                           </p>
@@ -1346,11 +1346,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 </div>
               )}
 
-              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+              <div className="pt-4 border-t border-[#E8E8E8] flex justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(1)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -1361,7 +1361,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     saveChanges();
                     setCurrentStep(3);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
                 >
                   <span>Continue to Rights Clearance Register</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1372,26 +1372,26 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
           {/* STEP 3: RIGHTS CLEARANCE & DOCUMENTATION */}
           {currentStep === 3 && (
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-              <div className="border-b border-[#1F2430] pb-3">
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+              <div className="border-b border-[#E8E8E8] pb-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                    <FileCheck className="w-4 h-4 text-indigo-400" />
+                  <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                    <FileCheck className="w-4 h-4 text-[#171717]" />
                     <span>Rights Clearance & Agreements (Schedule B)</span>
                   </h2>
-                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[11px] font-semibold text-[#269568] bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-full">
                     Optional at Initial Submission
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-[#777777] mt-0.5">
                   Download sample statutory split sheets, execute with collaborators, and attach documentation. Reviewers will verify before final DSP store delivery.
                 </p>
               </div>
 
               {/* Reviewer Feedback / Document Request Notice if Revision Requested */}
               {release.status === 'REVISION_REQUESTED' && release.revisionRequests?.[0] && (
-                <div className="p-4 bg-amber-950/50 border border-amber-800/60 rounded-xl space-y-2.5">
-                  <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-lg space-y-2.5">
+                  <div className="flex items-center space-x-2 text-[#D69E36] font-bold text-xs">
                     <AlertTriangle className="w-4 h-4" />
                     <span>Reviewer Revision Instructions</span>
                   </div>
@@ -1400,7 +1400,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   </p>
                   {release.revisionRequests[0].requestedDocuments && (
                     <div className="mt-2 pl-6">
-                      <span className="text-[11px] font-semibold text-amber-300 block mb-1">
+                      <span className="text-[11px] font-semibold text-[#D69E36] block mb-1">
                         Specific Agreements Requested by Reviewer:
                       </span>
                       <div className="flex flex-wrap gap-1.5">
@@ -1432,11 +1432,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               )}
 
               {/* Informational Non-Compulsory Notice */}
-              <div className="p-3.5 bg-indigo-950/30 border border-indigo-900/50 rounded-xl flex items-start space-x-3 text-xs text-indigo-300">
-                <Info className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+              <div className="p-3.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex items-start space-x-3 text-xs text-[#171717]">
+                <Info className="w-4 h-4 text-[#171717] flex-shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
                   <span className="font-semibold text-indigo-200">Non-Compulsory for Initial Submission:</span>
-                  <p className="text-[11px] text-zinc-300 leading-relaxed">
+                  <p className="text-[11px] text-[#171717] leading-relaxed">
                     You can submit this release now with or without attached clearance documents. The PHD review team makes the final decision on whether the release proceeds to stores without documents, or they will request specific signed agreements from you.
                   </p>
                 </div>
@@ -1445,36 +1445,36 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               {/* SAMPLE AGREEMENTS DOWNLOAD & IDENTIFICATION CARDS */}
               <div className="space-y-3">
                 <div>
-                  <h3 className="text-xs font-bold text-zinc-200 flex items-center space-x-1.5 uppercase tracking-wider">
-                    <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                  <h3 className="text-xs font-bold text-[#171717] flex items-center space-x-1.5 uppercase tracking-wider">
+                    <FileText className="w-3.5 h-3.5 text-[#171717]" />
                     <span>Download Official Sample Split Sheets & Agreements</span>
                   </h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                  <p className="text-[11px] text-[#777777] mt-0.5">
                     Each sample agreement is tagged with a unique document reference number for easy identification. Download, sign with your collaborators, and attach below.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                   {/* Card 1: Producer Agreement */}
-                  <div className="bg-[#0E1015] border border-[#1F2430] rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-md">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-900/50 px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
                           {release.referenceNumber}-DOC-PROD
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-medium">Producer Split</span>
+                        <span className="text-[10px] text-[#999999] font-medium">Producer Split</span>
                       </div>
                       <h4 className="text-xs font-bold text-white mt-2">Music Producer Split Sheet</h4>
-                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-3">
+                      <p className="text-[11px] text-[#777777] mt-1 line-clamp-3">
                         Statutory agreement establishing producer master ownership share, publishing percentage, advance fees, and production credits.
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#1F2430]">
+                    <div className="pt-2 border-t border-[#E8E8E8]">
                       <a
                         href="/templates/agreements/PHD-Producer-Split-Sheet.pdf"
                         download="PHD-Producer-Split-Sheet.pdf"
-                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold transition-colors"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Download Sample Template</span>
@@ -1483,25 +1483,25 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   </div>
 
                   {/* Card 2: Featured Artist Consent */}
-                  <div className="bg-[#0E1015] border border-[#1F2430] rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-md">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-900/50 px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
                           {release.referenceNumber}-DOC-FEAT
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-medium">Guest Artist Release</span>
+                        <span className="text-[10px] text-[#999999] font-medium">Guest Artist Release</span>
                       </div>
                       <h4 className="text-xs font-bold text-white mt-2">Featured-Artist Consent / Release</h4>
-                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-3">
+                      <p className="text-[11px] text-[#777777] mt-1 line-clamp-3">
                         Commercial consent and release granting name, image, and likeness rights along with agreed featured artist royalty shares.
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#1F2430]">
+                    <div className="pt-2 border-t border-[#E8E8E8]">
                       <a
                         href="/templates/agreements/PHD-Collaboration-Featured-Artist-Split-Sheet.pdf"
                         download="PHD-Collaboration-Featured-Artist-Split-Sheet.pdf"
-                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold transition-colors"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Download Sample Template</span>
@@ -1510,25 +1510,25 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   </div>
 
                   {/* Card 3: Songwriter Split Sheet */}
-                  <div className="bg-[#0E1015] border border-[#1F2430] rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+                  <div className="bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg p-4 flex flex-col justify-between space-y-3 shadow-md">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 border border-indigo-900/50 px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] border border-[#E8E8E8] px-2 py-0.5 rounded font-bold">
                           {release.referenceNumber}-DOC-SPLIT
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-medium">Composition Split</span>
+                        <span className="text-[10px] text-[#999999] font-medium">Composition Split</span>
                       </div>
                       <h4 className="text-xs font-bold text-white mt-2">Songwriter / Composer Split Agreement</h4>
-                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-3">
+                      <p className="text-[11px] text-[#777777] mt-1 line-clamp-3">
                         Legal composition split defining lyrical and musical publishing splits across co-writers, composers, and lyricists.
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#1F2430]">
+                    <div className="pt-2 border-t border-[#E8E8E8]">
                       <a
                         href="/templates/agreements/PHD-Songwriter-Composer-Split-Sheet.pdf"
                         download="PHD-Songwriter-Composer-Split-Sheet.pdf"
-                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold transition-colors"
+                        className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Download Sample Template</span>
@@ -1539,8 +1539,8 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               </div>
 
               {/* 14 Categories Checklist */}
-              <div className="pt-2 border-t border-[#1F2430]">
-                <h3 className="text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#E8E8E8]">
+                <h3 className="text-xs font-bold text-[#171717] mb-2 uppercase tracking-wider">
                   Schedule B – Clearance Checklist (14 Categories)
                 </h3>
               </div>
@@ -1555,14 +1555,14 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   return (
                     <div
                       key={item.id || idx}
-                      className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-3"
+                      className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-3"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                          <span className="text-xs font-bold text-zinc-200">
+                          <span className="text-xs font-bold text-[#171717]">
                             {idx + 1}. {catDef?.label || item.category}
                           </span>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">
+                          <p className="text-[11px] text-[#999999] mt-0.5">
                             {catDef?.description || 'Mandatory clearance item'}
                           </p>
                         </div>
@@ -1586,7 +1586,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                     : st === 'Pending'
                                     ? 'bg-amber-600 text-white shadow-sm'
                                     : 'bg-zinc-700 text-white'
-                                  : 'bg-[#1A1F2B] text-zinc-400 hover:text-zinc-200'
+                                  : 'bg-white text-[#777777] hover:text-[#171717]'
                               }`}
                             >
                               {st}
@@ -1595,9 +1595,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[#1F2430]/60">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[#E8E8E8]/60">
                         <div>
-                          <label className="block text-[10px] text-zinc-400 mb-1">
+                          <label className="block text-[10px] text-[#777777] mb-1">
                             Document Reference Number
                           </label>
                           <input
@@ -1610,12 +1610,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             }}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. REF-AGR-2026-001"
-                            className="w-full px-3 py-1 bg-[#141820] border border-[#262D3D] rounded text-xs text-zinc-200 font-mono"
+                            className="w-full px-3 py-1 bg-white border border-[#E8E8E8] rounded text-xs text-[#171717] font-mono"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[10px] text-zinc-400 mb-1">
+                          <label className="block text-[10px] text-[#777777] mb-1">
                             Rights Holder / Licensor Entity
                           </label>
                           <input
@@ -1628,26 +1628,26 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             }}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. Beatstars Licensor, Dekaf"
-                            className="w-full px-3 py-1 bg-[#141820] border border-[#262D3D] rounded text-xs text-zinc-200"
+                            className="w-full px-3 py-1 bg-white border border-[#E8E8E8] rounded text-xs text-[#171717]"
                           />
                         </div>
                       </div>
 
                       {/* PDF Clearance Agreement Upload - Strictly Required when status is 'Obtained' */}
                       {(isObtained || item.supportingDocUrl) && (
-                        <div className="pt-3 border-t border-[#1F2430]/60 space-y-2">
+                        <div className="pt-3 border-t border-[#E8E8E8]/60 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-bold text-zinc-200 flex items-center space-x-1.5">
-                              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                            <span className="text-[11px] font-bold text-[#171717] flex items-center space-x-1.5">
+                              <FileText className="w-3.5 h-3.5 text-[#171717]" />
                               <span>Signed Clearance Agreement (PDF Only) {isObtained && '*'}</span>
                             </span>
                             {item.supportingDocUrl ? (
-                              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded flex items-center space-x-1">
+                              <span className="text-[10px] font-mono text-[#269568] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded flex items-center space-x-1">
                                 <CheckCircle2 className="w-3 h-3" />
                                 <span>PDF Document Attached</span>
                               </span>
                             ) : (
-                              <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded flex items-center space-x-1">
+                              <span className="text-[10px] font-mono text-[#D69E36] bg-[#FFFBEB] border border-[#FDE68A] px-2 py-0.5 rounded flex items-center space-x-1">
                                 <AlertTriangle className="w-3 h-3" />
                                 <span>Mandatory Prior to Release</span>
                               </span>
@@ -1655,8 +1655,8 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           </div>
 
                           {!item.supportingDocUrl && isObtained && (
-                            <div className="p-2.5 rounded-lg bg-amber-950/30 border border-amber-900/40 text-[11px] text-amber-300/90 flex items-start space-x-2">
-                              <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                            <div className="p-2.5 rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-[11px] text-[#D69E36]/90 flex items-start space-x-2">
+                              <AlertCircle className="w-4 h-4 text-[#D69E36] flex-shrink-0 mt-0.5" />
                               <p>
                                 <strong>Document submission required:</strong> Because this clearance is marked <em>Obtained</em>, the executed and signed agreement must be uploaded in PDF format prior to release of the song.
                               </p>
@@ -1664,34 +1664,34 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           )}
 
                           {isUploading[`clearance_${idx}`] ? (
-                            <div className="p-3 bg-[#141820] border border-indigo-900/60 rounded-xl space-y-2">
+                            <div className="p-3 bg-white border border-[#E8E8E8] rounded-lg space-y-2">
                               <div className="flex items-center justify-between text-xs">
-                                <span className="flex items-center space-x-2 text-indigo-300 font-medium">
-                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                                <span className="flex items-center space-x-2 text-[#171717] font-medium">
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#171717]" />
                                   <span>Uploading signed PDF agreement...</span>
                                 </span>
-                                <span className="font-mono font-bold text-indigo-400">
+                                <span className="font-mono font-bold text-[#171717]">
                                   {uploadProgress[`clearance_${idx}`] || 0}%
                                 </span>
                               </div>
-                              <div className="w-full h-1.5 bg-[#1A1F2B] rounded-full overflow-hidden">
+                              <div className="w-full h-1.5 bg-white rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-indigo-500 rounded-full transition-all duration-200"
+                                  className="h-full bg-[#171717] rounded-full transition-all duration-200"
                                   style={{ width: `${uploadProgress[`clearance_${idx}`] || 0}%` }}
                                 />
                               </div>
                             </div>
                           ) : item.supportingDocUrl ? (
-                            <div className="p-3 bg-[#121620] border border-emerald-900/40 rounded-xl flex items-center justify-between gap-3">
+                            <div className="p-3 bg-[#121620] border border-[#A7F3D0] rounded-lg flex items-center justify-between gap-3">
                               <div className="flex items-center space-x-2.5 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center text-[#269568] flex-shrink-0">
                                   <FileText className="w-4 h-4" />
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-xs font-semibold text-zinc-100 truncate">
+                                  <p className="text-xs font-semibold text-[#171717] truncate">
                                     {item.supportingDocUrl.split('/').pop() || 'Clearance_Agreement.pdf'}
                                   </p>
-                                  <p className="text-[10px] text-zinc-400 font-mono">
+                                  <p className="text-[10px] text-[#777777] font-mono">
                                     Signed Legal PDF Document
                                   </p>
                                 </div>
@@ -1702,12 +1702,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                   href={item.supportingDocUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="px-2.5 py-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 text-[11px] font-medium border border-[#2B3447] transition-colors flex items-center space-x-1"
+                                  className="px-2.5 py-1 rounded bg-white hover:bg-[#252C3D] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] transition-colors flex items-center space-x-1"
                                 >
                                   <ExternalLink className="w-3 h-3" />
                                   <span>View PDF</span>
                                 </a>
-                                <label className="px-2.5 py-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-300 text-[11px] font-medium border border-[#2B3447] cursor-pointer transition-colors">
+                                <label className="px-2.5 py-1 rounded bg-white hover:bg-[#252C3D] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] cursor-pointer transition-colors">
                                   <span>Replace</span>
                                   <input
                                     type="file"
@@ -1722,7 +1722,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                 <button
                                   type="button"
                                   onClick={() => handleClearancePdfDelete(idx)}
-                                  className="p-1.5 rounded text-rose-400 hover:text-white hover:bg-rose-950/60 border border-rose-900/40 transition-colors"
+                                  className="p-1.5 rounded text-[#D64B4B] hover:text-white hover:bg-[#FEF2F2] border border-[#FECACA] transition-colors"
                                   title="Remove PDF"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1731,12 +1731,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             </div>
                           ) : (
                             <div>
-                              <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#2B3447] hover:border-indigo-500/60 rounded-xl cursor-pointer bg-[#12151B] transition-colors text-center group">
-                                <Upload className="w-5 h-5 text-indigo-400 mb-1 group-hover:scale-105 transition-transform" />
-                                <span className="text-xs font-semibold text-zinc-200">
+                              <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#E8E8E8] hover:border-indigo-500/60 rounded-lg cursor-pointer bg-white transition-colors text-center group">
+                                <Upload className="w-5 h-5 text-[#171717] mb-1 group-hover:scale-105 transition-transform" />
+                                <span className="text-xs font-semibold text-[#171717]">
                                   Upload Signed Agreement (PDF Only) *
                                 </span>
-                                <span className="text-[10px] text-zinc-400 mt-0.5">
+                                <span className="text-[10px] text-[#777777] mt-0.5">
                                   Only .pdf files are accepted (maximum 100MB)
                                 </span>
                                 <input
@@ -1753,7 +1753,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           )}
 
                           {uploadError[`clearance_${idx}`] && (
-                            <p className="text-[11px] text-rose-400 flex items-center space-x-1">
+                            <p className="text-[11px] text-[#D64B4B] flex items-center space-x-1">
                               <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                               <span>{uploadError[`clearance_${idx}`]}</span>
                             </p>
@@ -1766,20 +1766,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               </div>
 
               {/* Statutory Artist Declaration wording */}
-              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl space-y-2">
-                <span className="text-xs font-bold text-zinc-300">
+              <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg space-y-2">
+                <span className="text-xs font-bold text-[#171717]">
                   Statutory Artist Rights Declaration
                 </span>
-                <p className="text-[11px] text-zinc-400 leading-relaxed italic">
+                <p className="text-[11px] text-[#777777] leading-relaxed italic">
                   "{ARTIST_DECLARATION_TEXT}"
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+              <div className="pt-4 border-t border-[#E8E8E8] flex justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -1790,7 +1790,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     saveChanges();
                     setCurrentStep(4);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
                 >
                   <span>Continue to Release Deliverables</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1801,19 +1801,19 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
           {/* STEP 4: DELIVERABLES */}
           {currentStep === 4 && (
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-              <div className="border-b border-[#1F2430] pb-3">
-                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                  <Upload className="w-4 h-4 text-indigo-400" />
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+              <div className="border-b border-[#E8E8E8] pb-3">
+                <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                  <Upload className="w-4 h-4 text-[#171717]" />
                   <span>Release Deliverables Schedule (Schedule A – Part III)</span>
                 </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-[#777777] mt-0.5">
                   Manage the 12 contractual delivery milestones and verify technical assets.
                 </p>
               </div>
 
               {/* Artwork Inspection Callout */}
-              <div className="p-5 bg-[#0E1015] border border-[#1F2430] rounded-xl flex flex-col md:flex-row gap-5 items-start">
+              <div className="p-5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex flex-col md:flex-row gap-5 items-start">
                 <ArtworkPreview
                   url={artworkDeliverable?.fileUrl}
                   width={3000}
@@ -1822,28 +1822,28 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <div className="space-y-3 flex-1 w-full">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h3 className="text-sm font-bold text-zinc-200">Cover Artwork Delivery</h3>
+                      <h3 className="text-sm font-bold text-[#171717]">Cover Artwork Delivery</h3>
                       {artworkDeliverable?.fileUrl && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 border border-emerald-800/50">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECFDF5] text-[#269568] border border-[#A7F3D0]">
                           ✓ Uploaded (3000×3000)
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-zinc-400 mt-1">
+                    <p className="text-xs text-[#777777] mt-1">
                       DSPs strictly require 1:1 square artwork, at least 3000 x 3000 pixels, in RGB format without unapproved promotional stickers.
                     </p>
                   </div>
 
                   {isUploading.artwork ? (
-                    <div className="p-4 bg-[#12151B] border border-indigo-900/60 rounded-xl space-y-2">
+                    <div className="p-4 bg-white border border-[#E8E8E8] rounded-lg space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-indigo-300 font-medium flex items-center space-x-2">
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                        <span className="text-[#171717] font-medium flex items-center space-x-2">
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#171717]" />
                           <span>Uploading cover artwork to Cloudflare R2...</span>
                         </span>
-                        <span className="font-mono text-indigo-400 font-bold">{uploadProgress.artwork || 0}%</span>
+                        <span className="font-mono text-[#171717] font-bold">{uploadProgress.artwork || 0}%</span>
                       </div>
-                      <div className="w-full h-2 bg-[#1A1F2B] rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-white rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-200"
                           style={{ width: `${uploadProgress.artwork || 0}%` }}
@@ -1852,7 +1852,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     </div>
                   ) : (
                     <div className="flex flex-wrap items-center gap-2">
-                      <label className="inline-flex items-center space-x-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
+                      <label className="inline-flex items-center space-x-2 px-3.5 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium cursor-pointer transition-colors shadow-sm">
                         <Upload className="w-4 h-4" />
                         <span>{artworkDeliverable?.fileUrl ? 'Replace Cover Artwork' : 'Upload Cover Artwork (PNG / JPG)'}</span>
                         <input
@@ -1869,7 +1869,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <button
                           type="button"
                           onClick={handleArtworkDelete}
-                          className="inline-flex items-center space-x-1 px-3 py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center space-x-1 px-3 py-2 bg-[#FEF2F2] hover:bg-rose-900/60 text-[#D64B4B] border border-[#FECACA] rounded-lg text-xs font-medium transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Remove Artwork</span>
@@ -1879,25 +1879,25 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   )}
 
                   {uploadError.artwork && (
-                    <p className="text-xs text-rose-400">{uploadError.artwork}</p>
+                    <p className="text-xs text-[#D64B4B]">{uploadError.artwork}</p>
                   )}
                 </div>
               </div>
 
               {/* Deliverables Table */}
               <div className="space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#777777]">
                   Deliverable Milestones
                 </h3>
 
-                <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl overflow-hidden bg-[#0E1015]">
+                <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2]">
                   {deliverables.map((d, idx) => (
                     <div key={d.id || idx} className="p-3.5 flex items-center justify-between text-xs">
                       <div className="space-y-0.5">
-                        <span className="font-semibold text-zinc-200">{d.name}</span>
-                        <p className="text-[11px] text-zinc-500">
+                        <span className="font-semibold text-[#171717]">{d.name}</span>
+                        <p className="text-[11px] text-[#999999]">
                           Responsible: {d.responsibleParty}
-                          {d.fileName && <span className="text-zinc-400 ml-2">({d.fileName})</span>}
+                          {d.fileName && <span className="text-[#777777] ml-2">({d.fileName})</span>}
                         </p>
                       </div>
 
@@ -1905,21 +1905,21 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <span
                           className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
                             d.status === 'Approved'
-                              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                              ? 'bg-emerald-950 text-[#269568] border-emerald-800'
                               : d.status === 'Uploaded'
-                              ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
-                              : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                              ? 'bg-indigo-950 text-[#171717] border-indigo-800'
+                              : 'bg-zinc-800 text-[#777777] border-zinc-700'
                           }`}
                         >
                           {d.status}
                         </span>
 
                         {isUploading[`deliverable_${idx}`] ? (
-                          <span className="text-[11px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-[#171717] font-mono">
                             {uploadProgress[`deliverable_${idx}`] || 0}%
                           </span>
                         ) : (
-                          <label className="text-[11px] text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium">
+                          <label className="text-[11px] text-[#171717] hover:text-[#171717] cursor-pointer font-medium">
                             {d.fileUrl ? 'Replace' : 'Upload File'}
                             <input
                               type="file"
@@ -1937,11 +1937,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+              <div className="pt-4 border-t border-[#E8E8E8] flex justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(3)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -1952,7 +1952,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     saveChanges();
                     setCurrentStep(5);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
                 >
                   <span>Continue to Budget & Recoupment</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1963,14 +1963,14 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
           {/* STEP 5: BUDGET & RECOUPMENT */}
           {currentStep === 5 && (
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-[#E8E8E8] pb-3">
                 <div>
-                  <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-indigo-400" />
+                  <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                    <DollarSign className="w-4 h-4 text-[#171717]" />
                     <span>Release Budget & Recoupment (Schedule A – Part IV)</span>
                   </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-xs text-[#777777] mt-0.5">
                     Track approved recoupable costs and simulate the 70% Artist / 30% PHD allocation.
                   </p>
                 </div>
@@ -1982,7 +1982,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     setRelease({ ...release, currency: e.target.value });
                     saveChanges({ currency: e.target.value });
                   }}
-                  className="px-3 py-1.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-xs text-zinc-200 font-mono font-bold"
+                  className="px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] font-mono font-bold"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -1994,15 +1994,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
               {/* Expense Ledger */}
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-800/40 text-xs text-indigo-300 flex items-start space-x-3">
-                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-400" />
+                <div className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] text-xs text-[#171717] flex items-start space-x-3">
+                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#171717]" />
                   <p className="leading-relaxed">
                     <strong className="font-semibold text-white">Suggested Budget Notice:</strong> All figures entered on this screen constitute the Artist's <strong>Suggested Budget</strong>. PHD Services review officers will evaluate each category and return an <strong>Approved Rate</strong> in accordance with Schedule A before execution.
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#777777]">
                     Expense Ledger (Suggested vs Approved)
                   </h3>
                   <button
@@ -2022,7 +2022,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         },
                       ]);
                     }}
-                    className="flex items-center space-x-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                    className="flex items-center space-x-1 text-xs text-[#171717] hover:text-[#171717] font-medium"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Expense Entry</span>
@@ -2033,20 +2033,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   {budgetItems.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-xl bg-[#0E1015] border border-[#1F2430] space-y-3 text-xs"
+                      className="p-4 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] space-y-3 text-xs"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1F2430] pb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8E8E8] pb-2">
                         <div className="flex items-center space-x-2">
-                          <span className="font-bold text-zinc-100">{item.expenseCategory}</span>
+                          <span className="font-bold text-[#171717]">{item.expenseCategory}</span>
                           <span
                             className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
                               item.approvalStatus === 'REJECTED'
-                                ? 'bg-rose-950 text-rose-300 border-rose-800'
+                                ? 'bg-rose-950 text-[#D64B4B] border-rose-800'
                                 : item.approvalStatus === 'ADJUSTED'
                                 ? 'bg-blue-950 text-blue-300 border-blue-800'
                                 : item.approvedAmount > 0 || item.approvalStatus === 'APPROVED'
-                                ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                                : 'bg-amber-950 text-amber-300 border-amber-800'
+                                ? 'bg-emerald-950 text-[#269568] border-emerald-800'
+                                : 'bg-amber-950 text-[#D69E36] border-amber-800'
                             }`}
                           >
                             {item.approvalStatus === 'REJECTED'
@@ -2059,7 +2059,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           </span>
                         </div>
                         {item.approvalReference && (
-                          <span className="text-[10px] font-mono text-zinc-500">
+                          <span className="text-[10px] font-mono text-[#999999]">
                             Ref: {item.approvalReference}
                           </span>
                         )}
@@ -2067,7 +2067,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-[10px] text-zinc-400 mb-1">
+                          <label className="block text-[10px] text-[#777777] mb-1">
                             Expense Category
                           </label>
                           <select
@@ -2078,7 +2078,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               setBudgetItems(updated);
                             }}
                             onBlur={() => saveChanges()}
-                            className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-200"
+                            className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717]"
                           >
                             {EXPENSE_CATEGORIES.map((c) => (
                               <option key={c} value={c}>
@@ -2089,7 +2089,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-medium text-indigo-300 mb-1">
+                          <label className="block text-[10px] font-medium text-[#171717] mb-1">
                             Artist Suggested Budget ({release.currency}) *
                           </label>
                           <input
@@ -2102,12 +2102,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             }}
                             onBlur={() => saveChanges()}
                             placeholder="e.g. 500000"
-                            className="w-full px-2.5 py-1.5 bg-[#141820] border border-indigo-700/50 rounded text-zinc-100 font-mono font-medium focus:outline-none focus:border-indigo-500"
+                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-700/50 rounded text-[#171717] font-mono font-medium focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[10px] text-zinc-400 mb-1">
+                          <label className="block text-[10px] text-[#777777] mb-1">
                             Actual Expenditure Incurred ({release.currency})
                           </label>
                           <input
@@ -2119,13 +2119,13 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               setBudgetItems(updated);
                             }}
                             onBlur={() => saveChanges()}
-                            className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-200 font-mono"
+                            className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] font-mono"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[10px] text-zinc-400 mb-1">Notes / Budget Justification</label>
+                        <label className="block text-[10px] text-[#777777] mb-1">Notes / Budget Justification</label>
                         <input
                           type="text"
                           value={item.notes || ''}
@@ -2136,12 +2136,12 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           }}
                           onBlur={() => saveChanges()}
                           placeholder="e.g. 2 days studio time at Soundcity Studios..."
-                          className="w-full px-2.5 py-1.5 bg-[#141820] border border-[#262D3D] rounded text-zinc-300 text-xs"
+                          className="w-full px-2.5 py-1.5 bg-white border border-[#E8E8E8] rounded text-[#171717] text-xs"
                         />
                       </div>
 
                       {item.reviewerNotes && (
-                        <div className="p-2.5 bg-indigo-950/40 border border-indigo-800/40 rounded-lg text-xs text-indigo-300">
+                        <div className="p-2.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717]">
                           <span className="font-semibold text-indigo-200">PHD Reviewer Feedback: </span>
                           {item.reviewerNotes}
                         </div>
@@ -2164,11 +2164,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 );
               })()}
 
-              <div className="pt-4 border-t border-[#1F2430] flex justify-between">
+              <div className="pt-4 border-t border-[#E8E8E8] flex justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(4)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -2179,7 +2179,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     saveChanges();
                     setCurrentStep(6);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
                 >
                   <span>Proceed to Final Execution & Signing</span>
                   <ArrowRight className="w-4 h-4" />
@@ -2190,19 +2190,19 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
           {/* STEP 6: REVIEW & DIGITAL SIGNATURES */}
           {currentStep === 6 && (
-            <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-6">
-              <div className="border-b border-[#1F2430] pb-3">
-                <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
-                  <PenTool className="w-4 h-4 text-indigo-400" />
+            <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-6">
+              <div className="border-b border-[#E8E8E8] pb-3">
+                <h2 className="text-base font-bold text-[#171717] flex items-center space-x-2">
+                  <PenTool className="w-4 h-4 text-[#171717]" />
                   <span>Digital Execution & Submission (Stage 2)</span>
                 </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-[#777777] mt-0.5">
                   Confirm statutory declarations, capture your signature, and submit to PHD Services.
                 </p>
               </div>
 
               {submitError && (
-                <div className="p-4 bg-rose-950/60 border border-rose-800/40 rounded-xl text-xs text-rose-300 space-y-1">
+                <div className="p-4 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B] space-y-1">
                   <div className="flex items-center space-x-2 font-semibold text-rose-200">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                     <span>Submission Error</span>
@@ -2212,8 +2212,8 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               )}
 
               {/* Release Execution Summary Hero with Cover Artwork */}
-              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex flex-col sm:flex-row items-center gap-4">
-                <div className="w-20 h-20 rounded-lg bg-[#12151B] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center text-zinc-600 shadow-md">
+              <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-20 h-20 rounded-lg bg-white border border-[#E8E8E8] overflow-hidden flex-shrink-0 flex items-center justify-center text-[#999999] shadow-md">
                   {artworkDeliverable?.fileUrl ? (
                     <img
                       src={artworkDeliverable.fileUrl}
@@ -2222,32 +2222,32 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     />
                   ) : (
                     <div className="text-center p-1">
-                      <ImageIcon className="w-6 h-6 mx-auto mb-0.5 text-zinc-600" />
-                      <span className="text-[9px] text-zinc-500">No Art</span>
+                      <ImageIcon className="w-6 h-6 mx-auto mb-0.5 text-[#999999]" />
+                      <span className="text-[9px] text-[#999999]">No Art</span>
                     </div>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0 space-y-1 text-xs">
                   <div className="flex items-center space-x-2">
-                    <span className="font-mono text-[10px] text-indigo-400 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/40 font-bold">
+                    <span className="font-mono text-[10px] text-[#171717] bg-[#F4F4F2] px-1.5 py-0.5 rounded border border-[#E8E8E8] font-bold">
                       {release.referenceNumber}
                     </span>
-                    <span className="text-zinc-400 font-medium truncate">
+                    <span className="text-[#777777] font-medium truncate">
                       {release.releaseType} • {release.primaryArtist}
                     </span>
                   </div>
                   <h3 className="text-sm font-bold text-white truncate">{release.title}</h3>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-zinc-400 pt-0.5">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#777777] pt-0.5">
                     <span>
                       <strong>Tracks:</strong> {tracks.length} registered ({tracks.filter((t) => t.audioFileUrl).length} with master audio)
                     </span>
                     <span>
                       <strong>Cover Artwork:</strong>{' '}
                       {artworkDeliverable?.fileUrl ? (
-                        <span className="text-emerald-400 font-medium">✓ Uploaded</span>
+                        <span className="text-[#269568] font-medium">✓ Uploaded</span>
                       ) : (
-                        <span className="text-rose-400 font-medium">✗ Missing</span>
+                        <span className="text-[#D64B4B] font-medium">✗ Missing</span>
                       )}
                     </span>
                   </div>
@@ -2256,9 +2256,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
               {/* Readiness / Critical Blockers Checklist Callout */}
               {currentReadiness.criticalBlockers.length > 0 ? (
-                <div className="p-4 bg-rose-950/40 border border-rose-800/60 rounded-xl space-y-2">
-                  <div className="flex items-center space-x-2 text-rose-300 font-bold text-xs">
-                    <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                <div className="p-4 bg-[#FEF2F2] border border-[#FECACA] rounded-lg space-y-2">
+                  <div className="flex items-center space-x-2 text-[#D64B4B] font-bold text-xs">
+                    <AlertCircle className="w-4 h-4 text-[#D64B4B] flex-shrink-0" />
                     <span>Submission Blocked — {currentReadiness.criticalBlockers.length} Critical Blocker{currentReadiness.criticalBlockers.length > 1 ? 's' : ''} Must Be Resolved:</span>
                   </div>
                   <ul className="list-disc pl-5 space-y-1 text-xs text-rose-200">
@@ -2266,34 +2266,34 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       <li key={i}>{blocker}</li>
                     ))}
                   </ul>
-                  <p className="text-[11px] text-rose-300/80 pt-1">
+                  <p className="text-[11px] text-[#D64B4B]/80 pt-1">
                     Please use the navigation above to return to previous steps and supply the missing assets or information before signing.
                   </p>
                 </div>
               ) : (
-                <div className="p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl flex items-center space-x-2 text-xs text-emerald-300">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <div className="p-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded-lg flex items-center space-x-2 text-xs text-[#269568]">
+                  <CheckCircle2 className="w-4 h-4 text-[#269568] flex-shrink-0" />
                   <span>All statutory Schedule A and Schedule B requirements are satisfied. The release is ready for legal execution.</span>
                 </div>
               )}
 
               {/* Statutory Confirmation Box */}
-              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl space-y-3">
-                <h4 className="text-xs font-bold text-zinc-200">
+              <div className="p-4 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg space-y-3">
+                <h4 className="text-xs font-bold text-[#171717]">
                   Statutory Artist Confirmation (Schedule B – Part VIII)
                 </h4>
-                <p className="text-xs text-zinc-400 italic leading-relaxed">
+                <p className="text-xs text-[#777777] italic leading-relaxed">
                   "{ARTIST_CONFIRMATION_TEXT}"
                 </p>
 
-                <label className="flex items-start space-x-2.5 pt-2 border-t border-[#1F2430] cursor-pointer">
+                <label className="flex items-start space-x-2.5 pt-2 border-t border-[#E8E8E8] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={confirmDeclarations}
                     onChange={(e) => setConfirmDeclarations(e.target.checked)}
                     className="mt-0.5 accent-indigo-600 rounded"
                   />
-                  <span className="text-xs text-zinc-300 font-medium leading-relaxed">
+                  <span className="text-xs text-[#171717] font-medium leading-relaxed">
                     I confirm that I have disclosed all material ownership interests, third-party rights, and supplied accurate legal documentation under the Music Distribution, Management & Master Control Agreement.
                   </span>
                 </label>
@@ -2301,7 +2301,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
               {/* Signer Legal Name */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                <label className="block text-xs font-medium text-[#171717] mb-1.5">
                   Artist Legal Name (Signatory) *
                 </label>
                 <input
@@ -2310,13 +2310,13 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   value={artistLegalName}
                   onChange={(e) => setArtistLegalName(e.target.value)}
                   placeholder="e.g. Damilola Emmanuel Kafaru"
-                  className="w-full px-3.5 py-2.5 bg-[#0E1015] border border-[#262D3D] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-sm text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-medium"
                 />
               </div>
 
               {/* Signature Pad */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                <label className="block text-xs font-medium text-[#171717] mb-1.5">
                   Digital Signature Pad *
                 </label>
                 <SignaturePad
@@ -2329,11 +2329,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               </div>
 
               {/* Submission Button */}
-              <div className="pt-4 border-t border-[#1F2430] flex items-center justify-between">
+              <div className="pt-4 border-t border-[#E8E8E8] flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(5)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#1A1F2B] hover:bg-[#262D3D] text-zinc-300 rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -2343,7 +2343,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   type="button"
                   disabled={submitting || currentReadiness.criticalBlockers.length > 0}
                   onClick={handleSubmitRelease}
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PenTool className="w-4 h-4" />
                   <span>
@@ -2370,13 +2370,13 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
             completedItems={currentReadiness.completedItems}
           />
 
-          <div className="bg-[#12151B] border border-[#1F2430] rounded-xl p-4 space-y-3 text-xs">
-            <h4 className="font-semibold text-zinc-200 uppercase tracking-wider text-[11px]">
+          <div className="bg-white border border-[#E8E8E8] rounded-lg p-4 space-y-3 text-xs">
+            <h4 className="font-semibold text-[#171717] uppercase tracking-wider text-[11px]">
               Release Summary
             </h4>
 
             {artworkDeliverable?.fileUrl && (
-              <div className="aspect-square w-full rounded-lg overflow-hidden border border-[#1F2430] bg-[#0E1015]">
+              <div className="aspect-square w-full rounded-lg overflow-hidden border border-[#E8E8E8] bg-[#F4F4F2]">
                 <img
                   src={artworkDeliverable.fileUrl}
                   alt={release.title}
@@ -2385,34 +2385,34 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               </div>
             )}
 
-            <div className="space-y-2 text-zinc-400">
+            <div className="space-y-2 text-[#777777]">
               <div className="flex justify-between">
                 <span>Reference:</span>
-                <span className="font-mono text-zinc-200">{release.referenceNumber}</span>
+                <span className="font-mono text-[#171717]">{release.referenceNumber}</span>
               </div>
               <div className="flex justify-between">
                 <span>Total Tracks:</span>
-                <span className="text-zinc-200 font-medium">{tracks.length}</span>
+                <span className="text-[#171717] font-medium">{tracks.length}</span>
               </div>
               <div className="flex justify-between">
                 <span>Audio Uploaded:</span>
-                <span className={tracks.filter((t) => t.audioFileUrl).length === tracks.length && tracks.length > 0 ? 'text-emerald-400 font-medium' : 'text-amber-400 font-medium'}>
+                <span className={tracks.filter((t) => t.audioFileUrl).length === tracks.length && tracks.length > 0 ? 'text-[#269568] font-medium' : 'text-[#D69E36] font-medium'}>
                   {tracks.filter((t) => t.audioFileUrl).length} of {tracks.length}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Cover Artwork:</span>
-                <span className={artworkDeliverable?.fileUrl ? 'text-emerald-400 font-medium' : 'text-amber-400 font-medium'}>
+                <span className={artworkDeliverable?.fileUrl ? 'text-[#269568] font-medium' : 'text-[#D69E36] font-medium'}>
                   {artworkDeliverable?.fileUrl ? '✓ Uploaded' : '✗ Missing'}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Currency:</span>
-                <span className="font-mono text-zinc-200">{release.currency}</span>
+                <span className="font-mono text-[#171717]">{release.currency}</span>
               </div>
               <div className="flex justify-between">
                 <span>Clearances:</span>
-                <span className="text-zinc-200">
+                <span className="text-[#171717]">
                   {clearanceItems.filter((c) => c.status === 'Obtained').length} of{' '}
                   {clearanceItems.length} obtained
                 </span>

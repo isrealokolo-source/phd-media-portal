@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import { ContractsConsole } from '@/components/ContractsConsole';
 
 export default async function AdminContractsPage() {
@@ -47,7 +47,9 @@ export default async function AdminContractsPage() {
       uploadedBy: c.uploadedBy,
       claimedByUser: claimedUser
         ? {
-            ...claimedUser,
+            id: claimedUser.id,
+            name: claimedUser.name,
+            email: claimedUser.email,
             createdAt: claimedUser.createdAt.toISOString(),
           }
         : null,
@@ -55,11 +57,8 @@ export default async function AdminContractsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ContractsConsole initialContracts={serializedContracts} currentUser={user} />
-      </main>
-    </div>
+    <AppLayout user={user} breadcrumb="Contracts Register">
+      <ContractsConsole initialContracts={serializedContracts} currentUser={user} />
+    </AppLayout>
   );
 }

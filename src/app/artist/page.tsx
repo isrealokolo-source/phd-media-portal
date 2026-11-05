@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { evaluateReleaseReadiness } from '@/lib/readiness';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import { ArtistDashboardConsole } from '@/components/ArtistDashboardConsole';
 
 export default async function ArtistDashboardPage() {
@@ -32,20 +32,19 @@ export default async function ArtistDashboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ArtistDashboardConsole
-          initialReleases={enrichedReleases}
-          user={{
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            artistProfile: user.artistProfile,
-          }}
-        />
-      </main>
-    </div>
+    <AppLayout
+      user={user}
+      breadcrumb="Releases Catalogue"
+    >
+      <ArtistDashboardConsole
+        initialReleases={enrichedReleases}
+        user={{
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          artistProfile: user.artistProfile,
+        }}
+      />
+    </AppLayout>
   );
 }

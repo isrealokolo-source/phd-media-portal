@@ -10,7 +10,6 @@ import {
   ExternalLink,
   PlusCircle,
   Globe,
-  Sparkles,
   ArrowRight,
 } from 'lucide-react';
 
@@ -75,23 +74,23 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
   });
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-[#12151B] border border-[#1F2430] shadow-xl">
+    <div className="space-y-6 select-none">
+      {/* Top Header Card */}
+      <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
         <div>
-          <span className="text-xs font-mono uppercase tracking-widest text-indigo-400">
-            Artist Portfolio & Talent Roster
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#777777]">
+            Artist Portfolio & Roster
           </span>
-          <h1 className="text-xl font-bold text-white mt-1">Artist Registry</h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Manage signed artists, view catalogue release histories, and communicate directly with talent.
+          <h1 className="text-2xl font-semibold tracking-tight text-[#171717] mt-1">Artist Registry</h1>
+          <p className="text-xs text-[#777777] mt-1 max-w-xl">
+            Manage authorized artists, inspect individual release catalogues, and maintain talent contact details.
           </p>
         </div>
 
         <div className="flex items-center space-x-2.5">
           <Link
             href="/admin/users?create=true"
-            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-900/30"
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-md bg-[#171717] hover:bg-[#262626] text-white text-xs font-medium transition-colors shadow-sm"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Add Artist Account</span>
@@ -100,38 +99,38 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
       </div>
 
       {/* Roster Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-        <div className="p-4 bg-[#12151B] border border-[#1F2430] rounded-xl">
-          <span className="text-zinc-500 block uppercase font-mono text-[10px]">Total Signed Artists</span>
-          <span className="text-2xl font-bold font-mono text-zinc-100 mt-1 block">{artists.length}</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 text-xs">
+        <div className="p-4 bg-white border border-[#E8E8E8] rounded-lg shadow-sm">
+          <span className="text-[#777777] block uppercase font-mono text-[10px]">Total Signed Artists</span>
+          <span className="text-2xl font-bold font-mono text-[#171717] mt-1 block">{artists.length}</span>
         </div>
 
-        <div className="p-4 bg-[#12151B] border border-indigo-900/40 rounded-xl">
-          <span className="text-indigo-400 block uppercase font-mono text-[10px]">Total Active Releases</span>
-          <span className="text-2xl font-bold font-mono text-indigo-300 mt-1 block">{totalReleasesCount}</span>
+        <div className="p-4 bg-white border border-[#E8E8E8] rounded-lg shadow-sm">
+          <span className="text-[#777777] block uppercase font-mono text-[10px]">Total Active Releases</span>
+          <span className="text-2xl font-bold font-mono text-[#171717] mt-1 block">{totalReleasesCount}</span>
         </div>
 
-        <div className="p-4 bg-[#12151B] border border-[#1F2430] rounded-xl">
-          <span className="text-zinc-500 block uppercase font-mono text-[10px]">Countries Represented</span>
-          <span className="text-2xl font-bold font-mono text-zinc-100 mt-1 block">{countries.length}</span>
+        <div className="p-4 bg-white border border-[#E8E8E8] rounded-lg shadow-sm">
+          <span className="text-[#777777] block uppercase font-mono text-[10px]">Countries Represented</span>
+          <span className="text-2xl font-bold font-mono text-[#171717] mt-1 block">{countries.length}</span>
         </div>
 
-        <div className="p-4 bg-[#12151B] border border-emerald-900/40 rounded-xl">
-          <span className="text-emerald-400 block uppercase font-mono text-[10px]">Roster Health</span>
-          <span className="text-2xl font-bold font-mono text-emerald-300 mt-1 block">100% Verified</span>
+        <div className="p-4 bg-white border border-[#E8E8E8] rounded-lg shadow-sm">
+          <span className="text-[#269568] block uppercase font-mono text-[10px]">Roster Health</span>
+          <span className="text-2xl font-bold font-mono text-[#269568] mt-1 block">100% Verified</span>
         </div>
       </div>
 
       {/* Search & Country Filter */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-[#777777] absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by stage name, legal name, email, label..."
-            className="w-full pl-10 pr-4 py-2 bg-[#12151B] border border-[#1F2430] rounded-xl text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2 bg-white border border-[#E8E8E8] rounded-md text-xs text-[#171717] placeholder-[#999999] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-colors"
           />
         </div>
 
@@ -140,10 +139,10 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
             <button
               type="button"
               onClick={() => setSelectedCountry('ALL')}
-              className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
                 selectedCountry === 'ALL'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-[#12151B] text-zinc-400 hover:text-zinc-200 border border-[#1F2430]'
+                  ? 'bg-[#171717] text-white shadow-sm'
+                  : 'bg-white text-[#777777] hover:text-[#171717] border border-[#E8E8E8]'
               }`}
             >
               All Territories
@@ -153,10 +152,10 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
                 key={c}
                 type="button"
                 onClick={() => setSelectedCountry(c)}
-                className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
                   selectedCountry === c
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-[#12151B] text-zinc-400 hover:text-zinc-200 border border-[#1F2430]'
+                    ? 'bg-[#171717] text-white shadow-sm'
+                    : 'bg-white text-[#777777] hover:text-[#171717] border border-[#E8E8E8]'
                 }`}
               >
                 {c}
@@ -168,9 +167,9 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
 
       {/* Artist Grid */}
       {filteredArtists.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-2xl bg-[#12151B] border border-dashed border-[#262D3D] space-y-3">
-          <Users className="w-10 h-10 text-zinc-600 mx-auto" />
-          <p className="text-xs text-zinc-400">No artists matching search criteria.</p>
+        <div className="text-center py-16 px-4 rounded-lg bg-white border border-dashed border-[#E8E8E8] space-y-3">
+          <Users className="w-10 h-10 text-[#999999] mx-auto" />
+          <p className="text-xs text-[#777777]">No artists matching search criteria.</p>
           {(searchQuery || selectedCountry !== 'ALL') && (
             <button
               type="button"
@@ -178,7 +177,7 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
                 setSearchQuery('');
                 setSelectedCountry('ALL');
               }}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+              className="text-xs text-[#171717] underline font-medium"
             >
               Clear Filters
             </button>
@@ -193,60 +192,60 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
             return (
               <div
                 key={artist.id}
-                className="p-5 rounded-2xl bg-[#12151B] border border-[#1F2430] hover:border-[#2E374A] transition-all space-y-4 shadow-lg flex flex-col justify-between"
+                className="p-5 rounded-lg bg-white border border-[#E8E8E8] hover:border-[#777777] transition-colors space-y-4 shadow-sm flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center space-x-3 min-w-0">
-                      <div className="w-11 h-11 rounded-xl bg-indigo-950/70 border border-indigo-800/50 flex items-center justify-center text-indigo-300 font-bold text-sm uppercase flex-shrink-0">
+                      <div className="w-10 h-10 rounded-md bg-[#F4F4F2] border border-[#E8E8E8] flex items-center justify-center text-[#171717] font-bold text-xs uppercase flex-shrink-0">
                         {stageName.slice(0, 2)}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-base font-bold text-zinc-100 truncate">{stageName}</h3>
-                        <p className="text-xs text-zinc-400 truncate">Legal: {legalName}</p>
+                        <h3 className="text-sm font-semibold text-[#171717] truncate">{stageName}</h3>
+                        <p className="text-xs text-[#777777] truncate">Legal: {legalName}</p>
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 flex-shrink-0">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F4F4F2] text-[#777777] border border-[#E8E8E8] flex-shrink-0">
                       {artist.artistProfile?.country || 'Nigeria'}
                     </span>
                   </div>
 
-                  <div className="text-xs text-zinc-400 space-y-1 font-mono pt-1">
-                    <div className="flex items-center space-x-1.5 text-zinc-400">
-                      <Mail className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                  <div className="text-xs text-[#777777] space-y-1 font-mono pt-1">
+                    <div className="flex items-center space-x-1.5 text-[#777777]">
+                      <Mail className="w-3.5 h-3.5 text-[#999999] flex-shrink-0" />
                       <span className="truncate">{artist.email}</span>
                     </div>
                     {artist.artistProfile?.label && (
-                      <div className="text-[11px] text-zinc-500 font-sans">
-                        Label / Imprint: <strong className="text-zinc-300">{artist.artistProfile.label}</strong>
+                      <div className="text-[11px] text-[#777777] font-sans">
+                        Label / Imprint: <strong className="text-[#171717]">{artist.artistProfile.label}</strong>
                       </div>
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-[#1F2430] space-y-2 text-xs">
-                    <div className="flex justify-between items-center text-zinc-400">
-                      <span>Releases Registered:</span>
-                      <span className="font-bold font-mono text-zinc-100 bg-[#0E1015] px-2 py-0.5 rounded border border-[#1F2430]">
-                        {artist.releases.length} project(s)
+                  <div className="pt-3 border-t border-[#E8E8E8] space-y-2 text-xs">
+                    <div className="flex justify-between items-center text-[#777777]">
+                      <span>Registered Projects:</span>
+                      <span className="font-semibold font-mono text-[#171717] bg-[#F4F4F2] px-2 py-0.5 rounded border border-[#E8E8E8]">
+                        {artist.releases.length}
                       </span>
                     </div>
 
                     {artist.releases.length > 0 && (
                       <div className="space-y-1.5 pt-1">
-                        <span className="text-[10px] text-zinc-500 uppercase font-mono block">
-                          Recent Projects:
+                        <span className="text-[10px] text-[#999999] uppercase font-mono block">
+                          Recent Releases:
                         </span>
                         {artist.releases.slice(0, 3).map((r) => (
                           <Link
                             key={r.id}
                             href={`/admin/releases/${r.id}/review`}
-                            className="flex justify-between items-center text-[11px] p-1.5 rounded-lg bg-[#0E1015] hover:bg-[#161B24] border border-[#1F2430] transition-colors group"
+                            className="flex justify-between items-center text-[11px] p-1.5 rounded-md bg-[#F4F4F2] hover:bg-[#EAEAEA] border border-[#E8E8E8] transition-colors group"
                           >
-                            <span className="text-zinc-300 truncate max-w-[170px] group-hover:text-indigo-300">
+                            <span className="text-[#171717] truncate max-w-[170px] group-hover:underline">
                               {r.title}
                             </span>
-                            <span className="text-[9px] font-mono text-indigo-400 font-bold">
+                            <span className="text-[10px] font-mono text-[#777777]">
                               {r.referenceNumber}
                             </span>
                           </Link>
@@ -256,10 +255,10 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#1F2430] flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-[#E8E8E8] flex items-center justify-between gap-2">
                   <a
                     href={`mailto:${artist.email}?subject=PHD%20Services%20-%20Release%20Catalogue%20Inquiry`}
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-300 hover:text-white text-xs font-medium border border-[#2B3447] transition-colors"
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-md bg-white hover:bg-[#F4F4F2] text-[#171717] text-xs font-medium border border-[#E8E8E8] transition-colors"
                   >
                     <Mail className="w-3.5 h-3.5" />
                     <span>Email Artist</span>
@@ -267,9 +266,9 @@ export function AdminArtistsConsole({ initialArtists }: AdminArtistsConsoleProps
 
                   <Link
                     href={`/admin?search=${encodeURIComponent(stageName)}`}
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-semibold border border-indigo-500/30 transition-all"
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-md bg-[#171717] hover:bg-[#262626] text-white text-xs font-medium transition-colors shadow-sm"
                   >
-                    <span>View Catalogue</span>
+                    <span>View Releases</span>
                     <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import { UserManagementConsole } from '@/components/UserManagementConsole';
 
 export default async function AdminUsersPage() {
@@ -36,12 +36,8 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <UserManagementConsole currentUser={user} initialUsers={users as any} />
-      </main>
-    </div>
+    <AppLayout user={user} breadcrumb="Users & Access Controls">
+      <UserManagementConsole currentUser={user} initialUsers={users as any} />
+    </AppLayout>
   );
 }
-

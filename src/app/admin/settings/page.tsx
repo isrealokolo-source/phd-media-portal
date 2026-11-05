@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import { SettingsForm } from '@/components/SettingsForm';
 
 export default async function AdminSettingsPage() {
@@ -14,22 +14,20 @@ export default async function AdminSettingsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="p-6 rounded-2xl bg-[#12151B] border border-[#1F2430]">
-          <span className="text-xs font-mono uppercase tracking-widest text-indigo-400">
+    <AppLayout user={user} breadcrumb="Application Settings">
+      <div className="max-w-4xl mx-auto space-y-6 select-none">
+        <div className="p-6 sm:p-8 rounded-lg bg-white border border-[#E8E8E8] shadow-sm">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#777777]">
             System Administration
           </span>
-          <h1 className="text-xl font-bold text-white mt-1">Application Configuration</h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Configure PHD operational parameters, default legal representatives, reference number formats, and currencies.
+          <h1 className="text-2xl font-semibold tracking-tight text-[#171717] mt-1">Application Configuration</h1>
+          <p className="text-xs text-[#777777] mt-1">
+            Configure PHD operational parameters, default legal representatives, reference number formats, and settlement currencies.
           </p>
         </div>
 
         <SettingsForm initialSettings={settings} />
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
-

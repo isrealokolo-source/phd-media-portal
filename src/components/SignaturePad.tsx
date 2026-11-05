@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { PenTool, Type, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { PenTool, Type, RotateCcw } from 'lucide-react';
 
 interface SignaturePadProps {
   onSignatureChange: (signatureData: string, type: 'DRAWN' | 'TYPED') => void;
@@ -21,10 +21,10 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.strokeStyle = '#4F46E5'; // indigo
+      ctx.strokeStyle = '#171717'; // Obsidian ink
     }
   }, [tab]);
 
@@ -82,16 +82,15 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
     const val = e.target.value;
     setTypedName(val);
     if (val.trim()) {
-      // Create a canvas image of typed signature
       const offscreen = document.createElement('canvas');
       offscreen.width = 450;
       offscreen.height = 120;
       const ctx = offscreen.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = '#12151B';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, offscreen.width, offscreen.height);
         ctx.font = 'italic 34px "Brush Script MT", "Caveat", "Segoe Script", cursive';
-        ctx.fillStyle = '#6366F1';
+        ctx.fillStyle = '#171717';
         ctx.fillText(val, 30, 70);
         onSignatureChange(offscreen.toDataURL('image/png'), 'TYPED');
       }
@@ -101,16 +100,16 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
   };
 
   return (
-    <div className="bg-[#12151B] border border-[#1F2430] rounded-xl p-5 space-y-4">
-      <div className="flex items-center justify-between border-b border-[#1F2430] pb-3">
+    <div className="bg-white border border-[#E8E8E8] rounded-lg p-5 space-y-4 shadow-sm select-none">
+      <div className="flex items-center justify-between border-b border-[#E8E8E8] pb-3">
         <div className="flex items-center space-x-2">
           <button
             type="button"
             onClick={() => setTab('DRAWN')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
               tab === 'DRAWN'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#1A1F2B]'
+                ? 'bg-[#171717] text-white shadow-sm'
+                : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
             }`}
           >
             <PenTool className="w-3.5 h-3.5" />
@@ -119,10 +118,10 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
           <button
             type="button"
             onClick={() => setTab('TYPED')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
               tab === 'TYPED'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#1A1F2B]'
+                ? 'bg-[#171717] text-white shadow-sm'
+                : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
             }`}
           >
             <Type className="w-3.5 h-3.5" />
@@ -133,7 +132,7 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
           <button
             type="button"
             onClick={clearCanvas}
-            className="flex items-center space-x-1 text-xs text-zinc-400 hover:text-rose-400 transition-colors"
+            className="flex items-center space-x-1 text-xs text-[#777777] hover:text-[#D64B4B] transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Clear</span>
@@ -142,7 +141,7 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
       </div>
 
       {tab === 'DRAWN' ? (
-        <div className="relative border border-dashed border-[#2A3142] rounded-lg bg-[#0E1015] overflow-hidden">
+        <div className="relative border border-dashed border-[#E8E8E8] rounded-md bg-[#F4F4F2] overflow-hidden">
           <canvas
             ref={canvasRef}
             width={480}
@@ -157,7 +156,7 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
             onTouchEnd={stopDrawing}
           />
           {!hasDrawn && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-zinc-500 text-xs">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-[#999999] text-xs font-mono">
               Sign using cursor, trackpad or stylus inside this box
             </div>
           )}
@@ -169,14 +168,14 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
             value={typedName}
             onChange={handleTypedChange}
             placeholder="Type your official legal name..."
-            className="w-full px-3.5 py-2.5 bg-[#0E1015] border border-[#2A3142] rounded-lg text-sm text-zinc-200 focus:outline-none focus:border-indigo-500"
+            className="w-full px-3.5 py-2.5 bg-white border border-[#E8E8E8] rounded-md text-sm text-[#171717] placeholder-[#999999] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
           />
           {typedName && (
-            <div className="p-4 border border-[#2A3142] rounded-lg bg-[#0E1015] text-center">
-              <span className="font-serif italic text-2xl text-indigo-400 tracking-wide">
+            <div className="p-4 border border-[#E8E8E8] rounded-md bg-[#F4F4F2] text-center">
+              <span className="font-serif italic text-2xl text-[#171717] tracking-wide">
                 {typedName}
               </span>
-              <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider">
+              <p className="text-[10px] text-[#777777] font-mono mt-1 uppercase tracking-wider">
                 Digital Electronic Signature Representation
               </p>
             </div>
@@ -184,11 +183,10 @@ export function SignaturePad({ onSignatureChange, initialName = '' }: SignatureP
         </div>
       )}
 
-      <p className="text-[11px] text-zinc-500 leading-relaxed">
+      <p className="text-[11px] text-[#777777] leading-relaxed">
         By providing this signature, you certify that you have reviewed the details in Schedule A and B and are
         authorized to execute this agreement. Your IP address and timestamp will be cryptographically recorded in the audit snapshot.
       </p>
     </div>
   );
 }
-

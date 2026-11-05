@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Navbar } from '@/components/Navbar';
+import { AppLayout } from '@/components/AppLayout';
 import { ReleaseWizard } from '@/components/ReleaseWizard';
 
 export default async function EditReleasePage({ params }: { params: { id: string } }) {
@@ -27,12 +27,11 @@ export default async function EditReleasePage({ params }: { params: { id: string
   if (user.role === 'ARTIST' && release.artistId !== user.id) redirect('/artist');
 
   return (
-    <div className="min-h-screen bg-[#0B0D11] text-[#F3F4F6]">
-      <Navbar user={user} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ReleaseWizard initialRelease={release} user={user} />
-      </main>
-    </div>
+    <AppLayout
+      user={user}
+      breadcrumb={`Release Registration / ${release.referenceNumber}`}
+    >
+      <ReleaseWizard initialRelease={release} user={user} />
+    </AppLayout>
   );
 }
-
