@@ -258,6 +258,15 @@ export function AdminReviewConsole({
 
         {/* Action Controls for PHD Reviewer */}
         <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={`/api/releases/${release.id}/download?type=bundle`}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 text-xs font-semibold transition-colors shadow-sm"
+            title="Download formatted cover art, all audio masters, and clearance PDFs (.ZIP)"
+          >
+            <FileDown className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Download Assets (.ZIP)</span>
+          </a>
+
           {!isExecuted && (
             <>
               <button
@@ -420,9 +429,21 @@ export function AdminReviewConsole({
           {/* Sidebar: Artwork & Execution Data */}
           <div className="space-y-6">
             <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-5 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                Cover Artwork Deliverable
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  Cover Artwork Deliverable
+                </h4>
+                {artwork?.fileUrl && (
+                  <a
+                    href={`/api/releases/${release.id}/download?type=artwork`}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center space-x-1 font-medium"
+                    title="Download clean formatted cover artwork"
+                  >
+                    <FileDown className="w-3.5 h-3.5" />
+                    <span>Download</span>
+                  </a>
+                )}
+              </div>
               <ArtworkPreview url={artwork?.fileUrl} width={3000} height={3000} />
             </div>
 
@@ -521,7 +542,19 @@ export function AdminReviewConsole({
                       <span className="text-xs text-zinc-500">({t.versionRemix})</span>
                     )}
                   </div>
-                  <span className="text-xs font-mono text-zinc-400">{t.duration || '03:20'}</span>
+                  <div className="flex items-center space-x-2.5">
+                    {t.audioFileUrl && (
+                      <a
+                        href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 text-[11px] font-medium border border-[#2B3447] transition-colors"
+                        title={`Download audio master for ${t.title}`}
+                      >
+                        <FileDown className="w-3.5 h-3.5" />
+                        <span>Download Master WAV</span>
+                      </a>
+                    )}
+                    <span className="text-xs font-mono text-zinc-400">{t.duration || '03:20'}</span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs pt-2 border-t border-[#1F2430]">
@@ -626,6 +659,16 @@ export function AdminReviewConsole({
                   </div>
 
                   <div className="flex items-center space-x-2">
+                    {item.supportingDocUrl && (
+                      <a
+                        href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${item.id}`}
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-emerald-300 text-[11px] font-medium border border-emerald-900/40 transition-colors"
+                        title="Download signed clearance agreement PDF"
+                      >
+                        <FileDown className="w-3.5 h-3.5" />
+                        <span>Download PDF</span>
+                      </a>
+                    )}
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
                         isObtained
@@ -643,45 +686,209 @@ export function AdminReviewConsole({
         </div>
       )}
 
-      {/* 6. DELIVERABLES */}
+      {/* 6. DELIVERABLES & ASSET DOWNLOAD CENTER */}
       {activeTab === 'deliverables' && (
-        <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
-          <h3 className="text-sm font-bold text-zinc-100">
-            Schedule A – Part III: Release Deliverables & Milestones
-          </h3>
-          <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl overflow-hidden bg-[#0E1015] text-xs">
-            {release.deliverables.map((d: any) => (
-              <div key={d.id} className="p-3.5 flex items-center justify-between">
-                <div>
-                  <span className="font-semibold text-zinc-200">{d.name}</span>
-                  <p className="text-[11px] text-zinc-500">Party: {d.responsibleParty}</p>
+        <div className="space-y-6">
+          {/* Admin Asset Download Hub */}
+          <div className="bg-[#12151B] border border-indigo-900/50 rounded-2xl p-6 space-y-5 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2430] pb-4">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-indigo-400">
+                  Production Asset Distribution
+                </span>
+                <h3 className="text-base font-bold text-white mt-0.5 flex items-center space-x-2">
+                  <FileDown className="w-5 h-5 text-indigo-400" />
+                  <span>Release Asset Archive & Audio Masters</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Download all release assets bundled into a structured ZIP file or download individual clean-named files.
+                </p>
+              </div>
+
+              <a
+                href={`/api/releases/${release.id}/download?type=bundle`}
+                className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-900/40 flex-shrink-0"
+              >
+                <FileDown className="w-4 h-4" />
+                <span>Download Complete Archive (.ZIP)</span>
+              </a>
+            </div>
+
+            {/* Quick Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Cover Artwork Card */}
+              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-12 h-12 rounded-lg bg-[#141820] border border-[#222836] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {artwork?.fileUrl ? (
+                      <img src={artwork.fileUrl} alt="Cover" className="w-full h-full object-cover" />
+                    ) : (
+                      <Disc3 className="w-6 h-6 text-zinc-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-zinc-100 block truncate">
+                      Cover Artwork (3000×3000)
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-mono block">
+                      {artwork?.fileUrl ? 'Standard DSP Square Artwork' : 'Not Uploaded'}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
-                      d.status === 'Approved'
-                        ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                        : d.status === 'Uploaded'
-                        ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
-                        : 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                    }`}
+
+                {artwork?.fileUrl && (
+                  <a
+                    href={`/api/releases/${release.id}/download?type=artwork`}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold border border-[#2B3447] transition-colors flex-shrink-0"
+                    title="Download clean formatted cover artwork"
                   >
-                    {d.status}
-                  </span>
-                  {d.fileUrl && (
-                    <a
-                      href={d.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center space-x-1"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Preview</span>
-                    </a>
-                  )}
+                    <FileDown className="w-3.5 h-3.5" />
+                    <span>Download</span>
+                  </a>
+                )}
+              </div>
+
+              {/* Master Audio Summary Card */}
+              <div className="p-4 bg-[#0E1015] border border-[#1F2430] rounded-xl flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-12 h-12 rounded-lg bg-indigo-950/60 border border-indigo-800/50 flex-shrink-0 flex items-center justify-center text-indigo-400">
+                    <Music className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-zinc-100 block">
+                      {release.tracks.length} Master Recording{release.tracks.length > 1 ? 's' : ''}
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-mono block">
+                      {release.tracks.filter((t: any) => t.audioFileUrl).length} of {release.tracks.length} master files ready
+                    </span>
+                  </div>
+                </div>
+
+                <a
+                  href={`/api/releases/${release.id}/download?type=bundle`}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-semibold border border-[#2B3447] transition-colors flex-shrink-0"
+                >
+                  <FileDown className="w-3.5 h-3.5" />
+                  <span>Download All</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Individual Audio Masters List */}
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                Individual Audio Masters
+              </span>
+              <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl bg-[#0E1015] overflow-hidden">
+                {release.tracks.map((t: any, idx: number) => (
+                  <div key={t.id} className="p-3 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <span className="font-mono text-indigo-400 font-bold w-6">0{t.trackNumber || idx + 1}</span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-zinc-200 block truncate">{t.title}</span>
+                        <span className="text-[11px] text-zinc-500 font-mono block">
+                          {t.primaryArtist || release.primaryArtist} {t.isrc ? `• ISRC: ${t.isrc}` : ''}
+                        </span>
+                      </div>
+                    </div>
+
+                    {t.audioFileUrl ? (
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded">
+                          WAV / Lossless
+                        </span>
+                        <a
+                          href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
+                          className="flex items-center space-x-1 px-3 py-1 bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 rounded-lg text-xs font-medium border border-[#2B3447] transition-colors"
+                          title={`Download master WAV for ${t.title}`}
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                          <span>Download Audio</span>
+                        </a>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-amber-500 italic">No audio master uploaded</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Attached Signed Clearance Agreements List */}
+            {release.clearanceItems.some((c: any) => c.supportingDocUrl) && (
+              <div className="space-y-2 pt-1">
+                <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider block">
+                  Signed Rights Clearance Agreements (PDF)
+                </span>
+                <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl bg-[#0E1015] overflow-hidden">
+                  {release.clearanceItems
+                    .filter((c: any) => c.supportingDocUrl)
+                    .map((c: any) => (
+                      <div key={c.id} className="p-3 flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center space-x-3 min-w-0">
+                          <FileText className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <span className="font-semibold text-zinc-200 block truncate">{c.category}</span>
+                            <span className="text-[11px] text-zinc-500 font-mono block">
+                              Ref: {c.documentReference || 'N/A'} {c.rightsHolder ? `• Licensor: ${c.rightsHolder}` : ''}
+                            </span>
+                          </div>
+                        </div>
+
+                        <a
+                          href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${c.id}`}
+                          className="flex items-center space-x-1 px-3 py-1 bg-[#1A1F2B] hover:bg-[#252C3D] text-emerald-300 rounded-lg text-xs font-medium border border-emerald-900/50 transition-colors flex-shrink-0"
+                          title="Download signed PDF document"
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                          <span>Download PDF</span>
+                        </a>
+                      </div>
+                    ))}
                 </div>
               </div>
-            ))}
+            )}
+          </div>
+
+          {/* Schedule A – Part III Checklist */}
+          <div className="bg-[#12151B] border border-[#1F2430] rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-bold text-zinc-100">
+              Schedule A – Part III: Deliverables Verification Checklist
+            </h3>
+            <div className="divide-y divide-[#1F2430] border border-[#1F2430] rounded-xl overflow-hidden bg-[#0E1015] text-xs">
+              {release.deliverables.map((d: any) => (
+                <div key={d.id} className="p-3.5 flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-zinc-200">{d.name}</span>
+                    <p className="text-[11px] text-zinc-500">Party: {d.responsibleParty}</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
+                        d.status === 'Approved'
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                          : d.status === 'Uploaded'
+                          ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
+                          : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                      }`}
+                    >
+                      {d.status}
+                    </span>
+                    {d.fileUrl && (
+                      <a
+                        href={d.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center space-x-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

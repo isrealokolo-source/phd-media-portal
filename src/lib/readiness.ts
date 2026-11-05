@@ -119,20 +119,30 @@ export function evaluateReleaseReadiness(release: any): ReadinessEvaluation {
   }
 
   // 4. Rights Documentation & Clearances (Weight: 20%)
-  // Rights clearance is optional for artist submission. Reviewers assess documents prior to DSP delivery.
+  // Rights clearance items are optional to obtain at submission, BUT any item marked "Obtained"
+  // MUST have a supporting signed PDF document uploaded prior to release.
   let clearanceScore = 20;
   const clearances = release.clearanceItems || [];
   if (clearances.length > 0) {
     const pendingItems = clearances.filter((c: any) => c.status === 'Pending');
     const obtainedItems = clearances.filter((c: any) => c.status === 'Obtained');
+    const obtainedMissingDoc = obtainedItems.filter((c: any) => !c.supportingDocUrl || !c.supportingDocUrl.trim());
 
-    if (obtainedItems.length > 0) {
-      completedItems.push(`${obtainedItems.length} clearance documentation item(s) uploaded`);
+    if (obtainedMissingDoc.length > 0) {
+      for (const item of obtainedMissingDoc) {
+        criticalBlockers.push(`Clearance for "${item.category}" is marked Obtained but missing required signed PDF document.`);
+        outstandingItems.push(`Upload signed PDF for "${item.category}" clearance`);
+      }
+      clearanceScore = Math.max(5, clearanceScore - (obtainedMissingDoc.length * 5));
+    }
+
+    if (obtainedItems.length > 0 && obtainedMissingDoc.length === 0) {
+      completedItems.push(`${obtainedItems.length} clearance agreement PDF(s) verified`);
     }
 
     if (pendingItems.length > 0) {
-      warnings.push(`${pendingItems.length} clearance item(s) pending (optional at submission; reviewer can request specific documents)`);
-    } else {
+      warnings.push(`${pendingItems.length} clearance item(s) pending (optional at submission; reviewer can review or request documents)`);
+    } else if (obtainedMissingDoc.length === 0) {
       completedItems.push('All rights clearance documentation cleared');
     }
   } else {

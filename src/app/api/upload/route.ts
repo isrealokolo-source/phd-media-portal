@@ -8,6 +8,7 @@ const ALLOWED_CATEGORIES: Record<string, string> = {
   master: 'masters',
   artwork: 'artwork',
   document: 'documents',
+  clearance_pdf: 'documents',
   lyrics: 'documents',
   signature: 'signatures',
 };
@@ -101,6 +102,13 @@ export async function POST(req: NextRequest) {
 
     if (BLOCKED_EXTENSIONS.has(ext)) {
       return NextResponse.json({ error: `File type ${ext} is prohibited for security reasons.` }, { status: 400 });
+    }
+
+    // Clearance agreements strictly require PDF format
+    if (requestedCategory === 'clearance_pdf') {
+      if (ext !== '.pdf') {
+        return NextResponse.json({ error: 'Only PDF documents (.pdf) are permitted for signed clearance agreements.' }, { status: 400 });
+      }
     }
 
     // Strict category whitelist

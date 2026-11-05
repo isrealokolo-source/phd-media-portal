@@ -150,7 +150,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   // Upload helper using XMLHttpRequest for real progress events
   const uploadWithProgress = (
     file: File,
-    category: 'master' | 'artwork' | 'document' | 'lyrics',
+    category: 'master' | 'artwork' | 'document' | 'lyrics' | 'clearance_pdf',
     onProgress: (percent: number) => void
   ): Promise<{ fileUrl: string; metadata: any }> => {
     return new Promise((resolve, reject) => {
@@ -393,6 +393,53 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
     } finally {
       setIsUploading((prev) => ({ ...prev, [key]: false }));
     }
+  };
+
+  // Handle clearance document PDF upload (PDF only strictly enforced)
+  const handleClearancePdfUpload = async (clearanceIdx: number, file: File) => {
+    const key = `clearance_${clearanceIdx}`;
+    
+    // Strict client-side PDF verification
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+      setUploadError((prev) => ({ ...prev, [key]: 'Only PDF documents (.pdf) are permitted for signed clearance agreements.' }));
+      return;
+    }
+
+    setIsUploading((prev) => ({ ...prev, [key]: true }));
+    setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
+    setUploadError((prev) => ({ ...prev, [key]: '' }));
+
+    try {
+      const { fileUrl } = await uploadWithProgress(
+        file,
+        'clearance_pdf',
+        (percent) => setUploadProgress((prev) => ({ ...prev, [key]: percent }))
+      );
+
+      const updated = [...clearanceItems];
+      updated[clearanceIdx] = {
+        ...updated[clearanceIdx],
+        supportingDocUrl: fileUrl,
+      };
+      setClearanceItems(updated);
+      await saveChanges({ clearanceItems: updated });
+    } catch (err: any) {
+      setUploadError((prev) => ({ ...prev, [key]: err.message || 'PDF upload failed' }));
+    } finally {
+      setIsUploading((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Handle clearance document removal
+  const handleClearancePdfDelete = async (clearanceIdx: number) => {
+    if (!confirm('Are you sure you want to remove this attached clearance agreement PDF?')) return;
+    const updated = [...clearanceItems];
+    updated[clearanceIdx] = {
+      ...updated[clearanceIdx],
+      supportingDocUrl: null,
+    };
+    setClearanceItems(updated);
+    await saveChanges({ clearanceItems: updated });
   };
 
   // Submit Release with robust validation and blocker feedback
@@ -1418,6 +1465,134 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           />
                         </div>
                       </div>
+
+                      {/* PDF Clearance Agreement Upload - Strictly Required when status is 'Obtained' */}
+                      {(isObtained || item.supportingDocUrl) && (
+                        <div className="pt-3 border-t border-[#1F2430]/60 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-zinc-200 flex items-center space-x-1.5">
+                              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                              <span>Signed Clearance Agreement (PDF Only) {isObtained && '*'}</span>
+                            </span>
+                            {item.supportingDocUrl ? (
+                              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded flex items-center space-x-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>PDF Document Attached</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded flex items-center space-x-1">
+                                <AlertTriangle className="w-3 h-3" />
+                                <span>Mandatory Prior to Release</span>
+                              </span>
+                            )}
+                          </div>
+
+                          {!item.supportingDocUrl && isObtained && (
+                            <div className="p-2.5 rounded-lg bg-amber-950/30 border border-amber-900/40 text-[11px] text-amber-300/90 flex items-start space-x-2">
+                              <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                              <p>
+                                <strong>Document submission required:</strong> Because this clearance is marked <em>Obtained</em>, the executed and signed agreement must be uploaded in PDF format prior to release of the song.
+                              </p>
+                            </div>
+                          )}
+
+                          {isUploading[`clearance_${idx}`] ? (
+                            <div className="p-3 bg-[#141820] border border-indigo-900/60 rounded-xl space-y-2">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="flex items-center space-x-2 text-indigo-300 font-medium">
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                                  <span>Uploading signed PDF agreement...</span>
+                                </span>
+                                <span className="font-mono font-bold text-indigo-400">
+                                  {uploadProgress[`clearance_${idx}`] || 0}%
+                                </span>
+                              </div>
+                              <div className="w-full h-1.5 bg-[#1A1F2B] rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-indigo-500 rounded-full transition-all duration-200"
+                                  style={{ width: `${uploadProgress[`clearance_${idx}`] || 0}%` }}
+                                />
+                              </div>
+                            </div>
+                          ) : item.supportingDocUrl ? (
+                            <div className="p-3 bg-[#121620] border border-emerald-900/40 rounded-xl flex items-center justify-between gap-3">
+                              <div className="flex items-center space-x-2.5 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                  <FileText className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-zinc-100 truncate">
+                                    {item.supportingDocUrl.split('/').pop() || 'Clearance_Agreement.pdf'}
+                                  </p>
+                                  <p className="text-[10px] text-zinc-400 font-mono">
+                                    Signed Legal PDF Document
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-2 flex-shrink-0">
+                                <a
+                                  href={item.supportingDocUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-indigo-300 text-[11px] font-medium border border-[#2B3447] transition-colors flex items-center space-x-1"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  <span>View PDF</span>
+                                </a>
+                                <label className="px-2.5 py-1 rounded bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-300 text-[11px] font-medium border border-[#2B3447] cursor-pointer transition-colors">
+                                  <span>Replace</span>
+                                  <input
+                                    type="file"
+                                    accept=".pdf,application/pdf"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const f = e.target.files?.[0];
+                                      if (f) handleClearancePdfUpload(idx, f);
+                                    }}
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => handleClearancePdfDelete(idx)}
+                                  className="p-1.5 rounded text-rose-400 hover:text-white hover:bg-rose-950/60 border border-rose-900/40 transition-colors"
+                                  title="Remove PDF"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#2B3447] hover:border-indigo-500/60 rounded-xl cursor-pointer bg-[#12151B] transition-colors text-center group">
+                                <Upload className="w-5 h-5 text-indigo-400 mb-1 group-hover:scale-105 transition-transform" />
+                                <span className="text-xs font-semibold text-zinc-200">
+                                  Upload Signed Agreement (PDF Only) *
+                                </span>
+                                <span className="text-[10px] text-zinc-400 mt-0.5">
+                                  Only .pdf files are accepted (maximum 100MB)
+                                </span>
+                                <input
+                                  type="file"
+                                  accept=".pdf,application/pdf"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (f) handleClearancePdfUpload(idx, f);
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          )}
+
+                          {uploadError[`clearance_${idx}`] && (
+                            <p className="text-[11px] text-rose-400 flex items-center space-x-1">
+                              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>{uploadError[`clearance_${idx}`]}</span>
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

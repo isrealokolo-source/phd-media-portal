@@ -53,6 +53,14 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
     const key = params.path.join('/');
     const s3 = getS3Client();
 
+    const filename = req.nextUrl.searchParams.get('filename');
+    const shouldDownload = req.nextUrl.searchParams.get('download') === 'true' || Boolean(filename);
+    const contentDisposition = shouldDownload && filename
+      ? `attachment; filename="${encodeURIComponent(filename)}"`
+      : shouldDownload
+      ? 'attachment'
+      : 'inline';
+
     // 1. Try S3 / Cloudflare R2
     if (s3) {
       try {
@@ -74,6 +82,7 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
             headers: {
               'Content-Type': mime,
               'Content-Length': response.ContentLength ? response.ContentLength.toString() : '',
+              'Content-Disposition': contentDisposition,
               'Cache-Control': 'private, max-age=86400',
               'Accept-Ranges': 'bytes',
             },
@@ -99,6 +108,7 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
         headers: {
           'Content-Type': mime,
           'Content-Length': stat.size.toString(),
+          'Content-Disposition': contentDisposition,
           'Cache-Control': 'private, max-age=86400',
         },
       });

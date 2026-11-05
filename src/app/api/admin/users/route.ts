@@ -177,3 +177,104 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// DELETE: Super Admin can delete users
+export async function DELETE(req: NextRequest) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || !isSuperAdmin(currentUser.role)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Only Super Administrators have permission to delete users' },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    if (id === currentUser.id) {
+      return NextResponse.json({ error: 'You cannot delete your own user account' }, { status: 400 });
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        artistProfile: true,
+        releases: { select: { id: true, title: true, referenceNumber: true } },
+      },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Release any claimed contract back to ACTIVE status
+      await tx.artistContract.updateMany({
+        where: { claimedByUserId: id },
+        data: {
+          claimedByUserId: null,
+          status: 'ACTIVE',
+          claimedAt: null,
+        },
+      });
+
+      // 2. Reassign contracts uploaded by this user to current Super Admin
+      await tx.artistContract.updateMany({
+        where: { uploadedById: id },
+        data: {
+          uploadedById: currentUser.id,
+        },
+      });
+
+      // 3. Delete releases owned by this user (all child entities cascade delete via releaseId)
+      for (const rel of targetUser.releases) {
+        await tx.release.delete({ where: { id: rel.id } });
+      }
+
+      // 4. Delete user's artist profile if present
+      if (targetUser.artistProfile) {
+        await tx.artistProfile.delete({ where: { userId: id } });
+      }
+
+      // 5. Delete reviews authored by this user
+      await tx.review.deleteMany({ where: { reviewerUserId: id } });
+
+      // 6. Delete revision requests authored by this user
+      await tx.revisionRequest.deleteMany({ where: { requestedByUserId: id } });
+
+      // 7. Delete signatures by this user
+      await tx.signature.deleteMany({ where: { signerUserId: id } });
+
+      // 8. Delete the user
+      await tx.user.delete({ where: { id } });
+    });
+
+    await createAuditLog({
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      action: 'USER_DELETED',
+      entityType: 'User',
+      entityId: id,
+      previousValue: {
+        id: targetUser.id,
+        email: targetUser.email,
+        name: targetUser.name,
+        role: targetUser.role,
+        deletedBy: currentUser.email,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `User ${targetUser.name} (${targetUser.email}) has been permanently deleted`,
+    });
+  } catch (err: any) {
+    console.error('Failed to delete user:', err);
+    return NextResponse.json({ error: err.message || 'Failed to delete user' }, { status: 500 });
+  }
+}
+

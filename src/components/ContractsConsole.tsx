@@ -545,3 +545,4 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
     </div>
   );
 }
+

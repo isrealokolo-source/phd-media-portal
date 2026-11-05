@@ -20,6 +20,8 @@ import {
   KeyRound,
   X,
   Sparkles,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface UserData {
@@ -85,6 +87,32 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
     temporaryPassword?: string;
   } | null>(null);
   const [copiedPass, setCopiedPass] = useState(false);
+
+  // Delete user state (Super Admin only)
+  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch(`/api/admin/users?id=${userToDelete.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete user');
+
+      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      setUserToDelete(null);
+      router.refresh();
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete user');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Filtered Users
   const filteredUsers = users.filter((u) => {
@@ -270,12 +298,13 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 <th className="py-3 px-4">Portfolio / Profile</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4">Created Date</th>
+                {isSuperAdmin && <th className="py-3 px-4 text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1F2430]">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-zinc-500">
+                  <td colSpan={isSuperAdmin ? 6 : 5} className="py-8 text-center text-zinc-500">
                     No users matching search or filter criteria.
                   </td>
                 </tr>
@@ -340,6 +369,27 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                     <td className="py-3.5 px-4 font-mono text-[11px] text-zinc-400">
                       {new Date(u.createdAt).toLocaleDateString('en-GB')}
                     </td>
+
+                    {isSuperAdmin && (
+                      <td className="py-3.5 px-4 text-right">
+                        {u.id === currentUser.id ? (
+                          <span className="text-[10px] text-zinc-600 font-mono italic">Current User</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDeleteError('');
+                              setUserToDelete(u);
+                            }}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-rose-400 hover:text-white hover:bg-rose-950/60 border border-rose-900/40 hover:border-rose-700/60 transition-colors text-[11px]"
+                            title={`Delete user ${u.name}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
@@ -347,6 +397,75 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
           </table>
         </div>
       </div>
+
+      {/* DELETE USER CONFIRMATION MODAL */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#12151B] border border-rose-900/50 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div className="flex items-center space-x-3 text-rose-400 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-rose-950/60 border border-rose-800/40 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-rose-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Permanently Delete User</h3>
+                <p className="text-xs text-rose-300/80">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-rose-950/20 border border-rose-900/40 rounded-xl space-y-2 mb-4 text-xs">
+              <p className="text-zinc-200">
+                Are you sure you want to permanently delete <strong className="text-white">{userToDelete.name}</strong> (<span className="font-mono text-zinc-400">{userToDelete.email}</span>)?
+              </p>
+              <div className="text-zinc-400 text-[11px] space-y-1">
+                <div>Role: <strong className="text-zinc-300">{userToDelete.role}</strong></div>
+                {userToDelete._count && userToDelete._count.releases > 0 && (
+                  <div className="text-rose-400 font-medium">
+                    ⚠️ Warning: This user has {userToDelete._count.releases} release(s) that will be permanently purged along with associated assets.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {deleteError && (
+              <div className="mb-4 p-3 rounded-lg bg-rose-950/40 border border-rose-800 text-rose-200 text-xs">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setUserToDelete(null);
+                  setDeleteError('');
+                }}
+                className="px-4 py-2 bg-[#1A1F2B] hover:bg-[#252C3D] text-zinc-300 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-rose-950/50 flex items-center space-x-2 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete User</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CREATE USER MODAL */}
       {showCreateModal && (
