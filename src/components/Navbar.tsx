@@ -71,13 +71,13 @@ export function Navbar({ user }: NavbarProps) {
         {/* Brand */}
         <div className="flex items-center space-x-6">
           <Link href={isAdmin ? '/admin' : '/artist'} className="flex items-center space-x-2.5 group">
-            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-[#262D3D] flex items-center justify-center p-1 overflow-hidden shadow-md group-hover:border-indigo-500/50 transition-all">
+            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-[#E8E8E8] flex items-center justify-center p-1 overflow-hidden shadow-md group-hover:border-zinc-700 transition-all">
               <img src="/images/phd-logo.png" alt="PHD Services Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
                 <span className="font-bold tracking-tight text-white text-sm">PHD SERVICES</span>
-                <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-[#171717] text-white border border-[#171717]">
                   {user?.role?.replace(/_/g, ' ') || 'PORTAL'}
                 </span>
               </div>

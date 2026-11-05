@@ -3,14 +3,14 @@ export const DEFAULT_COMPANY_NAME = "PHD Services";
 export const DEFAULT_ADMIN_EMAIL = "operations@phdservices.com";
 
 export const RELEASE_STATUSES = [
-  { key: "DRAFT", label: "Draft", badgeClass: "bg-zinc-800 text-zinc-300 border-zinc-700" },
-  { key: "SUBMITTED_PENDING_APPROVAL", label: "Submitted (Pending Approval)", badgeClass: "bg-indigo-950 text-indigo-300 border-indigo-800" },
-  { key: "REVISION_REQUESTED", label: "Revision Requested", badgeClass: "bg-amber-950 text-amber-300 border-amber-800" },
-  { key: "RESUBMITTED", label: "Resubmitted", badgeClass: "bg-blue-950 text-blue-300 border-blue-800" },
-  { key: "FULLY_EXECUTED_APPROVED", label: "Fully Executed & Approved", badgeClass: "bg-emerald-950 text-emerald-300 border-emerald-800" },
-  { key: "ON_HOLD", label: "On Hold", badgeClass: "bg-rose-950 text-rose-300 border-rose-800" },
-  { key: "WITHDRAWN", label: "Withdrawn", badgeClass: "bg-zinc-900 text-zinc-400 border-zinc-800" },
-  { key: "TERMINATED", label: "Terminated", badgeClass: "bg-red-950 text-red-400 border-red-900" },
+  { key: "DRAFT", label: "Draft", badgeClass: "bg-[#F4F4F2] text-[#777777] border-[#E8E8E8]" },
+  { key: "SUBMITTED_PENDING_APPROVAL", label: "Submitted (Pending Approval)", badgeClass: "bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]" },
+  { key: "REVISION_REQUESTED", label: "Revision Requested", badgeClass: "bg-[#FFFBEB] text-[#D69E36] border-[#FDE68A]" },
+  { key: "RESUBMITTED", label: "Resubmitted", badgeClass: "bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]" },
+  { key: "FULLY_EXECUTED_APPROVED", label: "Fully Executed & Approved", badgeClass: "bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]" },
+  { key: "ON_HOLD", label: "On Hold", badgeClass: "bg-[#FEF2F2] text-[#D64B4B] border-[#FECACA]" },
+  { key: "WITHDRAWN", label: "Withdrawn", badgeClass: "bg-[#F4F4F2] text-[#777777] border-[#E8E8E8]" },
+  { key: "TERMINATED", label: "Terminated", badgeClass: "bg-[#FEF2F2] text-[#D64B4B] border-[#FECACA]" },
 ] as const;
 
 export const CLEARANCE_CATEGORIES = [

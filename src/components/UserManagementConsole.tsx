@@ -327,12 +327,12 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                       <span
                         className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border inline-block ${
                           u.role === 'SUPER_ADMIN'
-                            ? 'bg-purple-950 text-purple-300 border-purple-800'
+                            ? 'bg-[#171717] text-white border-[#171717]'
                             : u.role === 'ADMIN'
-                            ? 'bg-indigo-950 text-[#171717] border-indigo-800'
+                            ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
                             : u.role === 'RELEASE_REVIEWER'
-                            ? 'bg-blue-950 text-blue-300 border-blue-800'
-                            : 'bg-emerald-950 text-[#269568] border-emerald-800'
+                            ? 'bg-[#FFFBEB] text-[#D69E36] border-[#FDE68A]'
+                            : 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
                         }`}
                       >
                         {u.role.replace(/_/g, ' ')}
@@ -381,7 +381,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                               setDeleteError('');
                               setUserToDelete(u);
                             }}
-                            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[#D64B4B] hover:text-white hover:bg-[#FEF2F2] border border-rose-900/40 hover:border-rose-700/60 transition-colors text-[11px]"
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[#D64B4B] hover:text-[#D64B4B] hover:bg-[#FEE2E2] bg-[#FEF2F2] border border-[#FECACA] transition-colors text-[11px]"
                             title={`Delete user ${u.name}`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -401,7 +401,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
       {/* DELETE USER CONFIRMATION MODAL */}
       {userToDelete && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-rose-900/50 rounded-lg w-full max-w-md p-6 shadow-2xl relative">
+          <div className="bg-white border border-[#E8E8E8] rounded-lg w-full max-w-md p-6 shadow-2xl relative">
             <div className="flex items-center space-x-3 text-[#D64B4B] mb-4">
               <div className="w-10 h-10 rounded-lg bg-[#FEF2F2] border border-[#FECACA] flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-[#D64B4B]" />
@@ -412,7 +412,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
               </div>
             </div>
 
-            <div className="p-3.5 bg-[#FEF2F2] border border-rose-900/40 rounded-lg space-y-2 mb-4 text-xs">
+            <div className="p-3.5 bg-[#FEF2F2] border border-[#FECACA] rounded-lg space-y-2 mb-4 text-xs">
               <p className="text-[#171717]">
                 Are you sure you want to permanently delete <strong className="text-[#171717]">{userToDelete.name}</strong> (<span className="font-mono text-[#777777]">{userToDelete.email}</span>)?
               </p>
@@ -448,7 +448,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 type="button"
                 disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-rose-950/50 flex items-center space-x-2 disabled:opacity-50"
+                className="px-4 py-2 bg-[#D64B4B] hover:bg-[#b83b3b] text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center space-x-2 disabled:opacity-50"
               >
                 {isDeleting ? (
                   <>
@@ -477,14 +477,14 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 setShowCreateModal(false);
                 setCreatedSuccess(null);
               }}
-              className="absolute right-4 top-4 p-1.5 rounded-lg text-[#777777] hover:text-white hover:bg-white transition-colors"
+              className="absolute right-4 top-4 p-1.5 rounded-lg text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             {createdSuccess ? (
               <div className="space-y-5 text-center py-4">
-                <div className="w-12 h-12 rounded-lg bg-emerald-950 border border-emerald-800 text-[#269568] flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] text-[#269568] flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
                 <div>

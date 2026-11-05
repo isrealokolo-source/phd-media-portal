@@ -646,9 +646,17 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
           <button
             type="button"
-            onClick={() => saveChanges()}
+            onClick={() =>
+              saveChanges({
+                ...release,
+                tracks,
+                clearanceItems,
+                deliverables,
+                budgetItems,
+              })
+            }
             disabled={isSaving}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#262D3D] text-[#171717] text-xs font-medium border border-[#E8E8E8] transition-colors"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#EAEAEA] text-[#171717] text-xs font-medium border border-[#E8E8E8] transition-colors"
           >
             <Save className="w-3.5 h-3.5 text-[#171717]" />
             <span>Save Draft</span>
@@ -767,7 +775,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <button
                           type="button"
                           onClick={handleArtworkDelete}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-[#FEF2F2] hover:bg-rose-900/60 text-[#D64B4B] border border-[#FECACA] rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#D64B4B] border border-[#FECACA] rounded-lg text-xs font-medium transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Remove</span>
@@ -904,7 +912,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         setRelease({ ...release, territoryType: 'Worldwide' });
                         saveChanges({ territoryType: 'Worldwide' });
                       }}
-                      className="accent-indigo-600"
+                      className="accent-[#171717]"
                     />
                     <span>Worldwide</span>
                   </label>
@@ -917,7 +925,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         setRelease({ ...release, territoryType: 'Specific' });
                         saveChanges({ territoryType: 'Specific' });
                       }}
-                      className="accent-indigo-600"
+                      className="accent-[#171717]"
                     />
                     <span>Specific Territories</span>
                   </label>
@@ -952,7 +960,18 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    saveChanges();
+                    saveChanges({
+                      title: release.title,
+                      releaseType: release.releaseType,
+                      primaryArtist: release.primaryArtist,
+                      recordLabel: release.recordLabel,
+                      plannedReleaseDate: release.plannedReleaseDate,
+                      genre: release.genre,
+                      subgenre: release.subgenre,
+                      territoryType: release.territoryType,
+                      territoryDetails: release.territoryDetails,
+                      releaseDescription: release.releaseDescription,
+                    });
                     setCurrentStep(2);
                   }}
                   className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium transition-colors"
@@ -983,7 +1002,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       type="button"
                       onClick={handleBatchGenerateIsrcs}
                       disabled={isGeneratingIsrcs}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors"
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#EAEAEA] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors"
                       title="Auto-generate sequential ISRCs (Pattern: NGB772600300...)"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#171717]" />
@@ -1047,7 +1066,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.title}
                             onChange={(e) => updateTrack(idx, 'title', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
                         </div>
@@ -1074,7 +1093,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.primaryArtist || release.primaryArtist || ''}
                             onChange={(e) => updateTrack(idx, 'primaryArtist', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder={release.primaryArtist || 'Primary Artist'}
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
@@ -1086,7 +1105,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.featuredArtists || ''}
                             onChange={(e) => updateTrack(idx, 'featuredArtists', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="e.g. Tems, Burna Boy"
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
@@ -1098,7 +1117,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.versionRemix || ''}
                             onChange={(e) => updateTrack(idx, 'versionRemix', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="e.g. Original Master, Club Mix"
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
@@ -1126,7 +1145,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.producerBeatmaker || ''}
                             onChange={(e) => updateTrack(idx, 'producerBeatmaker', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="e.g. Kel-P, Sarz"
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
@@ -1154,7 +1173,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.songwritersComposers || ''}
                             onChange={(e) => updateTrack(idx, 'songwritersComposers', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="e.g. Dekaf, Kel-P"
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
@@ -1177,7 +1196,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.isrc || ''}
                             onChange={(e) => updateTrack(idx, 'isrc', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="e.g. NGB772600300"
                             maxLength={12}
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-mono uppercase tracking-wider"
@@ -1190,7 +1209,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.duration || ''}
                             onChange={(e) => updateTrack(idx, 'duration', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="03:24"
                             className="w-full px-3 py-1.5 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-mono"
                           />
@@ -1211,7 +1230,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                           rows={3}
                           value={track.lyricsText || ''}
                           onChange={(e) => updateTrack(idx, 'lyricsText', e.target.value)}
-                          onBlur={() => saveChanges()}
+                          onBlur={() => saveChanges({ tracks })}
                           placeholder="Type or paste lyrics for this track here..."
                           className="w-full px-3 py-2 bg-white border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-sans"
                         />
@@ -1243,7 +1262,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             type="text"
                             value={track.masterOwnerLegalName || artistLegalName}
                             onChange={(e) => updateTrack(idx, 'masterOwnerLegalName', e.target.value)}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             placeholder="Legal Entity or Artist Legal Name"
                             className="w-full px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717]"
                           />
@@ -1270,7 +1289,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             max="100"
                             value={track.masterOwnershipPercentage || 100}
                             onChange={(e) => updateTrack(idx, 'masterOwnershipPercentage', Number(e.target.value))}
-                            onBlur={() => saveChanges()}
+                            onBlur={() => saveChanges({ tracks })}
                             className="w-full px-3 py-1.5 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#171717] focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] font-mono"
                           />
                         </div>
@@ -1372,7 +1391,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(1)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-medium transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -1380,10 +1399,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    saveChanges();
+                    saveChanges({ tracks });
                     setCurrentStep(3);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium transition-colors"
                 >
                   <span>Continue to Rights Clearance Register</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1867,7 +1886,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                       </div>
                       <div className="w-full h-2 bg-white rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-200"
+                          className="h-full bg-[#171717] rounded-full transition-all duration-200"
                           style={{ width: `${uploadProgress.artwork || 0}%` }}
                         />
                       </div>
@@ -1891,7 +1910,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <button
                           type="button"
                           onClick={handleArtworkDelete}
-                          className="inline-flex items-center space-x-1 px-3 py-2 bg-[#FEF2F2] hover:bg-rose-900/60 text-[#D64B4B] border border-[#FECACA] rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center space-x-1 px-3 py-2 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#D64B4B] border border-[#FECACA] rounded-lg text-xs font-medium transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Remove Artwork</span>
@@ -1912,7 +1931,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   Deliverable Milestones
                 </h3>
 
-                <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2]">
+                <div className="divide-y divide-[#E8E8E8] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2]">
                   {deliverables.map((d, idx) => (
                     <div key={d.id || idx} className="p-3.5 flex items-center justify-between text-xs">
                       <div className="space-y-0.5">
@@ -1927,10 +1946,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                         <span
                           className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
                             d.status === 'Approved'
-                              ? 'bg-emerald-950 text-[#269568] border-emerald-800'
+                              ? 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
                               : d.status === 'Uploaded'
-                              ? 'bg-indigo-950 text-[#171717] border-indigo-800'
-                              : 'bg-zinc-800 text-[#777777] border-zinc-700'
+                              ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                              : 'bg-white text-[#777777] border-[#E8E8E8]'
                           }`}
                         >
                           {d.status}
@@ -1963,7 +1982,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(3)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-medium transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -1971,10 +1990,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    saveChanges();
+                    saveChanges({ deliverables });
                     setCurrentStep(5);
                   }}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-medium transition-colors"
                 >
                   <span>Continue to Budget & Recoupment</span>
                   <ArrowRight className="w-4 h-4" />
@@ -2346,7 +2365,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
               {submitError && (
                 <div className="p-4 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B] space-y-1">
-                  <div className="flex items-center space-x-2 font-semibold text-rose-200">
+                  <div className="flex items-center space-x-2 font-semibold text-[#D64B4B]">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                     <span>Submission Error</span>
                   </div>
@@ -2404,7 +2423,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     <AlertCircle className="w-4 h-4 text-[#D64B4B] flex-shrink-0" />
                     <span>Submission Blocked — {currentReadiness.criticalBlockers.length} Critical Blocker{currentReadiness.criticalBlockers.length > 1 ? 's' : ''} Must Be Resolved:</span>
                   </div>
-                  <ul className="list-disc pl-5 space-y-1 text-xs text-rose-200">
+                  <ul className="list-disc pl-5 space-y-1 text-xs text-[#D64B4B]">
                     {currentReadiness.criticalBlockers.map((blocker, i) => (
                       <li key={i}>{blocker}</li>
                     ))}
@@ -2434,7 +2453,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     type="checkbox"
                     checked={confirmDeclarations}
                     onChange={(e) => setConfirmDeclarations(e.target.checked)}
-                    className="mt-0.5 accent-indigo-600 rounded"
+                    className="mt-0.5 accent-[#171717] rounded"
                   />
                   <span className="text-xs text-[#171717] font-medium leading-relaxed">
                     I confirm that I have disclosed all material ownership interests, third-party rights, and supplied accurate legal documentation under the Music Distribution, Management & Master Control Agreement.
@@ -2476,7 +2495,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(5)}
-                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#262D3D] text-[#171717] rounded-lg text-xs font-medium"
+                  className="flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-medium transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -2486,7 +2505,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   type="button"
                   disabled={submitting || currentReadiness.criticalBlockers.length > 0}
                   onClick={handleSubmitRelease}
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PenTool className="w-4 h-4" />
                   <span>

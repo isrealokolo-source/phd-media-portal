@@ -241,10 +241,10 @@ export function AdminReviewConsole({
             <span
               className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${
                 isExecuted
-                  ? 'bg-emerald-950 text-[#269568] border-emerald-800'
+                  ? 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
                   : release.status === 'REVISION_REQUESTED'
-                  ? 'bg-amber-950 text-[#D69E36] border-amber-800'
-                  : 'bg-indigo-950 text-[#171717] border-indigo-800'
+                  ? 'bg-[#FFFBEB] text-[#D69E36] border-[#FDE68A]'
+                  : 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
               }`}
             >
               {release.status.replace(/_/g, ' ')}
@@ -426,7 +426,7 @@ export function AdminReviewConsole({
                     ) : (
                       <div className="p-3 bg-[#F4F4F2] border border-[#E8E8E8] rounded-lg text-xs text-[#D69E36] flex items-center justify-between">
                         <span>{t.title} — No master audio file uploaded</span>
-                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-950 border border-amber-800">
+                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#FFFBEB] text-[#D69E36] border border-[#FDE68A]">
                           Missing Master
                         </span>
                       </div>
@@ -685,8 +685,8 @@ export function AdminReviewConsole({
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
                         isObtained
-                          ? 'bg-emerald-950 text-[#269568] border-emerald-800'
-                          : 'bg-amber-950 text-[#D69E36] border-amber-800'
+                          ? 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
+                          : 'bg-[#FFFBEB] text-[#D69E36] border-[#FDE68A]'
                       }`}
                     >
                       {item.status}
@@ -879,10 +879,10 @@ export function AdminReviewConsole({
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
                         d.status === 'Approved'
-                          ? 'bg-emerald-950 text-[#269568] border-emerald-800'
+                          ? 'bg-[#ECFDF5] text-[#269568] border-[#A7F3D0]'
                           : d.status === 'Uploaded'
-                          ? 'bg-indigo-950 text-[#171717] border-indigo-800'
-                          : 'bg-zinc-800 text-[#777777] border-zinc-700'
+                          ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                          : 'bg-white text-[#777777] border-[#E8E8E8]'
                       }`}
                     >
                       {d.status}
