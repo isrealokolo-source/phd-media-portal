@@ -72,6 +72,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [trackActionError, setTrackActionError] = useState('');
 
   // Upload progress & states
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
@@ -351,6 +352,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   // Auto-generate single track ISRC: Pattern NGB77{YY}{SEQ5} starting from 00300
   const handleGenerateSingleIsrc = async (trackIdx: number) => {
     setIsGeneratingIsrcs(true);
+    setTrackActionError('');
     try {
       const res = await fetch('/api/isrc/generate?count=1');
       const data = await res.json();
@@ -360,10 +362,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
         setTracks(updated);
         await saveChanges({ tracks: updated });
       } else {
-        alert(data.error || 'Failed to generate ISRC');
+        setTrackActionError(data.error || 'Failed to generate ISRC');
       }
     } catch {
-      alert('Error generating ISRC');
+      setTrackActionError('Error generating ISRC');
     } finally {
       setIsGeneratingIsrcs(false);
     }
@@ -383,6 +385,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
     }
 
     setIsGeneratingIsrcs(true);
+    setTrackActionError('');
     try {
       const res = await fetch(`/api/isrc/generate?count=${countToGenerate}`);
       const data = await res.json();
@@ -403,10 +406,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
         setTracks(updated);
         await saveChanges({ tracks: updated });
       } else {
-        alert(data.error || 'Failed to allocate ISRCs');
+        setTrackActionError(data.error || 'Failed to allocate ISRCs');
       }
     } catch {
-      alert('Error allocating ISRCs');
+      setTrackActionError('Error allocating ISRCs');
     } finally {
       setIsGeneratingIsrcs(false);
     }
@@ -487,7 +490,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       setDeliverables(updated);
       await saveChanges({ deliverables: updated });
     } catch (err: any) {
-      alert(err.message || 'Document upload failed');
+      setUploadError((prev) => ({ ...prev, [key]: err.message || 'Document upload failed' }));
     } finally {
       setIsUploading((prev) => ({ ...prev, [key]: false }));
     }
@@ -1019,6 +1022,13 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                   </button>
                 </div>
               </div>
+
+              {trackActionError && (
+                <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B] flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{trackActionError}</span>
+                </div>
+              )}
 
               {tracks.length === 0 ? (
                 <div className="text-center py-12 border border-dashed border-[#E8E8E8] rounded-lg p-6 space-y-3">

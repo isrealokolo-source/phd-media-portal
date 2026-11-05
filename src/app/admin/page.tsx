@@ -249,11 +249,6 @@ export default async function AdminDashboardPage({
                       >
                         <td className="py-3.5 px-4 font-mono font-semibold text-[#171717]">
                           {release.referenceNumber}
-                          {release.isDemo && (
-                            <span className="ml-1 text-[8px] bg-[#F4F4F2] text-[#777777] px-1 py-0.5 rounded border border-[#E8E8E8] font-mono uppercase">
-                              DEMO
-                            </span>
-                          )}
                         </td>
                         <td className="py-3.5 px-4 font-medium text-[#171717]">
                           {release.title}

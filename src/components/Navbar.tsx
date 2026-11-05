@@ -32,7 +32,6 @@ interface NavbarProps {
 export function Navbar({ user }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isPrefilling, setIsPrefilling] = useState(false);
 
   const isAdmin = user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' || user.role === 'RELEASE_REVIEWER');
 
@@ -40,29 +39,6 @@ export function Navbar({ user }: NavbarProps) {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
     router.refresh();
-  };
-
-  const handlePrefillDemo = async () => {
-    if (isPrefilling) return;
-    setIsPrefilling(true);
-    try {
-      const res = await fetch('/api/releases/prefill-demo', { method: 'POST' });
-      const data = await res.json();
-      if (data.success && data.release?.id) {
-        if (isAdmin) {
-          router.push(`/admin/releases/${data.release.id}/review`);
-        } else {
-          router.push(`/artist/releases/${data.release.id}/edit`);
-        }
-        router.refresh();
-      } else {
-        alert(data.error || 'Failed to create demo release');
-      }
-    } catch (err) {
-      alert('Error creating demo release');
-    } finally {
-      setIsPrefilling(false);
-    }
   };
 
   return (

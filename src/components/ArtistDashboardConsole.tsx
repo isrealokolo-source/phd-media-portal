@@ -36,7 +36,6 @@ interface ReleaseItem {
   status: string;
   plannedReleaseDate?: string | Date | null;
   createdAt: string | Date;
-  isDemo?: boolean;
   artworkUrl?: string | null;
   readiness: {
     score: number;
@@ -386,12 +385,6 @@ export function ArtistDashboardConsole({ initialReleases, user }: ArtistDashboar
                               <Copy className="w-3 h-3 text-[#777777]" />
                             )}
                           </button>
-
-                          {release.isDemo && (
-                            <span className="text-[9px] font-mono uppercase px-1 rounded bg-[#F4F4F2] text-[#777777] border border-[#E8E8E8]">
-                              DEMO
-                            </span>
-                          )}
                         </div>
 
                         <Link href={editUrl} className="block mt-1 group">
@@ -570,7 +563,7 @@ export function ArtistDashboardConsole({ initialReleases, user }: ArtistDashboar
                 className="inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] text-xs font-medium transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download Sample PDF</span>
+                <span>Download Agreement Template (PDF)</span>
               </a>
             </div>
           ))}

@@ -1,0 +1,7 @@
+# PHD Services Release Management & Rights Clearance Portal
+User-agent: *
+Disallow: /admin/
+Disallow: /artist/
+Disallow: /api/
+Allow: /login
+Allow: /register

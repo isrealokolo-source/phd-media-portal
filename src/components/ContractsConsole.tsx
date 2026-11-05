@@ -72,6 +72,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
 
   // Copy state
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [tableError, setTableError] = useState('');
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -169,13 +170,14 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this unclaimed contract?')) return;
+    setTableError('');
     try {
       const res = await fetch(`/api/admin/contracts?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete');
       setContracts(contracts.filter((c) => c.id !== id));
     } catch (err: any) {
-      alert(err.message || 'Delete failed');
+      setTableError(err.message || 'Failed to delete contract');
     }
   };
 
@@ -245,6 +247,13 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
           ))}
         </div>
       </div>
+
+      {tableError && (
+        <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B] flex items-center space-x-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{tableError}</span>
+        </div>
+      )}
 
       {/* Contracts Table */}
       <div className="bg-white border border-[#E8E8E8] rounded-lg overflow-hidden shadow-xl">

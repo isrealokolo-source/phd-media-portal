@@ -13,6 +13,7 @@ import {
   PenTool,
   Clock,
   CheckCircle2,
+  AlertCircle,
   AlertTriangle,
   AlertOctagon,
   ArrowLeft,
@@ -100,10 +101,12 @@ export function AdminReviewConsole({
   );
   const [savingBudget, setSavingBudget] = useState(false);
   const [budgetSavedSuccess, setBudgetSavedSuccess] = useState(false);
+  const [budgetSaveError, setBudgetSaveError] = useState('');
 
   const handleSaveBudgetRates = async () => {
     setSavingBudget(true);
     setBudgetSavedSuccess(false);
+    setBudgetSaveError('');
     try {
       const res = await fetch(`/api/releases/${release.id}/budget`, {
         method: 'PUT',
@@ -116,10 +119,10 @@ export function AdminReviewConsole({
         setTimeout(() => setBudgetSavedSuccess(false), 4000);
         router.refresh();
       } else {
-        alert(data.error || 'Failed to save approved budget rates');
+        setBudgetSaveError(data.error || 'Failed to save approved budget rates');
       }
     } catch (err: any) {
-      alert('Error updating budget rates: ' + err.message);
+      setBudgetSaveError('Error updating budget rates: ' + err.message);
     } finally {
       setSavingBudget(false);
     }
@@ -935,6 +938,13 @@ export function AdminReviewConsole({
             <div className="p-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded-lg text-xs text-[#269568] flex items-center space-x-2">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
               <span>Approved budget rates successfully updated and locked in release register.</span>
+            </div>
+          )}
+
+          {budgetSaveError && (
+            <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-xs text-[#D64B4B] flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{budgetSaveError}</span>
             </div>
           )}
 

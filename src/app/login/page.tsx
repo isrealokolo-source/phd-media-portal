@@ -42,11 +42,6 @@ export default function LoginPage() {
     }
   };
 
-  const fillCredentials = (userEmail: string, userPass: string) => {
-    setEmail(userEmail);
-    setPassword(userPass);
-  };
-
   return (
     <div className="min-h-screen bg-[#F4F4F2] flex flex-col justify-center py-12 sm:px-6 lg:px-8 select-none">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
@@ -120,43 +115,6 @@ export default function LoginPage() {
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
-
-          {/* Quick Demo Logins for Pair Programming & Testing */}
-          <div className="mt-6 pt-5 border-t border-[#E8E8E8] space-y-2">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[#999999] text-center">
-              Quick Sign-In (Testing Accounts)
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <button
-                type="button"
-                onClick={() => fillCredentials('superadmin@phdservices.com', 'Admin@12345')}
-                className="px-2.5 py-1.5 rounded bg-[#F4F4F2] hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] font-mono text-[10px] truncate transition-colors text-left"
-              >
-                Super Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('reviewer@phdservices.com', 'Reviewer@12345')}
-                className="px-2.5 py-1.5 rounded bg-[#F4F4F2] hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] font-mono text-[10px] truncate transition-colors text-left"
-              >
-                Reviewer
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('fave@artist.com', 'Artist@12345')}
-                className="px-2.5 py-1.5 rounded bg-[#F4F4F2] hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] font-mono text-[10px] truncate transition-colors text-left"
-              >
-                Artist (FAVE)
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('victor.ad@artist.com', 'Artist@12345')}
-                className="px-2.5 py-1.5 rounded bg-[#F4F4F2] hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] font-mono text-[10px] truncate transition-colors text-left"
-              >
-                Artist (Victor AD)
-              </button>
-            </div>
-          </div>
 
           <div className="mt-6 pt-4 border-t border-[#E8E8E8] text-center">
             <Link

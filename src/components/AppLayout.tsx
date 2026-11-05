@@ -10,7 +10,6 @@ import {
   Users,
   Settings,
   LogOut,
-  Sparkles,
   Shield,
   FileText,
   Activity,
@@ -41,7 +40,6 @@ export function AppLayout({ user, children, breadcrumb, action }: AppLayoutProps
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isPrefilling, setIsPrefilling] = useState(false);
 
   const isAdmin =
     user &&
@@ -53,29 +51,6 @@ export function AppLayout({ user, children, breadcrumb, action }: AppLayoutProps
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
     router.refresh();
-  };
-
-  const handlePrefillDemo = async () => {
-    if (isPrefilling) return;
-    setIsPrefilling(true);
-    try {
-      const res = await fetch('/api/releases/prefill-demo', { method: 'POST' });
-      const data = await res.json();
-      if (data.success && data.release?.id) {
-        if (isAdmin) {
-          router.push(`/admin/releases/${data.release.id}/review`);
-        } else {
-          router.push(`/artist/releases/${data.release.id}/edit`);
-        }
-        router.refresh();
-      } else {
-        alert(data.error || 'Failed to create demo release');
-      }
-    } catch {
-      alert('Error creating demo release');
-    } finally {
-      setIsPrefilling(false);
-    }
   };
 
   // Nav Items
@@ -163,22 +138,6 @@ export function AppLayout({ user, children, breadcrumb, action }: AppLayoutProps
               </Link>
             );
           })}
-
-          {/* Quick Demo Pre-fill */}
-          <div className="pt-6 px-3">
-            <div className="pb-1 text-[10px] font-mono uppercase tracking-wider text-[#999999]">
-              Developer Tools
-            </div>
-            <button
-              type="button"
-              onClick={handlePrefillDemo}
-              disabled={isPrefilling}
-              className="w-full flex items-center space-x-2 px-3 py-2 rounded-md text-xs text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2] transition-colors border border-dashed border-[#E8E8E8]"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#777777]" />
-              <span>{isPrefilling ? 'Generating...' : 'Load Sample Demo'}</span>
-            </button>
-          </div>
         </div>
 
         {/* Sidebar Footer / User Profile */}
