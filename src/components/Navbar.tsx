@@ -66,33 +66,33 @@ export function Navbar({ user }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#1F2430] bg-[#0B0D11]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-[#E8E8E8] bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center space-x-6">
           <Link href={isAdmin ? '/admin' : '/artist'} className="flex items-center space-x-2.5 group">
-            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-[#E8E8E8] flex items-center justify-center p-1 overflow-hidden shadow-md group-hover:border-zinc-700 transition-all">
+            <div className="w-9 h-9 rounded-lg bg-white border border-[#E8E8E8] flex items-center justify-center p-1 overflow-hidden shadow-sm transition-all">
               <img src="/images/phd-logo.png" alt="PHD Services Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
-                <span className="font-bold tracking-tight text-white text-sm">PHD SERVICES</span>
+                <span className="font-bold tracking-tight text-[#171717] text-sm">PHD SERVICES</span>
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-[#171717] text-white border border-[#171717]">
                   {user?.role?.replace(/_/g, ' ') || 'PORTAL'}
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-400">Release Management & Rights Clearance</p>
+              <p className="text-[10px] text-[#777777]">Release Management & Rights Clearance</p>
             </div>
           </Link>
 
           {/* Nav links */}
-          <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-[#1F2430]">
+          <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-[#E8E8E8]">
             {isAdmin ? (
               <>
                 <Link
                   href="/admin"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/admin' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/admin' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Submissions
@@ -100,7 +100,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin/artists"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/admin/artists' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/admin/artists' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Artists
@@ -108,7 +108,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin/contracts"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/admin/contracts' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/admin/contracts' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Contracts
@@ -116,7 +116,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin/users"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/admin/users' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/admin/users' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Users & Team
@@ -124,7 +124,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin/audit"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/admin/audit' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/admin/audit' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Audit Trail
@@ -132,7 +132,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin/settings"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/admin/settings' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/admin/settings' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Settings
@@ -143,7 +143,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/artist"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/artist' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/artist' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Dashboard
@@ -151,7 +151,7 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/artist/releases/new"
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    pathname === '/artist/releases/new' ? 'bg-[#181C25] text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    pathname === '/artist/releases/new' ? 'bg-[#171717] text-white' : 'text-[#777777] hover:text-[#171717] hover:bg-[#F4F4F2]'
                   }`}
                 >
                   Register Release
@@ -166,7 +166,7 @@ export function Navbar({ user }: NavbarProps) {
           {user?.role === 'SUPER_ADMIN' && (
             <Link
               href="/admin/users?create=true"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-900/30"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#171717] hover:bg-[#262626] text-white transition-all shadow-sm"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>Create User</span>
@@ -176,7 +176,7 @@ export function Navbar({ user }: NavbarProps) {
           {user?.role === 'ARTIST' && (
             <Link
               href="/artist/releases/new"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-900/30"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#171717] hover:bg-[#262626] text-white transition-all shadow-sm"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>New Release</span>
@@ -185,19 +185,19 @@ export function Navbar({ user }: NavbarProps) {
 
           {/* User profile & Logout */}
           {user && (
-            <div className="flex items-center space-x-3 pl-3 border-l border-[#1F2430]">
+            <div className="flex items-center space-x-3 pl-3 border-l border-[#E8E8E8]">
               <div className="hidden sm:block text-right">
-                <span className="block text-xs font-medium text-zinc-200">
+                <span className="block text-xs font-medium text-[#171717]">
                   {user.artistProfile?.stageName || user.name}
                 </span>
-                <span className="block text-[10px] text-zinc-400 font-mono truncate max-w-[140px]">
+                <span className="block text-[10px] text-[#777777] font-mono truncate max-w-[140px]">
                   {user.email}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-[#1A1F2B] transition-colors"
+                className="p-1.5 rounded-lg text-[#777777] hover:text-[#D64B4B] hover:bg-[#FEF2F2] transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />

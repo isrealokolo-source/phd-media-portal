@@ -619,7 +619,7 @@ export function AdminReviewConsole({
             </p>
           </div>
 
-          <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2] text-xs">
+          <div className="divide-y divide-[#E8E8E8] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2] text-xs">
             {release.tracks.flatMap((t: any) =>
               t.contributors.map((c: any, i: number) => (
                 <div key={c.id || i} className="p-3.5 flex items-center justify-between">
@@ -792,7 +792,7 @@ export function AdminReviewConsole({
               <span className="text-xs font-bold text-[#171717] uppercase tracking-wider block">
                 Individual Audio Masters
               </span>
-              <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg bg-[#F4F4F2] overflow-hidden">
+              <div className="divide-y divide-[#E8E8E8] border border-[#E8E8E8] rounded-lg bg-[#F4F4F2] overflow-hidden">
                 {release.tracks.map((t: any, idx: number) => (
                   <div key={t.id} className="p-3 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center space-x-3 min-w-0">
@@ -812,7 +812,7 @@ export function AdminReviewConsole({
                         </span>
                         <a
                           href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
-                          className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-medium border border-[#E8E8E8] transition-colors"
+                          className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#EAEAEA] text-[#171717] rounded-lg text-xs font-medium border border-[#E8E8E8] transition-colors"
                           title={`Download master WAV for ${t.title}`}
                         >
                           <FileDown className="w-3.5 h-3.5" />
@@ -833,7 +833,7 @@ export function AdminReviewConsole({
                 <span className="text-xs font-bold text-[#171717] uppercase tracking-wider block">
                   Signed Rights Clearance Agreements (PDF)
                 </span>
-                <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg bg-[#F4F4F2] overflow-hidden">
+                <div className="divide-y divide-[#E8E8E8] border border-[#E8E8E8] rounded-lg bg-[#F4F4F2] overflow-hidden">
                   {release.clearanceItems
                     .filter((c: any) => c.supportingDocUrl)
                     .map((c: any) => (
@@ -868,7 +868,7 @@ export function AdminReviewConsole({
             <h3 className="text-sm font-bold text-[#171717]">
               Schedule A – Part III: Deliverables Verification Checklist
             </h3>
-            <div className="divide-y divide-[#1F2430] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2] text-xs">
+            <div className="divide-y divide-[#E8E8E8] border border-[#E8E8E8] rounded-lg overflow-hidden bg-[#F4F4F2] text-xs">
               {release.deliverables.map((d: any) => (
                 <div key={d.id} className="p-3.5 flex items-center justify-between">
                   <div>
@@ -1163,7 +1163,7 @@ export function AdminReviewConsole({
       {activeTab === 'audit' && (
         <div className="bg-white border border-[#E8E8E8] rounded-lg p-6 space-y-4">
           <h3 className="text-sm font-bold text-[#171717]">Release Audit Trail</h3>
-          <div className="divide-y divide-[#1F2430] text-xs">
+          <div className="divide-y divide-[#E8E8E8] text-xs">
             {release.auditLogs.map((log: any) => (
               <div key={log.id} className="py-3 flex items-center justify-between">
                 <div>
@@ -1248,7 +1248,7 @@ export function AdminReviewConsole({
                               setSelectedRequestedDocs(selectedRequestedDocs.filter((d) => d !== docName));
                             }
                           }}
-                          className="rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-0"
+                          className="rounded border-[#E8E8E8] bg-white accent-[#171717] text-[#171717] focus:ring-0"
                         />
                         <span className="text-[11px] font-medium">{docName}</span>
                       </label>

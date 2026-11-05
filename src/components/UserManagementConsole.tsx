@@ -301,7 +301,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 {isSuperAdmin && <th className="py-3 px-4 text-right">Actions</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1F2430]">
+            <tbody className="divide-y divide-[#E8E8E8]">
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={isSuperAdmin ? 6 : 5} className="py-8 text-center text-[#999999]">
@@ -373,7 +373,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                     {isSuperAdmin && (
                       <td className="py-3.5 px-4 text-right">
                         {u.id === currentUser.id ? (
-                          <span className="text-[10px] text-zinc-600 font-mono italic">Current User</span>
+                          <span className="text-[10px] text-[#777777] font-mono italic">Current User</span>
                         ) : (
                           <button
                             type="button"

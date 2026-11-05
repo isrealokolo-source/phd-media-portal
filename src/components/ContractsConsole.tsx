@@ -260,13 +260,13 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                 <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1F2430]/60 text-[#171717]">
+            <tbody className="divide-y divide-[#E8E8E8] text-[#171717]">
               {filteredContracts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-[#999999]">
                     <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="text-sm font-medium">No contracts found</p>
-                    <p className="text-xs text-zinc-600 mt-1">
+                    <p className="text-xs text-[#777777] mt-1">
                       Click &quot;Upload & Authorize Contract&quot; above to issue the first artist contract.
                     </p>
                   </td>
@@ -275,7 +275,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                 filteredContracts.map((c) => {
                   const isClaimed = c.status === 'CLAIMED';
                   return (
-                    <tr key={c.id} className="hover:bg-[#161A22] transition-colors">
+                    <tr key={c.id} className="hover:bg-[#F4F4F2] transition-colors">
                       <td className="px-5 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           <span className="font-mono font-bold text-[#171717] bg-[#EFF6FF] border border-[#BFDBFE] px-2.5 py-1 rounded-md">
@@ -284,7 +284,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                           <button
                             onClick={() => handleCopy(c.contractNumber, c.id)}
                             title="Copy Contract Number"
-                            className="p-1 text-[#777777] hover:text-white transition-colors"
+                            className="p-1 text-[#777777] hover:text-[#171717] transition-colors"
                           >
                             {copiedId === c.id ? (
                               <Check className="w-3.5 h-3.5 text-[#269568]" />
@@ -334,7 +334,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                             )}
                           </div>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FFFBEB] text-amber-300 border border-[#FDE68A]">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FFFBEB] text-[#D69E36] border border-[#FDE68A]">
                             <Clock className="w-3 h-3 mr-1" />
                             Awaiting Registration
                           </span>
@@ -433,7 +433,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                     <button
                       type="button"
                       onClick={() => setUploadedFile(null)}
-                      className="text-xs text-[#D64B4B] hover:text-rose-300 font-medium"
+                      className="text-xs text-[#D64B4B] hover:text-[#b83b3b] font-medium"
                     >
                       Remove
                     </button>
@@ -446,7 +446,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                     </div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#E8E8E8] hover:border-indigo-500/50 rounded-lg cursor-pointer bg-[#F4F4F2] transition-colors group">
+                  <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#E8E8E8] hover:border-[#171717] rounded-lg cursor-pointer bg-[#F4F4F2] transition-colors group">
                     <Upload className="w-5 h-5 text-[#777777] group-hover:text-[#171717] transition-colors mb-1" />
                     <span className="text-xs text-[#171717] font-medium">Click to select contract PDF</span>
                     <span className="text-[10px] text-[#999999] mt-0.5">Supports PDF up to 50MB</span>
@@ -478,7 +478,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-white text-[#171717] rounded-lg font-medium"
+                  className="px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg font-medium transition-colors"
                 >
                   Cancel
                 </button>
@@ -499,7 +499,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white border border-[#A7F3D0] rounded-lg p-6 space-y-4 shadow-2xl text-center">
-            <div className="w-12 h-12 rounded-full bg-[#ECFDF5] border border-emerald-700/50 flex items-center justify-center mx-auto text-[#269568]">
+            <div className="w-12 h-12 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center mx-auto text-[#269568]">
               <CheckCircle2 className="w-6 h-6" />
             </div>
 
