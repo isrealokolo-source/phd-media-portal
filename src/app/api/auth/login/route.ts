@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       role: user.role,
       ipAddress: ip,
       userAgent: req.headers.get('user-agent') || 'Web Browser',
-      appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://media.phantomdigital.com.ng',
     }).catch((err) => console.error('Failed to send login alert email:', err));
 
     const response = NextResponse.json({

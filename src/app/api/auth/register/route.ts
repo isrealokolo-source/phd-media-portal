@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 3. Dispatch Email Notifications
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://phd-media-portal.onrender.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://media.phantomdigital.com.ng';
     const settings = await prisma.systemSettings.findUnique({ where: { id: 'default' } });
     const adminEmail = settings?.administrativeEmail || process.env.PHD_ADMIN_EMAIL || 'israel@phantomdigital.com.ng';
 

@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Send invitation email if enabled
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://media.phantomdigital.com.ng';
     if (parsed.sendInviteEmail) {
       sendUserInvitationEmail({
         toEmail: newUser!.email,

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const body = await req.json();
     const { action } = body; // 'COUNTERSIGN_EXECUTE' | 'REQUEST_REVISION' | 'PLACE_ON_HOLD' | 'REMOVE_HOLD'
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://phd-media-portal.onrender.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://media.phantomdigital.com.ng';
     const artistEmail = release.artist.email;
     const artistName = release.artist.artistProfile?.stageName || release.artist.name;
 

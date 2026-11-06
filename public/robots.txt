@@ -5,3 +5,4 @@ Disallow: /artist/
 Disallow: /api/
 Allow: /login
 Allow: /register
+

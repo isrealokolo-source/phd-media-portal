@@ -1,9 +1,22 @@
 import { Resend } from 'resend';
 import { prisma } from './prisma';
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-const DEFAULT_FROM = process.env.EMAIL_FROM || 'PHD Services <noreply@phantomdigital.com.ng>';
+export const DEFAULT_APP_URL = (
+  process.env.NEXT_PUBLIC_APP_URL || 'https://media.phantomdigital.com.ng'
+).replace(/\/+$/, '');
+
+function resolveUrl(appUrl?: string): string {
+  if (!appUrl) return DEFAULT_APP_URL;
+  const trimmed = appUrl.trim().replace(/\/+$/, '');
+  // Disallow localhost or dev render domain in outgoing emails
+  if (
+    trimmed.includes('localhost') ||
+    trimmed.includes('phd-media-portal.onrender.com')
+  ) {
+    return DEFAULT_APP_URL;
+  }
+  return trimmed || DEFAULT_APP_URL;
+}
 
 export interface SendEmailOptions {
   to: string;
@@ -108,28 +121,32 @@ export async function sendArtistSubmissionEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const reviewUrl = `${params.appUrl}/admin/releases/${params.releaseId}/review`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const reviewUrl = `${baseUrl}/admin/releases/${params.releaseId}/review`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #6366f1; margin: 0 0 8px 0; font-size: 22px;">PHD Services — Release Review Required</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">A new release has been executed by the artist and submitted for administrative approval.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #171717; margin-bottom: 8px;">PHD SERVICES &bull; RELEASE OPERATIONS</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Release Review Required</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">A new release package has been executed by the artist and submitted for administrative approval and countersigning.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Primary Artist:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.artistName}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Track Count:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.trackCount}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Planned Release Date:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.plannedReleaseDate || 'TBD'}</td></tr>
+        </table>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${reviewUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            Open Review Console
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management Portal &bull; Automated Operations Dispatcher &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #6366f1; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Primary Artist:</td><td style="padding: 8px 0; color: #ffffff;">${params.artistName}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Track Count:</td><td style="padding: 8px 0; color: #ffffff;">${params.trackCount}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Planned Release Date:</td><td style="padding: 8px 0; color: #ffffff;">${params.plannedReleaseDate || 'TBD'}</td></tr>
-      </table>
-      <div style="margin: 32px 0;">
-        <a href="${reviewUrl}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          Open Release Review Console
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 12px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        This is an automated notification from the PHD Services Release Management Portal.
-      </p>
     </div>
   `;
 
@@ -154,43 +171,47 @@ export async function sendRevisionRequestEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const editUrl = `${params.appUrl}/artist/releases/${params.releaseId}/edit`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const editUrl = `${baseUrl}/artist/releases/${params.releaseId}/edit`;
   const requestedDocsHtml = params.requestedDocuments && params.requestedDocuments.length > 0
     ? `
-      <div style="background-color: #1a1f2b; border-left: 4px solid #6366f1; padding: 16px; margin: 20px 0; border-radius: 4px;">
-        <h4 style="margin: 0 0 10px 0; color: #818cf8; font-size: 14px;">Specific Agreements / Documents Requested:</h4>
-        <ul style="margin: 0; padding-left: 20px; color: #e5e7eb;">
-          ${params.requestedDocuments.map((doc) => `<li style="padding: 4px 0;"><strong>${doc}</strong></li>`).join('')}
+      <div style="background-color: #FFFBEB; border-left: 3px solid #D69E36; padding: 14px 16px; margin: 18px 0; border-radius: 4px;">
+        <h4 style="margin: 0 0 8px 0; color: #92400E; font-size: 13px; font-weight: 600;">Specific Documentation / Rights Clearances Required:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #78350F; font-size: 13px; line-height: 1.5;">
+          ${params.requestedDocuments.map((doc) => `<li style="padding: 3px 0;"><strong>${doc}</strong></li>`).join('')}
         </ul>
-        <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px;">You can download official sample split sheet & consent templates directly in Step 3 of your release portal.</p>
+        <p style="margin: 10px 0 0 0; color: #92400E; font-size: 11px;">You can upload clearances (in PDF format) or download standard templates directly in Step 3 of your release portal.</p>
       </div>
     `
     : '';
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #f59e0b; margin: 0 0 8px 0; font-size: 22px;">Action Required — Release Revision Requested</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">PHD Services has reviewed your release submission and requested revisions.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #D69E36; margin-bottom: 8px;">ACTION REQUIRED &bull; REVISION REQUESTED</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Action Required on Your Release Submission</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">PHD Services operations team has reviewed your submission and requested adjustments before countersigning.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Sections Requiring Action:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.sections.join(', ')}</td></tr>
+        </table>
+        ${requestedDocsHtml}
+        <div style="background-color: #F4F4F2; border-left: 3px solid #171717; padding: 14px 16px; margin: 18px 0; border-radius: 4px;">
+          <h4 style="margin: 0 0 6px 0; color: #171717; font-size: 13px; font-weight: 600;">Reviewer Comments:</h4>
+          <p style="margin: 0; color: #404040; white-space: pre-line; font-size: 13px; line-height: 1.5;">${params.comments}</p>
+        </div>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${editUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            Edit Release & Resubmit
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management Portal &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #f59e0b; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Sections Requiring Action:</td><td style="padding: 8px 0; color: #ffffff;">${params.sections.join(', ')}</td></tr>
-      </table>
-      ${requestedDocsHtml}
-      <div style="background-color: #1a1f2b; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px;">
-        <h4 style="margin: 0 0 8px 0; color: #f59e0b;">Administrative Feedback:</h4>
-        <p style="margin: 0; color: #e5e7eb; white-space: pre-line;">${params.comments}</p>
-      </div>
-      <div style="margin: 32px 0;">
-        <a href="${editUrl}" style="background-color: #f59e0b; color: #000000; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          Resume Editing & Resubmit
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 12px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        Please make the requested adjustments and resubmit your release for final approval and countersigning.
-      </p>
     </div>
   `;
 
@@ -214,27 +235,36 @@ export async function sendReleaseExecutionEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const releaseUrl = `${params.appUrl}/artist/releases/${params.releaseId}`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const releaseUrl = `${baseUrl}/artist/releases/${params.releaseId}`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #10b981; margin: 0 0 8px 0; font-size: 22px;">Congratulations! Release Approved & Executed</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Your release has been approved and countersigned by PHD Services. Schedules A & B are now fully executed.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #269568; margin-bottom: 8px;">APPROVAL &bull; FULLY EXECUTED</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Release Approved and Countersigned</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">Your release package has been approved and countersigned by PHD Services. Schedules A & B are now fully executed.</p>
+        </div>
+        <div style="background-color: #F0FDF4; border-left: 3px solid #269568; padding: 14px 16px; margin-bottom: 20px; border-radius: 4px;">
+          <p style="margin: 0; color: #166534; font-size: 13px; line-height: 1.5;">
+            Official digitally signed and SHA-256 verified copies of Schedule A (Master Register) and Schedule B (Rights Clearance Register) are stored in your artist vault.
+          </p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Planned Release Date:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.plannedReleaseDate || 'Confirmed with Operations'}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Tracklist:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.tracks.join(', ')}</td></tr>
+        </table>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${releaseUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            View Executed Release & Download PDFs
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management Portal &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #10b981; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Planned Release Date:</td><td style="padding: 8px 0; color: #ffffff;">${params.plannedReleaseDate || 'Confirmed with Operations'}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Tracklist:</td><td style="padding: 8px 0; color: #ffffff;">${params.tracks.join(', ')}</td></tr>
-      </table>
-      <div style="margin: 32px 0;">
-        <a href="${releaseUrl}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          View Executed Release & Download PDFs
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 12px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        Official digitally signed and SHA-256 verified copies of Schedule A (Master Register) and Schedule B (Rights Clearance Register) are stored in your artist vault.
-      </p>
     </div>
   `;
 
@@ -257,25 +287,32 @@ export async function sendReleaseOnHoldEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const releaseUrl = `${params.appUrl}/artist/releases/${params.releaseId}`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const releaseUrl = `${baseUrl}/artist/releases/${params.releaseId}`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #ef4444; margin: 0 0 8px 0; font-size: 22px;">Notice — Release Placed On Hold</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Your release submission [${params.referenceNumber}] has been placed on administrative hold.</p>
-      </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #ef4444; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-      </table>
-      <div style="background-color: #1a1f2b; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; border-radius: 4px;">
-        <h4 style="margin: 0 0 8px 0; color: #ef4444;">Reason for Hold:</h4>
-        <p style="margin: 0; color: #e5e7eb; white-space: pre-line;">${params.reason}</p>
-      </div>
-      <div style="margin: 32px 0;">
-        <a href="${releaseUrl}" style="background-color: #29303e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          View Release Status
-        </a>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #D64B4B; margin-bottom: 8px;">ADMINISTRATIVE HOLD NOTICE</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Release Placed On Hold</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">Your release submission [${params.referenceNumber}] has been placed on administrative hold.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+        </table>
+        <div style="background-color: #FEF2F2; border-left: 3px solid #D64B4B; padding: 14px 16px; margin: 18px 0; border-radius: 4px;">
+          <h4 style="margin: 0 0 6px 0; color: #991B1B; font-size: 13px; font-weight: 600;">Reason for Administrative Hold:</h4>
+          <p style="margin: 0; color: #7F1D1D; white-space: pre-line; font-size: 13px; line-height: 1.5;">${params.reason}</p>
+        </div>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${releaseUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            View Release Details
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management Portal &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
     </div>
   `;
@@ -298,30 +335,34 @@ export async function sendLoginAlertEmail(params: {
   userAgent: string;
   appUrl: string;
 }) {
+  const baseUrl = resolveUrl(params.appUrl);
   const loginTime = new Date().toUTCString();
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #6366f1; margin: 0 0 8px 0; font-size: 20px;">PHD Services — Security Alert: Account Sign-In</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Hello ${params.userName}, a successful sign-in to your PHD Services account was just recorded.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #171717; margin-bottom: 8px;">SECURITY NOTICE &bull; SIGN-IN ACTIVITY</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Successful Sign-In to Your Account</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">Hello ${params.userName}, a successful sign-in to your PHD Services account was just registered.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 160px;">Account Role:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.role.replace(/_/g, ' ')}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Sign-In Timestamp:</td><td style="padding: 10px 0; color: #171717;">${loginTime}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">IP Address:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace;">${params.ipAddress}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Client Device:</td><td style="padding: 10px 0; color: #777777; font-size: 12px;">${params.userAgent}</td></tr>
+        </table>
+        <p style="color: #777777; font-size: 12px; line-height: 1.5;">
+          If you initiated this sign-in, no further action is necessary. If you did not authorize this login, please notify PHD Operations immediately.
+        </p>
+        <div style="margin: 24px 0 16px 0;">
+          <a href="${baseUrl}" style="background-color: #171717; color: #FFFFFF; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600; display: inline-block;">
+            Open Portal
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management & Rights Clearance System &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 160px;">Account Role:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.role.replace(/_/g, ' ')}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Sign-In Timestamp:</td><td style="padding: 8px 0; color: #ffffff;">${loginTime}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">IP Address:</td><td style="padding: 8px 0; color: #6366f1; font-family: monospace;">${params.ipAddress}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Client Device / App:</td><td style="padding: 8px 0; color: #d1d5db; font-size: 12px;">${params.userAgent}</td></tr>
-      </table>
-      <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
-        If you initiated this sign-in, no further action is necessary. If you did not authorize this login, please contact PHD Operations immediately to secure your account.
-      </p>
-      <div style="margin: 24px 0;">
-        <a href="${params.appUrl}" style="background-color: #1e2433; color: #c7d2fe; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 13px; display: inline-block; border: 1px solid #374151;">
-          Access Portal
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 24px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        PHD Services Release Management & Rights Clearance System. Automated Security Notification.
-      </p>
     </div>
   `;
 
@@ -341,38 +382,42 @@ export async function sendUserInvitationEmail(params: {
   tempPassword?: string;
   appUrl: string;
 }) {
-  const loginUrl = `${params.appUrl}/login`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const loginUrl = `${baseUrl}/login`;
   const roleName = params.role.replace(/_/g, ' ');
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #6366f1; margin: 0 0 8px 0; font-size: 22px;">Welcome to PHD Services Portal</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">An authorized account has been provisioned for you by the Super Administrator.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #171717; margin-bottom: 8px;">PHD SERVICES &bull; ACCESS PROVISIONED</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Welcome to PHD Services Portal</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">An authorized account has been provisioned for you by the Super Administrator.</p>
+        </div>
+        <p style="color: #171717; font-size: 13px; margin-bottom: 16px; line-height: 1.5;">
+          Hello <strong>${params.name}</strong>, you have been invited as a <strong>${roleName}</strong> on the PHD Services Release Management & Rights Clearance Portal.
+        </p>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; background-color: #F4F4F2; border-radius: 6px; padding: 16px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #E8E8E8;"><td style="padding: 10px 16px; color: #777777; width: 160px;">Login Email:</td><td style="padding: 10px 16px; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.toEmail}</td></tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;"><td style="padding: 10px 16px; color: #777777;">Assigned Role:</td><td style="padding: 10px 16px; color: #171717; font-weight: 600;">${roleName}</td></tr>
+          ${
+            params.tempPassword
+              ? `<tr><td style="padding: 10px 16px; color: #777777;">Initial Password:</td><td style="padding: 10px 16px; color: #269568; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.tempPassword}</td></tr>`
+              : ''
+          }
+        </table>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${loginUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            Sign In to Portal
+          </a>
+        </div>
+        <p style="color: #777777; font-size: 12px; line-height: 1.5;">
+          For security, we recommend updating your password after your initial sign-in.
+        </p>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Ltd. Official Platform Provisioning Notice &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <p style="color: #e5e7eb; font-size: 14px; margin-bottom: 16px;">
-        Hello <strong>${params.name}</strong>, you have been invited as a <strong>${roleName}</strong> on the PHD Services Release Management & Rights Clearance Portal.
-      </p>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; background-color: #12151b; border-radius: 6px; padding: 16px;">
-        <tr><td style="padding: 10px 16px; color: #9ca3af; width: 160px;">Login Email:</td><td style="padding: 10px 16px; color: #ffffff; font-family: monospace; font-weight: bold;">${params.toEmail}</td></tr>
-        <tr><td style="padding: 10px 16px; color: #9ca3af;">Assigned Role:</td><td style="padding: 10px 16px; color: #6366f1; font-weight: 600;">${roleName}</td></tr>
-        ${
-          params.tempPassword
-            ? `<tr><td style="padding: 10px 16px; color: #9ca3af;">Initial Password:</td><td style="padding: 10px 16px; color: #10b981; font-family: monospace; font-weight: bold;">${params.tempPassword}</td></tr>`
-            : ''
-        }
-      </table>
-      <div style="margin: 32px 0;">
-        <a href="${loginUrl}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          Sign In to Portal
-        </a>
-      </div>
-      <p style="color: #9ca3af; font-size: 12px;">
-        For security, we recommend updating your password immediately after your initial sign-in.
-      </p>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        PHD Services Ltd. Official Platform Provisioning Notice.
-      </p>
     </div>
   `;
 
@@ -395,31 +440,35 @@ export async function sendArtistSubmissionReceiptEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const releaseUrl = `${params.appUrl}/artist/releases/${params.releaseId}`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const releaseUrl = `${baseUrl}/artist/releases/${params.releaseId}`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #6366f1; margin: 0 0 8px 0; font-size: 22px;">Submission Received — Legal Review Underway</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Hello ${params.artistName}, your release has been successfully submitted to PHD Services.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #171717; margin-bottom: 8px;">SUBMISSION CONFIRMATION &bull; LEGAL REVIEW UNDERWAY</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Release Submission Received</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">Hello ${params.artistName}, your release has been successfully submitted to PHD Services.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Tracks Submitted:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.trackCount}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Planned Release Date:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.plannedReleaseDate || 'TBD'}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Status:</td><td style="padding: 10px 0; color: #D69E36; font-weight: 600;">Pending Legal & Clearance Inspection</td></tr>
+        </table>
+        <p style="color: #777777; font-size: 12px; line-height: 1.6;">
+          Your digital signatures on Schedule A (Master Register) and Schedule B (Rights Clearance Register) have been cryptographically stamped. The release record is now locked against unilateral alterations while PHD reviews your deliverables, ownership percentages, and rights documentation.
+        </p>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${releaseUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            View Submission Status
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management Portal &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #6366f1; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Tracks Submitted:</td><td style="padding: 8px 0; color: #ffffff;">${params.trackCount}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Planned Release Date:</td><td style="padding: 8px 0; color: #ffffff;">${params.plannedReleaseDate || 'TBD'}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Status:</td><td style="padding: 8px 0; color: #f59e0b; font-weight: 600;">Pending Legal & Clearance Inspection</td></tr>
-      </table>
-      <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
-        Your digital signatures on Schedule A (Master Register) and Schedule B (Rights Clearance Register) have been cryptographically stamped. The release record is now locked against unilateral alterations while PHD reviews your deliverables, ownership percentages, and rights documentation.
-      </p>
-      <div style="margin: 28px 0;">
-        <a href="${releaseUrl}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          View Submission Status
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 28px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        You will receive an automated email notification as soon as PHD approves your submission or requests any revision.
-      </p>
     </div>
   `;
 
@@ -441,27 +490,31 @@ export async function sendReleaseResubmittedEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const reviewUrl = `${params.appUrl}/admin/releases/${params.releaseId}/review`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const reviewUrl = `${baseUrl}/admin/releases/${params.releaseId}/review`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #3b82f6; margin: 0 0 8px 0; font-size: 22px;">Notice: Release Resubmitted for Final Review</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">The artist has addressed the requested revisions and resubmitted the release package.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #2563EB; margin-bottom: 8px;">RESUBMISSION &bull; READY FOR COUNTERSIGNING</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Release Resubmitted for Final Review</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">The artist has addressed the requested revisions and resubmitted the release package.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Artist:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.artistName}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Status:</td><td style="padding: 10px 0; color: #2563EB; font-weight: 600;">RESUBMITTED (Ready for Countersigning)</td></tr>
+        </table>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${reviewUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            Open Review Console & Countersign
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Legal & Operations Notification Engine &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #3b82f6; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Artist:</td><td style="padding: 8px 0; color: #ffffff;">${params.artistName}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Status:</td><td style="padding: 8px 0; color: #3b82f6; font-weight: 600;">RESUBMITTED (Ready for Countersigning)</td></tr>
-      </table>
-      <div style="margin: 32px 0;">
-        <a href="${reviewUrl}" style="background-color: #3b82f6; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          Open Review Console & Countersign
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        PHD Services Legal & Operations Notification Engine.
-      </p>
     </div>
   `;
 
@@ -486,30 +539,34 @@ export async function sendAdminExecutionNotificationEmail(params: {
   releaseId: string;
   appUrl: string;
 }) {
-  const reviewUrl = `${params.appUrl}/admin/releases/${params.releaseId}/review`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const reviewUrl = `${baseUrl}/admin/releases/${params.releaseId}/review`;
   const executionTime = new Date().toUTCString();
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #10b981; margin: 0 0 8px 0; font-size: 22px;">Release Fully Executed & Sealed</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Schedules A & B have been legally executed by both parties and sealed in the vault.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #269568; margin-bottom: 8px;">EXECUTION &bull; SEALED & ARCHIVED</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Release Fully Executed & Sealed</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">Schedules A & B have been legally executed by both parties and cryptographically sealed.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Release Title:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.releaseTitle}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Reference Number:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.referenceNumber}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Primary Artist:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.artistName}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">PHD Countersigner:</td><td style="padding: 10px 0; color: #171717; font-weight: 500;">${params.representativeName} (${params.position})</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Execution Timestamp:</td><td style="padding: 10px 0; color: #171717;">${executionTime}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">SHA-256 Seal Hash:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace; font-size: 11px;">${params.documentHash}</td></tr>
+        </table>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${reviewUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            View Sealed Executed Agreement
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          Automated confirmation for PHD Administrative Archive and Executive Records &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Release Title:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.releaseTitle}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Reference Number:</td><td style="padding: 8px 0; color: #10b981; font-family: monospace; font-weight: bold;">${params.referenceNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Primary Artist:</td><td style="padding: 8px 0; color: #ffffff;">${params.artistName}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">PHD Countersigner:</td><td style="padding: 8px 0; color: #ffffff;">${params.representativeName} (${params.position})</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Execution Timestamp:</td><td style="padding: 8px 0; color: #ffffff;">${executionTime}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">SHA-256 Seal Hash:</td><td style="padding: 8px 0; color: #10b981; font-family: monospace; font-size: 11px;">${params.documentHash}</td></tr>
-      </table>
-      <div style="margin: 32px 0;">
-        <a href="${reviewUrl}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          View Sealed Executed Agreement
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        Automated confirmation for PHD Administrative Archive and Executive Records.
-      </p>
     </div>
   `;
 
@@ -529,34 +586,36 @@ export async function sendArtistWelcomeEmail(params: {
   contractNumber: string;
   appUrl: string;
 }) {
-  const portalUrl = `${params.appUrl}/artist`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const portalUrl = `${baseUrl}/artist`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #6366f1; margin: 0 0 8px 0; font-size: 22px;">Welcome to PHD Services!</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">Your artist account has been successfully verified and activated.</p>
-      </div>
-      <p style="color: #e5e7eb; font-size: 14px; margin-bottom: 16px;">
-        Hello <strong>${params.artistName}</strong>, welcome to the PHD Services Release Management & Rights Clearance Portal. Your account is tied to authorized contract <strong style="color: #6366f1; font-family: monospace;">${params.contractNumber}</strong>.
-      </p>
-      <div style="background-color: #12151b; border: 1px solid #1f2430; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr><td style="padding: 6px 0; color: #9ca3af; width: 160px;">Artist Name:</td><td style="padding: 6px 0; color: #ffffff; font-weight: 600;">${params.artistName}</td></tr>
-          <tr><td style="padding: 6px 0; color: #9ca3af;">Account Email:</td><td style="padding: 6px 0; color: #ffffff;">${params.artistEmail}</td></tr>
-          <tr><td style="padding: 6px 0; color: #9ca3af;">Linked Contract:</td><td style="padding: 6px 0; color: #10b981; font-family: monospace; font-weight: bold;">${params.contractNumber}</td></tr>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #171717; margin-bottom: 8px;">PHD SERVICES &bull; ARTIST REGISTRATION</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Welcome to PHD Services</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">Your artist account has been verified and linked to your distribution agreement.</p>
+        </div>
+        <p style="color: #171717; font-size: 13px; margin-bottom: 16px; line-height: 1.5;">
+          Hello <strong>${params.artistName}</strong>, welcome to the PHD Services Release Management & Rights Clearance Portal. Your account is tied to authorized contract <strong style="font-family: 'Geist Mono', monospace;">${params.contractNumber}</strong>.
+        </p>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; background-color: #F4F4F2; border-radius: 6px; padding: 16px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #E8E8E8;"><td style="padding: 10px 16px; color: #777777; width: 160px;">Artist Name:</td><td style="padding: 10px 16px; color: #171717; font-weight: 600;">${params.artistName}</td></tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;"><td style="padding: 10px 16px; color: #777777;">Account Email:</td><td style="padding: 10px 16px; color: #171717; font-family: 'Geist Mono', monospace;">${params.artistEmail}</td></tr>
+          <tr><td style="padding: 10px 16px; color: #777777;">Linked Contract:</td><td style="padding: 10px 16px; color: #269568; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.contractNumber}</td></tr>
         </table>
+        <p style="color: #777777; font-size: 12px; line-height: 1.6;">
+          You can now register music releases, upload lossless masters and cover artwork, manage split sheet clearances, and monitor distribution approval directly from your dashboard.
+        </p>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${portalUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            Access Artist Portal
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Release Management & Rights Clearance Engine &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
-        You can now register your music releases, upload lossless masters and cover artwork, download statutory split agreements, and track distribution readiness directly from your artist dashboard.
-      </p>
-      <div style="margin: 28px 0;">
-        <a href="${portalUrl}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          Go to Artist Portal
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        PHD Services Release Management & Rights Clearance Engine • Automated Onboarding Notification.
-      </p>
     </div>
   `;
 
@@ -576,27 +635,31 @@ export async function sendNewArtistRegistrationAdminAlertEmail(params: {
   contractNumber: string;
   appUrl: string;
 }) {
-  const adminUrl = `${params.appUrl}/admin/contracts`;
+  const baseUrl = resolveUrl(params.appUrl);
+  const adminUrl = `${baseUrl}/admin/contracts`;
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0d11; color: #f3f4f6; padding: 40px; border-radius: 8px;">
-      <div style="border-bottom: 1px solid #1f2430; padding-bottom: 20px; margin-bottom: 24px;">
-        <h2 style="color: #10b981; margin: 0 0 8px 0; font-size: 22px;">New Artist Registration Verified</h2>
-        <p style="color: #9ca3af; margin: 0; font-size: 14px;">An artist has registered and claimed their authorized contract.</p>
+    <div style="background-color: #F4F4F2; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 36px 32px;">
+        <div style="border-bottom: 1px solid #E8E8E8; padding-bottom: 20px; margin-bottom: 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #269568; margin-bottom: 8px;">ADMINISTRATIVE ALERT &bull; ARTIST CLAIMED CONTRACT</div>
+          <h2 style="color: #171717; margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">New Artist Registration Verified</h2>
+          <p style="color: #777777; margin: 0; font-size: 13px; line-height: 1.5;">An artist has registered and successfully claimed their authorized contract.</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777; width: 170px;">Artist Name:</td><td style="padding: 10px 0; color: #171717; font-weight: 600;">${params.artistName}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Registered Email:</td><td style="padding: 10px 0; color: #171717; font-family: 'Geist Mono', monospace;">${params.artistEmail}</td></tr>
+          <tr style="border-bottom: 1px solid #F4F4F2;"><td style="padding: 10px 0; color: #777777;">Claimed Contract:</td><td style="padding: 10px 0; color: #269568; font-family: 'Geist Mono', monospace; font-weight: 700;">${params.contractNumber}</td></tr>
+          <tr><td style="padding: 10px 0; color: #777777;">Timestamp:</td><td style="padding: 10px 0; color: #171717;">${new Date().toUTCString()}</td></tr>
+        </table>
+        <div style="margin: 28px 0 20px 0;">
+          <a href="${adminUrl}" style="background-color: #171717; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block;">
+            View Contracts Console
+          </a>
+        </div>
+        <p style="color: #999999; font-size: 11px; margin-top: 32px; border-top: 1px solid #E8E8E8; padding-top: 16px; line-height: 1.5;">
+          PHD Services Administrative Operations Dispatcher &bull; <a href="https://media.phantomdigital.com.ng" style="color: #777777; text-decoration: underline;">media.phantomdigital.com.ng</a>
+        </p>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tr><td style="padding: 8px 0; color: #9ca3af; width: 180px;">Artist Name:</td><td style="padding: 8px 0; color: #ffffff; font-weight: 600;">${params.artistName}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Registered Email:</td><td style="padding: 8px 0; color: #ffffff;">${params.artistEmail}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Claimed Contract:</td><td style="padding: 8px 0; color: #10b981; font-family: monospace; font-weight: bold;">${params.contractNumber}</td></tr>
-        <tr><td style="padding: 8px 0; color: #9ca3af;">Timestamp:</td><td style="padding: 8px 0; color: #ffffff;">${new Date().toUTCString()}</td></tr>
-      </table>
-      <div style="margin: 28px 0;">
-        <a href="${adminUrl}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-          View Contracts Console
-        </a>
-      </div>
-      <p style="color: #6b7280; font-size: 11px; margin-top: 32px; border-top: 1px solid #1f2430; padding-top: 16px;">
-        PHD Services Administrative Operations Dispatcher.
-      </p>
     </div>
   `;
 
@@ -607,4 +670,3 @@ export async function sendNewArtistRegistrationAdminAlertEmail(params: {
     templateType: 'ADMIN_ARTIST_REGISTERED',
   });
 }
-
