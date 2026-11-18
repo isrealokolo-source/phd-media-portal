@@ -89,7 +89,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         newValue: { comments, sections, requestedDocuments },
       });
 
-      await sendRevisionRequestEmail({
+      sendRevisionRequestEmail({
         artistEmail,
         artistName,
         releaseTitle: release.title,
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         requestedDocuments: Array.isArray(requestedDocuments) ? requestedDocuments : undefined,
         releaseId: release.id,
         appUrl,
-      });
+      }).catch((err) => console.error('Failed to send revision email:', err));
 
       return NextResponse.json({ success: true, message: 'Revision requested', revisionRequest: revReq });
     }
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         newValue: { reason },
       });
 
-      await sendReleaseOnHoldEmail({
+      sendReleaseOnHoldEmail({
         artistEmail,
         artistName,
         releaseTitle: release.title,
@@ -148,9 +148,43 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         reason,
         releaseId: release.id,
         appUrl,
-      });
+      }).catch((err) => console.error('Failed to send on-hold email:', err));
 
       return NextResponse.json({ success: true, message: 'Release placed on hold' });
+    }
+
+    // OPTION B2: REMOVE HOLD
+    if (action === 'REMOVE_HOLD') {
+      await prisma.$transaction(async (tx) => {
+        await tx.review.create({
+          data: {
+            releaseId: params.id,
+            reviewerUserId: user.id,
+            reviewType: 'NOTE',
+            notes: 'Administrative hold removed; returned to active review queue.',
+          },
+        });
+
+        await tx.release.update({
+          where: { id: params.id },
+          data: {
+            status: 'SUBMITTED_PENDING_APPROVAL',
+            onHoldReason: null,
+          },
+        });
+      });
+
+      await createAuditLog({
+        releaseId: release.id,
+        userId: user.id,
+        userEmail: user.email,
+        action: 'HOLD_REMOVED',
+        entityType: 'Release',
+        entityId: release.id,
+        newValue: { status: 'SUBMITTED_PENDING_APPROVAL' },
+      });
+
+      return NextResponse.json({ success: true, message: 'Administrative hold removed' });
     }
 
     // OPTION C: COUNTERSIGN AND EXECUTE

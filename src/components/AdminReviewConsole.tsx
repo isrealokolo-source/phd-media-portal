@@ -201,6 +201,28 @@ export function AdminReviewConsole({
     }
   };
 
+  // Remove Hold Action
+  const handleRemoveHold = async () => {
+    setActionError('');
+    setSubmittingAction(true);
+    try {
+      const res = await fetch(`/api/releases/${release.id}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'REMOVE_HOLD',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to remove hold');
+      router.refresh();
+    } catch (err: any) {
+      setActionError(err.message);
+    } finally {
+      setSubmittingAction(false);
+    }
+  };
+
   // Countersign & Execute Action
   const handleCountersign = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,13 +312,24 @@ export function AdminReviewConsole({
 
           {!isExecuted && (
             <>
-              <button
-                type="button"
-                onClick={() => setShowHoldModal(true)}
-                className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] text-xs font-medium transition-colors"
-              >
-                Place On Hold
-              </button>
+              {release.status === 'ON_HOLD' ? (
+                <button
+                  type="button"
+                  disabled={submittingAction}
+                  onClick={handleRemoveHold}
+                  className="px-3 py-1.5 rounded-lg bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#269568] border border-[#A7F3D0] text-xs font-medium transition-colors"
+                >
+                  Remove Hold
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowHoldModal(true)}
+                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] text-xs font-medium transition-colors"
+                >
+                  Place On Hold
+                </button>
+              )}
 
               <button
                 type="button"
@@ -318,13 +351,27 @@ export function AdminReviewConsole({
           )}
 
           {isExecuted && (
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href={`/api/releases/${release.id}/pdf?type=schedA`}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#F4F4F2] text-[#171717] rounded-lg text-xs font-medium border border-[#E8E8E8] transition-colors"
+              >
+                <FileDown className="w-3.5 h-3.5 text-[#777777]" />
+                <span>Schedule A PDF</span>
+              </a>
+              <a
+                href={`/api/releases/${release.id}/pdf?type=schedB`}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#F4F4F2] text-[#171717] rounded-lg text-xs font-medium border border-[#E8E8E8] transition-colors"
+              >
+                <FileDown className="w-3.5 h-3.5 text-[#777777]" />
+                <span>Schedule B PDF</span>
+              </a>
               <a
                 href={`/api/releases/${release.id}/pdf?type=combined`}
                 className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-colors"
               >
                 <FileDown className="w-4 h-4" />
-                <span>Download Executed Agreement PDF</span>
+                <span>Combined Agreement PDF</span>
               </a>
             </div>
           )}
@@ -590,7 +637,7 @@ export function AdminReviewConsole({
                     {t.audioFileUrl && (
                       <a
                         href={`/api/releases/${release.id}/download?type=track&trackId=${t.id}`}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#252C3D] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] transition-colors"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#EAEAEA] text-[#171717] text-[11px] font-medium border border-[#E8E8E8] transition-colors"
                         title={`Download audio master for ${t.title}`}
                       >
                         <FileDown className="w-3.5 h-3.5" />
@@ -707,7 +754,7 @@ export function AdminReviewConsole({
                     {item.supportingDocUrl && (
                       <a
                         href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${item.id}`}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-[#252C3D] text-[#269568] text-[11px] font-medium border border-[#A7F3D0] transition-colors"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-[#EAEAEA] text-[#269568] text-[11px] font-medium border border-[#A7F3D0] transition-colors"
                         title="Download signed clearance agreement PDF"
                       >
                         <FileDown className="w-3.5 h-3.5" />
@@ -752,7 +799,7 @@ export function AdminReviewConsole({
 
               <a
                 href={`/api/releases/${release.id}/download?type=bundle`}
-                className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-900/40 flex-shrink-0"
+                className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-sm flex-shrink-0"
               >
                 <FileDown className="w-4 h-4" />
                 <span>Download Complete Archive (.ZIP)</span>
@@ -784,7 +831,7 @@ export function AdminReviewConsole({
                 {artwork?.fileUrl && (
                   <a
                     href={`/api/releases/${release.id}/download?type=artwork`}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors flex-shrink-0"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#EAEAEA] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors flex-shrink-0"
                     title="Download clean formatted cover artwork"
                   >
                     <FileDown className="w-3.5 h-3.5" />
@@ -811,7 +858,7 @@ export function AdminReviewConsole({
 
                 <a
                   href={`/api/releases/${release.id}/download?type=bundle`}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors flex-shrink-0"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#EAEAEA] text-[#171717] rounded-lg text-xs font-semibold border border-[#E8E8E8] transition-colors flex-shrink-0"
                 >
                   <FileDown className="w-3.5 h-3.5" />
                   <span>Download All</span>
@@ -882,7 +929,7 @@ export function AdminReviewConsole({
 
                         <a
                           href={`/api/releases/${release.id}/download?type=clearance&clearanceId=${c.id}`}
-                          className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#252C3D] text-[#269568] rounded-lg text-xs font-medium border border-[#A7F3D0] transition-colors flex-shrink-0"
+                          className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#EAEAEA] text-[#269568] rounded-lg text-xs font-medium border border-[#A7F3D0] transition-colors flex-shrink-0"
                           title="Download signed PDF document"
                         >
                           <FileDown className="w-3.5 h-3.5" />
@@ -956,7 +1003,7 @@ export function AdminReviewConsole({
               type="button"
               onClick={handleSaveBudgetRates}
               disabled={savingBudget}
-              className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-900/30 disabled:opacity-50"
+              className="flex items-center space-x-1.5 px-4 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{savingBudget ? 'Saving Rates...' : 'Save Approved Rates'}</span>
@@ -1119,7 +1166,7 @@ export function AdminReviewConsole({
                           updated[idx].isEligibleRecoupable = e.target.checked;
                           setAdminBudgetItems(updated);
                         }}
-                        className="accent-indigo-600 rounded"
+                        className="accent-[#171717] rounded"
                       />
                       <span>Eligible Recoupable Cost (70/30 Waterfall)</span>
                     </label>
@@ -1443,7 +1490,7 @@ export function AdminReviewConsole({
                   required
                   checked={confirmedInspection}
                   onChange={(e) => setConfirmedInspection(e.target.checked)}
-                  className="mt-0.5 accent-indigo-600 rounded"
+                  className="mt-0.5 accent-[#171717] rounded"
                 />
                 <span className="text-[#171717] leading-relaxed font-medium">
                   I certify that I have inspected the release deliverables, rights documentation, and contributor splits, and am duly authorized to execute Schedules A & B on behalf of PHD Services.
@@ -1461,7 +1508,7 @@ export function AdminReviewConsole({
                 <button
                   type="submit"
                   disabled={submittingAction}
-                  className="px-6 py-2 bg-[#171717] hover:bg-[#262626] text-white font-bold rounded-lg shadow-md shadow-indigo-900/30"
+                  className="px-6 py-2 bg-[#171717] hover:bg-[#262626] text-white font-bold rounded-lg shadow-sm"
                 >
                   {submittingAction ? 'Executing & Generating PDFs...' : 'Confirm Execution & Generate Signed PDFs'}
                 </button>

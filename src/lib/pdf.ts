@@ -22,10 +22,37 @@ function calculateSha256(buffer: Uint8Array | Buffer): string {
   return crypto.createHash('sha256').update(buffer).digest('hex');
 }
 
+/**
+ * Sanitizes arbitrary user/system strings so pdf-lib StandardFonts (WinAnsi encoding)
+ * never throw encoding exceptions on symbols like ₦, em-dashes, smart quotes, or diacritics.
+ */
+function sanitizePdfText(input: any): string {
+  if (input === null || input === undefined) return '';
+  return String(input)
+    .replace(/₦/g, 'NGN ')
+    .replace(/[—–]/g, '-')
+    .replace(/•/g, '*')
+    .replace(/…/g, '...')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
+}
+
+function patchPageDrawText(p: any) {
+  const origDrawText = p.drawText.bind(p);
+  p.drawText = (text: string, options?: any) => {
+    return origDrawText(sanitizePdfText(text), options);
+  };
+  return p;
+}
+
 // Helper to wrap text into lines fitting a given width
 function wrapText(text: string, maxWidth: number, font: any, fontSize: number): string[] {
-  if (!text) return [];
-  const words = text.split(' ');
+  const safeText = sanitizePdfText(text);
+  if (!safeText) return [];
+  const words = safeText.split(' ');
   const lines: string[] = [];
   let currentLine = '';
 
@@ -53,7 +80,7 @@ export async function generateScheduleAPdf(release: any): Promise<GeneratePdfRes
   const artistSig = release.signatures?.find((s: any) => s.signerType === 'ARTIST');
   const phdSig = release.signatures?.find((s: any) => s.signerType === 'PHD_REPRESENTATIVE');
 
-  let page = doc.addPage([595.28, 841.89]); // A4
+  let page = patchPageDrawText(doc.addPage([595.28, 841.89])); // A4
   const { width, height } = page.getSize();
   const margin = 40;
   const contentWidth = width - margin * 2;
@@ -63,7 +90,7 @@ export async function generateScheduleAPdf(release: any): Promise<GeneratePdfRes
     if (y - neededHeight < margin + 40) {
       // Add footer to current page
       drawFooter(page);
-      page = doc.addPage([595.28, 841.89]);
+      page = patchPageDrawText(doc.addPage([595.28, 841.89]));
       y = height - margin;
       drawHeader(page);
     }
@@ -583,16 +610,19 @@ export async function generateScheduleAPdf(release: any): Promise<GeneratePdfRes
   const pdfBytes = await doc.save();
   const documentHash = calculateSha256(pdfBytes);
 
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
   const fileName = `Schedule_A_${release.referenceNumber}_v${release.currentVersion || 1}.pdf`;
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
   const filePath = path.join(uploadDir, fileName);
-  fs.writeFileSync(filePath, pdfBytes);
+  try {
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    fs.writeFileSync(filePath, pdfBytes);
+  } catch (err) {
+    console.warn('Local PDF cache write skipped:', err);
+  }
 
   return {
     filePath,
-    fileUrl: `/uploads/pdfs/${fileName}`,
+    fileUrl: `/api/releases/${release.id}/pdf?type=schedA`,
     documentHash,
     pdfBytes,
   };
@@ -608,7 +638,7 @@ export async function generateScheduleBPdf(release: any): Promise<GeneratePdfRes
   const artistSig = release.signatures?.find((s: any) => s.signerType === 'ARTIST');
   const phdSig = release.signatures?.find((s: any) => s.signerType === 'PHD_REPRESENTATIVE');
 
-  let page = doc.addPage([595.28, 841.89]); // A4
+  let page = patchPageDrawText(doc.addPage([595.28, 841.89])); // A4
   const { width, height } = page.getSize();
   const margin = 40;
   const contentWidth = width - margin * 2;
@@ -617,7 +647,7 @@ export async function generateScheduleBPdf(release: any): Promise<GeneratePdfRes
   const checkAddPage = (neededHeight: number) => {
     if (y - neededHeight < margin + 40) {
       drawFooter(page);
-      page = doc.addPage([595.28, 841.89]);
+      page = patchPageDrawText(doc.addPage([595.28, 841.89]));
       y = height - margin;
       drawHeader(page);
     }
@@ -1017,16 +1047,19 @@ export async function generateScheduleBPdf(release: any): Promise<GeneratePdfRes
   const pdfBytes = await doc.save();
   const documentHash = calculateSha256(pdfBytes);
 
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
   const fileName = `Schedule_B_${release.referenceNumber}_v${release.currentVersion || 1}.pdf`;
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
   const filePath = path.join(uploadDir, fileName);
-  fs.writeFileSync(filePath, pdfBytes);
+  try {
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    fs.writeFileSync(filePath, pdfBytes);
+  } catch (err) {
+    console.warn('Local PDF cache write skipped:', err);
+  }
 
   return {
     filePath,
-    fileUrl: `/uploads/pdfs/${fileName}`,
+    fileUrl: `/api/releases/${release.id}/pdf?type=schedB`,
     documentHash,
     pdfBytes,
   };
@@ -1052,11 +1085,16 @@ export async function generateCombinedSchedulesPdf(release: any): Promise<Genera
   const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
   const fileName = `Combined_Schedules_A_and_B_${release.referenceNumber}_v${release.currentVersion || 1}.pdf`;
   const filePath = path.join(uploadDir, fileName);
-  fs.writeFileSync(filePath, pdfBytes);
+  try {
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    fs.writeFileSync(filePath, pdfBytes);
+  } catch (err) {
+    console.warn('Local PDF cache write skipped:', err);
+  }
 
   return {
     filePath,
-    fileUrl: `/uploads/pdfs/${fileName}`,
+    fileUrl: `/api/releases/${release.id}/pdf?type=combined`,
     documentHash,
     pdfBytes,
   };

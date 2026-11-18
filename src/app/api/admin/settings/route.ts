@@ -3,8 +3,14 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
+    const user = await getCurrentUser();
+    if (!user || !isPhdAdmin(user.role)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
     const settings = await prisma.systemSettings.findUnique({
       where: { id: 'default' },
     });

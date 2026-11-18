@@ -211,7 +211,7 @@ export function ContractsConsole({ initialContracts, currentUser }: ContractsCon
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-semibold shadow-lg shadow-indigo-900/30 transition-all self-start sm:self-auto"
+          className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-semibold shadow-sm transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Upload & Authorize Contract</span>

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser, isPhdAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -37,7 +38,9 @@ export default async function AdminUsersPage() {
 
   return (
     <AppLayout user={user} breadcrumb="Users & Access Controls">
-      <UserManagementConsole currentUser={user} initialUsers={users as any} />
+      <Suspense fallback={<div className="p-8 text-xs text-[#777777]">Loading user management console...</div>}>
+        <UserManagementConsole currentUser={user} initialUsers={users as any} />
+      </Suspense>
     </AppLayout>
   );
 }

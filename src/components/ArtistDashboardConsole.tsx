@@ -200,6 +200,7 @@ export function ArtistDashboardConsole({ initialReleases, user }: ArtistDashboar
         <div className="flex items-center space-x-3">
           <Link
             href="/artist/releases/new"
+            prefetch={false}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-md bg-[#171717] hover:bg-[#262626] text-white font-medium text-xs transition-colors shadow-sm"
           >
             <PlusCircle className="w-4 h-4" />
@@ -335,6 +336,7 @@ export function ArtistDashboardConsole({ initialReleases, user }: ArtistDashboar
             ) : (
               <Link
                 href="/artist/releases/new"
+                prefetch={false}
                 className="inline-flex items-center space-x-2 px-4 py-2 rounded-md bg-[#171717] hover:bg-[#262626] text-white text-xs font-medium"
               >
                 <PlusCircle className="w-4 h-4" />

@@ -118,7 +118,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         },
       });
 
-      // 4. Update status to SUBMITTED_PENDING_APPROVAL (or RESUBMITTED)
+      // 4. Mark any open revision requests as resolved on resubmission
+      if (release.status === 'REVISION_REQUESTED') {
+        await tx.revisionRequest.updateMany({
+          where: { releaseId: params.id, resolved: false },
+          data: { resolved: true, resolvedAt: submissionTime },
+        });
+      }
+
+      // 5. Update status to SUBMITTED_PENDING_APPROVAL (or RESUBMITTED)
       const newStatus = release.status === 'REVISION_REQUESTED' ? 'RESUBMITTED' : 'SUBMITTED_PENDING_APPROVAL';
 
       const updatedRelease = await tx.release.update({

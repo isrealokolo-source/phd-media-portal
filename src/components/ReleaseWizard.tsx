@@ -125,11 +125,23 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
   const artworkDeliverable = deliverables.find((d) => d.deliverableKey === 'cover_artwork');
 
-  // Synchronous auto-save logic with explicit payload override
-  const saveChanges = async (updates: any = {}) => {
+  // Synchronous auto-save logic with complete release state synchronization
+  const saveChanges = async (updates: any = {}, throwOnError = false) => {
     setIsSaving(true);
     try {
       const payload = {
+        title: updates.title !== undefined ? updates.title : release.title,
+        releaseType: updates.releaseType !== undefined ? updates.releaseType : release.releaseType,
+        primaryArtist: updates.primaryArtist !== undefined ? updates.primaryArtist : release.primaryArtist,
+        featuredArtists: updates.featuredArtists !== undefined ? updates.featuredArtists : release.featuredArtists,
+        recordLabel: updates.recordLabel !== undefined ? updates.recordLabel : release.recordLabel,
+        genre: updates.genre !== undefined ? updates.genre : release.genre,
+        subgenre: updates.subgenre !== undefined ? updates.subgenre : release.subgenre,
+        plannedReleaseDate: updates.plannedReleaseDate !== undefined ? updates.plannedReleaseDate : release.plannedReleaseDate,
+        territoryType: updates.territoryType !== undefined ? updates.territoryType : release.territoryType,
+        territoryDetails: updates.territoryDetails !== undefined ? updates.territoryDetails : release.territoryDetails,
+        releaseDescription: updates.releaseDescription !== undefined ? updates.releaseDescription : release.releaseDescription,
+        currency: updates.currency !== undefined ? updates.currency : release.currency,
         tracks: updates.tracks !== undefined ? updates.tracks : tracks,
         clearanceItems: updates.clearanceItems !== undefined ? updates.clearanceItems : clearanceItems,
         deliverables: updates.deliverables !== undefined ? updates.deliverables : deliverables,
@@ -145,7 +157,10 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
 
       const data = await res.json();
       if (data.success && data.release) {
-        setRelease(data.release);
+        setRelease((prev: any) => ({
+          ...prev,
+          ...data.release,
+        }));
         if (Array.isArray(data.release.tracks)) {
           setTracks(data.release.tracks);
         }
@@ -165,7 +180,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
       }
     } catch (err: any) {
       console.error('Auto-save error:', err);
-      throw err;
+      if (throwOnError) throw err;
     } finally {
       setIsSaving(false);
     }
@@ -240,6 +255,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
               audioFileName: file.name,
               audioFileSize: file.size,
               finalMasterDelivered: 'Yes',
+              duration: metadata?.duration || t.duration || '',
               audioSampleRate: metadata?.sampleRate || t.audioSampleRate,
               audioBitDepth: metadata?.bitDepth || t.audioBitDepth,
               audioChannels: metadata?.channels || t.audioChannels,
@@ -454,14 +470,20 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
   };
 
   const removeTrack = (index: number) => {
-    const updated = tracks.filter((_, i) => i !== index);
+    const updated = tracks
+      .filter((_, i) => i !== index)
+      .map((t, i) => ({ ...t, trackNumber: i + 1 }));
     setTracks(updated);
     saveChanges({ tracks: updated });
   };
 
   const updateTrack = (index: number, field: string, val: any) => {
     const updated = [...tracks];
-    updated[index] = { ...updated[index], [field]: val };
+    const nextItem: any = { ...updated[index], [field]: val };
+    if (field === 'lyricsText') {
+      nextItem.lyricsDelivered = String(val || '').trim() ? 'Yes' : 'No';
+    }
+    updated[index] = nextItem;
     setTracks(updated);
   };
 
@@ -571,12 +593,15 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
     setSubmitting(true);
     try {
       // 1. Force explicit database synchronization of all latest client states
-      await saveChanges({
-        tracks,
-        clearanceItems,
-        deliverables,
-        budgetItems,
-      });
+      await saveChanges(
+        {
+          tracks,
+          clearanceItems,
+          deliverables,
+          budgetItems,
+        },
+        true
+      );
 
       // 2. Submit to execution endpoint
       const res = await fetch(`/api/releases/${release.id}/submit`, {
@@ -686,11 +711,11 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold">STEP 0{s.id}</span>
+              <span className={`text-[10px] font-mono font-bold ${currentStep === s.id ? 'text-white/80' : ''}`}>STEP 0{s.id}</span>
               {currentStep > s.id && <Check className="w-3 h-3 text-[#269568]" />}
             </div>
-            <p className="text-xs font-semibold text-[#171717] mt-1 truncate">{s.title}</p>
-            <p className="text-[10px] text-[#999999] truncate mt-0.5">{s.desc}</p>
+            <p className={`text-xs font-semibold mt-1 truncate ${currentStep === s.id ? 'text-white' : 'text-[#171717]'}`}>{s.title}</p>
+            <p className={`text-[10px] truncate mt-0.5 ${currentStep === s.id ? 'text-[#EAEAEA]' : 'text-[#999999]'}`}>{s.desc}</p>
           </button>
         ))}
       </div>
@@ -1322,9 +1347,9 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                                 {uploadProgress[`track_${idx}`] || 0}%
                               </span>
                             </div>
-                            <div className="w-full h-2 bg-white rounded-full overflow-hidden">
+                            <div className="w-full h-2 bg-[#F4F4F2] rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-200"
+                                className="h-full bg-[#171717] rounded-full transition-all duration-200"
                                 style={{ width: `${uploadProgress[`track_${idx}`] || 0}%` }}
                               />
                             </div>
@@ -1363,7 +1388,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             />
                           </div>
                         ) : (
-                          <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#E8E8E8] hover:border-indigo-500/50 rounded-lg cursor-pointer bg-white transition-colors text-center group">
+                          <label className="flex flex-col items-center justify-center p-5 border border-dashed border-[#E8E8E8] hover:border-[#171717] rounded-lg cursor-pointer bg-white transition-colors text-center group">
                             <div className="w-10 h-10 rounded-lg bg-[#F4F4F2] border border-[#E8E8E8] flex items-center justify-center text-[#171717] mb-2 group-hover:scale-105 transition-transform">
                               <Upload className="w-5 h-5" />
                             </div>
@@ -1446,7 +1471,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                     <AlertTriangle className="w-4 h-4" />
                     <span>Reviewer Revision Instructions</span>
                   </div>
-                  <p className="text-xs text-amber-200/90 whitespace-pre-line pl-6">
+                  <p className="text-xs text-[#171717] whitespace-pre-line pl-6">
                     {release.revisionRequests[0].comments}
                   </p>
                   {release.revisionRequests[0].requestedDocuments && (
@@ -1462,7 +1487,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               ? docs.map((d: string) => (
                                   <span
                                     key={d}
-                                    className="px-2.5 py-1 rounded bg-amber-900/60 text-amber-200 border border-amber-700/60 text-xs font-semibold"
+                                    className="px-2.5 py-1 rounded bg-white text-[#D69E36] border border-[#FDE68A] text-xs font-semibold"
                                   >
                                     {d}
                                   </span>
@@ -1470,7 +1495,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                               : null;
                           } catch {
                             return (
-                              <span className="text-xs text-amber-200">
+                              <span className="text-xs text-[#D69E36]">
                                 {release.revisionRequests[0].requestedDocuments}
                               </span>
                             );
@@ -1782,7 +1807,7 @@ export function ReleaseWizard({ initialRelease, user }: ReleaseWizardProps) {
                             </div>
                           ) : (
                             <div>
-                              <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#E8E8E8] hover:border-indigo-500/60 rounded-lg cursor-pointer bg-white transition-colors text-center group">
+                              <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#E8E8E8] hover:border-[#171717] rounded-lg cursor-pointer bg-white transition-colors text-center group">
                                 <Upload className="w-5 h-5 text-[#171717] mb-1 group-hover:scale-105 transition-transform" />
                                 <span className="text-xs font-semibold text-[#171717]">
                                   Upload Signed Agreement (PDF Only) *

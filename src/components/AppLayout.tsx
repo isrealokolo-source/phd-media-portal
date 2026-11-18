@@ -127,6 +127,7 @@ export function AppLayout({ user, children, breadcrumb, action }: AppLayoutProps
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={item.href === '/artist/releases/new' ? false : undefined}
                 className={`flex items-center space-x-2.5 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   isActive
                     ? 'bg-[#171717] text-white'
@@ -202,6 +203,7 @@ export function AppLayout({ user, children, breadcrumb, action }: AppLayoutProps
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={item.href === '/artist/releases/new' ? false : undefined}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center space-x-2.5 px-3 py-2 rounded-md text-xs font-medium ${
                         isActive
@@ -267,6 +269,7 @@ export function AppLayout({ user, children, breadcrumb, action }: AppLayoutProps
             {user?.role === 'ARTIST' && !action && (
               <Link
                 href="/artist/releases/new"
+                prefetch={false}
                 className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-[#171717] hover:bg-[#262626] text-white text-xs font-medium transition-colors shadow-sm"
               >
                 <PlusCircle className="w-3.5 h-3.5" />

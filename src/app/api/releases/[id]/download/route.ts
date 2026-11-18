@@ -7,11 +7,11 @@ import fs from 'fs';
 import path from 'path';
 
 function getS3Client(): { client: S3Client; bucket: string } | null {
-  const bucket = process.env.S3_BUCKET;
-  const accessKeyId = process.env.S3_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
-  const region = process.env.S3_REGION || 'auto';
-  const endpoint = process.env.S3_ENDPOINT;
+  const bucket = process.env.S3_BUCKET?.trim();
+  const accessKeyId = process.env.S3_ACCESS_KEY_ID?.trim();
+  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY?.trim();
+  const region = (process.env.S3_REGION || 'auto').trim();
+  const endpoint = process.env.S3_ENDPOINT?.trim();
 
   if (!bucket || !accessKeyId || !secretAccessKey) return null;
 
@@ -34,7 +34,7 @@ function sanitizeForFilename(str: string): string {
 
 function getFileExtension(fileUrl: string, defaultExt: string): string {
   try {
-    const cleanUrl = fileUrl.split('?')[0];
+    const cleanUrl = fileUrl.replace(/[\r\n]+/g, '').trim().split('?')[0];
     const ext = path.extname(cleanUrl).toLowerCase();
     return ext ? ext.replace('.', '') : defaultExt;
   } catch {
@@ -44,19 +44,27 @@ function getFileExtension(fileUrl: string, defaultExt: string): string {
 
 async function fetchFileBuffer(fileUrl: string): Promise<Buffer | null> {
   try {
+    const cleaned = fileUrl.replace(/[\r\n]+/g, '').trim();
+    if (!cleaned) return null;
+
     const s3 = getS3Client();
 
-    // 1. If URL starts with /api/files/
-    if (fileUrl.startsWith('/api/files/')) {
-      const key = fileUrl.replace('/api/files/', '').split('?')[0];
+    // Extract storage key if URL contains 'uploads/' or '/api/files/'
+    let storageKey: string | null = null;
+    if (cleaned.startsWith('/api/files/')) {
+      storageKey = cleaned.replace('/api/files/', '').split('?')[0];
+    } else if (cleaned.includes('uploads/')) {
+      storageKey = cleaned.slice(cleaned.indexOf('uploads/')).split('?')[0];
+    }
 
-      // Try S3
+    if (storageKey) {
+      // 1. Try S3 / Cloudflare R2
       if (s3) {
         try {
           const res = await s3.client.send(
             new GetObjectCommand({
               Bucket: s3.bucket,
-              Key: key,
+              Key: storageKey,
             })
           );
           if (res.Body) {
@@ -66,25 +74,16 @@ async function fetchFileBuffer(fileUrl: string): Promise<Buffer | null> {
         } catch {}
       }
 
-      // Try Local
-      const localPath = path.join(process.cwd(), 'public', key);
-      if (fs.existsSync(localPath)) {
-        return fs.readFileSync(localPath);
-      }
-    }
-
-    // 2. If URL is a direct local path inside /uploads
-    if (fileUrl.startsWith('/uploads/') || fileUrl.startsWith('uploads/')) {
-      const cleanRel = fileUrl.startsWith('/') ? fileUrl.slice(1) : fileUrl;
-      const localPath = path.join(process.cwd(), 'public', cleanRel);
+      // 2. Try Local Disk
+      const localPath = path.join(process.cwd(), 'public', storageKey);
       if (fs.existsSync(localPath)) {
         return fs.readFileSync(localPath);
       }
     }
 
     // 3. Fallback: absolute HTTP(S) URL
-    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
-      const resp = await fetch(fileUrl);
+    if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+      const resp = await fetch(cleaned);
       if (resp.ok) {
         const ab = await resp.arrayBuffer();
         return Buffer.from(ab);

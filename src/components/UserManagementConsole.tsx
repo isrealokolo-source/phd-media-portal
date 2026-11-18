@@ -218,7 +218,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
               setCreatedSuccess(null);
               setShowCreateModal(true);
             }}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-900/30"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
             <span>Create New User</span>
@@ -261,8 +261,8 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
             onClick={() => setActiveRoleFilter(item.filter)}
             className={`p-3.5 rounded-lg border text-left transition-all ${
               activeRoleFilter === item.filter
-                ? 'bg-[#EFF6FF] border-indigo-700/60 shadow-sm'
-                : 'bg-white border-[#E8E8E8] hover:border-[#2F374A]'
+                ? 'bg-white border-[#171717] ring-1 ring-[#171717] shadow-sm'
+                : 'bg-white border-[#E8E8E8] hover:border-[#777777]'
             }`}
           >
             <span className="text-[10px] text-[#777777] font-medium block uppercase tracking-wider">
@@ -310,7 +310,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                 </tr>
               ) : (
                 filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-[#151922] transition-colors">
+                  <tr key={u.id} className="hover:bg-[#F4F4F2] transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center text-[#171717] font-bold text-xs uppercase">
@@ -715,7 +715,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                       type="checkbox"
                       checked={sendInviteEmail}
                       onChange={(e) => setSendInviteEmail(e.target.checked)}
-                      className="accent-indigo-600 rounded"
+                      className="accent-[#171717] rounded"
                     />
                     <span>Send welcome invitation email with login credentials</span>
                   </label>
@@ -726,7 +726,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 bg-white hover:bg-[#252C3D] text-[#171717] rounded-lg text-xs font-semibold transition-colors"
+                    className="px-4 py-2 bg-white hover:bg-[#EAEAEA] text-[#171717] border border-[#E8E8E8] rounded-lg text-xs font-semibold transition-colors"
                   >
                     Cancel
                   </button>
@@ -734,7 +734,7 @@ export function UserManagementConsole({ currentUser, initialUsers }: UserManagem
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex items-center space-x-1.5 px-5 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-900/30 disabled:opacity-50"
+                    className="flex items-center space-x-1.5 px-5 py-2 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     <span>{isSubmitting ? 'Provisioning...' : 'Create Account'}</span>

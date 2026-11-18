@@ -5,11 +5,11 @@ import fs from 'fs';
 import path from 'path';
 
 function getS3Client(): { client: S3Client; bucket: string } | null {
-  const bucket = process.env.S3_BUCKET;
-  const accessKeyId = process.env.S3_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
-  const region = process.env.S3_REGION || 'auto';
-  const endpoint = process.env.S3_ENDPOINT;
+  const bucket = process.env.S3_BUCKET?.trim();
+  const accessKeyId = process.env.S3_ACCESS_KEY_ID?.trim();
+  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY?.trim();
+  const region = (process.env.S3_REGION || 'auto').trim();
+  const endpoint = process.env.S3_ENDPOINT?.trim();
 
   if (!bucket || !accessKeyId || !secretAccessKey) return null;
 
@@ -27,6 +27,11 @@ function getMimeType(filePath: string): string {
   switch (ext) {
     case '.wav':
       return 'audio/wav';
+    case '.aif':
+    case '.aiff':
+      return 'audio/aiff';
+    case '.flac':
+      return 'audio/flac';
     case '.mp3':
       return 'audio/mpeg';
     case '.png':
@@ -34,6 +39,8 @@ function getMimeType(filePath: string): string {
     case '.jpg':
     case '.jpeg':
       return 'image/jpeg';
+    case '.webp':
+      return 'image/webp';
     case '.pdf':
       return 'application/pdf';
     case '.txt':
@@ -50,7 +57,8 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const key = params.path.join('/');
+    const safeParts = params.path.filter((p) => p && p !== '.' && p !== '..');
+    const key = safeParts.join('/');
     const s3 = getS3Client();
 
     const filename = req.nextUrl.searchParams.get('filename');
