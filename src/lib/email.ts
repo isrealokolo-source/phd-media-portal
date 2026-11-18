@@ -1,21 +1,21 @@
 import { Resend } from 'resend';
 import { prisma } from './prisma';
 
-export const DEFAULT_APP_URL = (
-  process.env.NEXT_PUBLIC_APP_URL || 'https://media.phantomdigital.com.ng'
-).replace(/\/+$/, '');
+export const DEFAULT_APP_URL = 'https://media.phantomdigital.com.ng';
 
 function resolveUrl(appUrl?: string): string {
   if (!appUrl) return DEFAULT_APP_URL;
   const trimmed = appUrl.trim().replace(/\/+$/, '');
-  // Disallow localhost or dev render domain in outgoing emails
+  // Strictly disallow localhost, 127.0.0.1, or legacy render domain in outgoing emails
   if (
+    !trimmed ||
     trimmed.includes('localhost') ||
+    trimmed.includes('127.0.0.1') ||
     trimmed.includes('phd-media-portal.onrender.com')
   ) {
     return DEFAULT_APP_URL;
   }
-  return trimmed || DEFAULT_APP_URL;
+  return DEFAULT_APP_URL;
 }
 
 export interface SendEmailOptions {
